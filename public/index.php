@@ -6,4 +6,4 @@ require "../vendor/autoload.php";
 $app = new Biogram\App();
 
 
-$app->tesClass();
+$app->testRouter();
