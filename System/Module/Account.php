@@ -3,7 +3,12 @@
     {
         public static function Register()
         {
-            echo "Account::Register Called!";
+            $db = new Database();
+            $db->insert('users',
+                [
+                   'name' => 'test'
+                ]);
+
         }
     }
 ?>
