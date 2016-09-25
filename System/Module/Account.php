@@ -1,14 +1,12 @@
 <?php
     class Account
     {
-        public static function Register()
+        public static function Register($App)
         {
-            $db = new Database();
-            $db->insert('users',
-                [
-                   'name' => 'test'
-                ]);
-
+            $App->DB->insert('users',
+            [
+                'name' => 'test'
+            ]);
         }
     }
 ?>

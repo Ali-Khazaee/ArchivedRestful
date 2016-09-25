@@ -1,20 +1,21 @@
 <?php
-
     class Application
     {
-
-        protected $db;
+        // DataBase Variable
+        protected $DB;
 
         public function __construct()
         {
+            // Connecting To DataBase
+            $this->DB = new DataBase();
 
-            // connecting to database
-            $this->db = new Database();
-
-            if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST["Action"])) {
-                switch ($_POST["Action"]) {
+            // Route The POST Request
+            if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST["Action"]))
+            {
+                switch ($_POST["Action"])
+                {
                     case "AccountRegister":
-                        Account::Register();
+                        Account::Register($this);
                         break;
                 }
             }
@@ -25,22 +26,22 @@
 
 
         // testing: insert data to table
-        public function testInsert($table_name, array $data){
-            $db = new Database();
-            $db->insert($table_name, ['name'], $data);
+        public function testInsert($table_name, array $data)
+        {
+            $this->DB->insert($table_name, ['name'], $data);
         }
 
         // testing: fetch all data from a specific table
         public function testTable($table_name)
         {
-
-            $db = new Database();
-            $results = $db->all($table_name);
+            $results = $this->DB->all($table_name);
             return $results;
-
         }
 
 
+        
+        
+        
+        
     }
-
 ?>

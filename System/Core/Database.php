@@ -1,12 +1,12 @@
 <?php
-
+    // DataBase Driver
     use MongoDB\Driver\Manager;
     use MongoDB\Driver\Command;
     use MongoDB\Driver\Query;
     use MongoDB\Driver\BulkWrite;
     use MongoDB\Driver\Exception\Exception;
 
-    class Database
+    class DataBase
     {
         protected $manager;
         protected $command;
