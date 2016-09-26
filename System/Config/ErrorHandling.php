@@ -11,6 +11,5 @@
     // Level Error Reporting
     error_reporting(E_ALL);
 
-    // Error Handler
-    set_error_handler("ErrorHandler");
+
 ?>

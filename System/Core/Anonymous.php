@@ -1,4 +1,9 @@
 <?php
+
+    // Error Handler
+    set_error_handler("ErrorHandler");
+
+
     // Don't Allow Access Directly
     if (!defined("ROOT")) { exit(); }
 

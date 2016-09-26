@@ -10,13 +10,4 @@
 
 
 
-
-    $App->testInsert('users', ['name' => 'ahmad']);
-    $data = $App->testTable('users');
-
-    foreach ($data as $d) {
-        echo $d->name . "\n";
-    }
-
-
 ?>
