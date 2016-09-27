@@ -69,15 +69,5 @@
 
             return $Result;
         }
-
-        // All Data From Collection
-        public function all($Collection)
-        {
-            $Query = new Query([]);
-
-            $Result = $this->Manager->executeQuery(DB_NAME . "." . $Collection, $Query);
-
-            return $Result;
-        }
     }
 ?>
