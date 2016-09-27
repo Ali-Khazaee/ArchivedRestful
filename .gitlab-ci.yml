@@ -1,4 +1,1 @@
-language: php
-
-php:
-  - 7.0
+image: php:7
