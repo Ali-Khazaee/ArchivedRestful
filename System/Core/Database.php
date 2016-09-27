@@ -9,76 +9,75 @@
         // DataBase Manager
         protected $Manager;
 
-        // DataBase Query
-        protected $query;
-
         // Connection
         public function __construct()
         {
             try
             {
-                $this->Manager = new Manager("mongodb://" . DB_HOST . ":" . DB_PORT, [ 'username' => DB_USERNAME, 'password' => DB_PASSWORD ]);
+                $this->Manager = new Manager("mongodb://" . DB_HOST . ":" . DB_PORT,
+                [
+                    'username' => DB_USERNAME,
+                    'password' => DB_PASSWORD
+                ]);
             }
             catch (Exception $e)
             {
                 Tracer("DataBaseError.log", "Connection Error:" . $e->getMessage());
                 exit("Connection Error:" . $e->getMessage());
             }
+
+            return $this->Manager;
         }
 
-        public function insert($tableName, array $data)
+        // Insert Into Collection
+        public function Insert($Collection, $Data)
         {
+            $Bulk = new BulkWrite;
 
-            $bulk = new BulkWrite;
+            $Data = array_merge(['_id' => new MongoDB\BSON\ObjectID], $Data);
+            $Bulk->insert($Data);
 
-            $data = array_merge(['_id' => new MongoDB\BSON\ObjectID], $data);
-            $bulk->insert($data);
-
-            $this->Manager->executeBulkWrite(DB_NAME . '.' . $tableName, $bulk);
-
+            $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        public function all($tableName)
+        // Delete From Collection
+        public function Delete($Collection, $Condition)
         {
+            $Bulk = new BulkWrite;
 
-            $query = new Query([]);
+            $Bulk->delete($Condition);
 
-            $results = $this->Manager->executeQuery(DB_NAME . "." . $tableName, $query);
-
-            return $results;
+            $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        public function delete($tableName, array $condition)
+        // Update The Collection
+        public function Update($Collection, $Conditions, $Data)
         {
+            $Bulk = new BulkWrite;
 
-            $bulk = new BulkWrite;
+            $Bulk->update($Conditions, ['$set' => $Data]);
 
-            $bulk->delete($condition);
-
-            $this->Manager->executeBulkWrite(DB_NAME . '.' . $tableName, $bulk);
-
+            $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        public function find($tableName, array $condition)
+        // Find Item In Collection
+        public function Find($Collection, $Conditions)
         {
+            $Query = new Query($Conditions);
 
-            $query = new Query($condition);
+            $Result = $this->Manager->executeQuery(DB_NAME . "." . $Collection, $Query);
 
-            $results = $this->Manager->executeQuery(DB_NAME . "." . $tableName, $query);
-
-            return $results;
-
+            return $Result;
         }
 
-        public function update($tableName, array $conditions, array $data)
+        // All Data From Collection
+        public function all($Collection)
         {
+            $Query = new Query([]);
 
-            $bulk = new BulkWrite;
+            $Result = $this->Manager->executeQuery(DB_NAME . "." . $Collection, $Query);
 
-            $bulk->update( $conditions, ['$set' => $data]);
-
-            $this->Manager->executeBulkWrite(DB_NAME . '.' . $tableName, $bulk);
-
+            return $Result;
         }
     }
 ?>
