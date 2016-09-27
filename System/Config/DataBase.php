@@ -3,8 +3,9 @@
     if (!defined("ROOT")) { exit(); }
 
     // Default Database Name
+    define("DB_HOST", "localhost");
+    define("DB_PORT", "27017");
     define("DB_NAME", "Biogram");
-    define("DB_USERNAME", "biogram");
-    define("DB_PASSWORD", "biogram");
-
+    define("DB_USERNAME", "Biogram");
+    define("DB_PASSWORD", "Biogram");
 ?>
