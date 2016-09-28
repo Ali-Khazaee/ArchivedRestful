@@ -10,6 +10,4 @@
 
     // Level Error Reporting
     error_reporting(E_ALL);
-
-
 ?>

@@ -1,11 +1,9 @@
 <?php
+    // Don't Allow Access Directly
+    if (!defined("ROOT")) { exit(); }
 
     // Error Handler
     set_error_handler("ErrorHandler");
-
-
-    // Don't Allow Access Directly
-    if (!defined("ROOT")) { exit(); }
 
     // Error Handler Function
     function ErrorHandler($errno, $errstr, $errfile, $errline)
