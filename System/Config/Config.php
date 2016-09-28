@@ -10,4 +10,9 @@
 
     // Load ErrorHandling Config
     include_once(ROOT . "System/Config/ErrorHandling.php");
-?>
+
+
+    // Load Auth & Token Config
+    include_once(ROOT . "System/Config/Auth.php");
+
+
