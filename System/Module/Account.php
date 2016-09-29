@@ -12,13 +12,13 @@
             if( isset($data->name) || !empty($data->name) ){
                 $name = $data->name;
             } else {
-                json_response('fail', 'name and password are required!');
+                JSON('fail', 'name and password are required!');
             }
 
             if( isset($data->password) || !empty($data['password']) ){
                 $password = password_hash($data->password, PASSWORD_BCRYPT);
             } else {
-                json_response('fail', 'name and password are required!');
+                JSON('fail', 'name and password are required!');
             }
 
 
@@ -33,10 +33,10 @@
                     'password' => $password
                 ]);
 
-                json_response('success', 'Registration was successfull!');
+                JSON('success', 'Registration was successfull!');
 
             } else {
-                json_response('fail', 'This name already has taken. Choose another name.');
+                JSON('fail', 'This name already has taken. Choose another name.');
             }
         }
 
