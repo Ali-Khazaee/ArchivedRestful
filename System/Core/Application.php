@@ -2,23 +2,35 @@
     class Application
     {
         // DataBase Variable
-        protected $DB;
+        public $DB;
+        // Router Instance
+        protected $Router;
 
         public function __construct()
         {
             // Connecting To DataBase
             $this->DB = new DataBase();
 
-            // Route The POST Request
-            if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST["Action"]))
-            {
-                switch ($_POST["Action"])
-                {
-                    case "AccountRegister":
-                        Account::Register($this);
-                        break;
-                }
-            }
+            $this->Router = new Router();
+
+            // Route For Registering Users
+            $this->Router->post(BIOGRAM_BASE_ROUTE.'AccountRegister', function(){
+                Account::Register($this);
+            });
+
+
+
+
+            $this->Router->run();
+
+
+            
         }
+
+
+
+
+
+
     }
 ?>
