@@ -2,9 +2,6 @@
     // Don't Allow Access Directly
     if (!defined("ROOT")) { exit(); }
 
-    // Error Handler
-    set_error_handler("ErrorHandler");
-
     // Error Handler Function
     function ErrorHandler($errno, $errstr, $errfile, $errline)
     {
@@ -16,5 +13,21 @@
     function Tracer($FileName, $Message)
     {
         file_put_contents(CONFIG_TRACE_DIRECTORY . $FileName, (date("[ Y-m-d H:i:s ] ", microtime(true)) . $Message . "\n"), FILE_APPEND);
+    }
+
+    // JSON Response
+    function JSON($Status = 'Fail', $Message = '', $Data = null, $Code = 200)
+    {
+        // Clear Headers
+        header_remove();
+
+        // Set HTTP Code
+        http_response_code($Code);
+
+        // Set Content Type
+        header('Content-Type: application/json');
+
+        // Return The Encoded JSON
+        exit(json_encode(['Status' => $Status, 'Message' => $Message, 'Data' => $Data]));
     }
 ?>
