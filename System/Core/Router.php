@@ -1,47 +1,37 @@
 <?php
-
     class Router
     {
-        public static $routes = array();
-        public static $methods = array();
-        public static $callbacks = array();
+        // Variables
+        public $Routes = array();
+        public $Methods = array();
+        public $CallBacks = array();
 
-        // Defines a route & callback function
-        public static function run()
+        // Execute Request
+        public function Execute()
         {
-            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            $method = $_SERVER['REQUEST_METHOD'];
-            $found_route = false;
+            $URL = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $this->Routes = preg_replace('/\/+/', '/', $this->Routes);
 
-            self::$routes = preg_replace('/\/+/', '/', self::$routes);
+            // Route Is Defined
+            if (in_array($URL, $this->Routes))
+            {
+                // Find Route Index
+                $Key = array_keys($this->Routes, $URL)[0];
 
-            // Check if route is defined without regex
-            if (in_array($uri, self::$routes)) {
-
-                // find route index key in all application defined routes
-                $i = array_keys(self::$routes, $uri)[0];
-
-                // if request method matches the route's method
-                if (self::$methods[$i] == $method) {
-                    $found_route = true;
-                    call_user_func(self::$callbacks[$i]);
-                }
-            }
-
-            // if route not found
-            if ($found_route == false) {
-                die("Route Not Found!");
+                // Request Method Matches The Route's Method
+                if ($this->Methods[$Key] == $_SERVER['REQUEST_METHOD'])
+                    call_user_func($this->CallBacks[$Key]);
             }
         }
 
-        //  create function and call it based on methods (get, post, . . . )
-        public function __call($method, $params)
+        // Default Function
+        public function __call($Method, $Params)
         {
-            $uri = dirname($_SERVER['PHP_SELF']) . '/' . $params[0];
-            $callback = $params[1];
-            array_push(self::$routes, $uri);
-            array_push(self::$methods, strtoupper($method));
-            array_push(self::$callbacks, $callback);
-        }
+            $URL = dirname($_SERVER['REQUEST_URI']) . '/' . $Params[0];
 
+            array_push($this->Routes, $URL);
+            array_push($this->Methods, $Method);
+            array_push($this->CallBacks, $Params[1]);
+        }
     }
+?>

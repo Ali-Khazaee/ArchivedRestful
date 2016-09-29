@@ -16,7 +16,7 @@
     }
 
     // JSON Response
-    function JSON($Status = 'Fail', $Message = '', $Data = null, $Code = 200)
+    function JSON($Message, $Code = 200)
     {
         // Clear Headers
         header_remove();
@@ -28,6 +28,6 @@
         header('Content-Type: application/json');
 
         // Return The Encoded JSON
-        exit(json_encode(['Status' => $Status, 'Message' => $Message, 'Data' => $Data]));
+        exit(json_encode($Message));
     }
 ?>

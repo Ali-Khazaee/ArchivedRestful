@@ -7,7 +7,4 @@
 
     // Tracer Location Config
     define("CONFIG_TRACE_DIRECTORY", ROOT . "Storage" . DIRECTORY_SEPARATOR, true);
-
-    // API URL
-    define("CONFIG_BASE_ROUTE", '/', true);
 ?>

@@ -16,10 +16,10 @@
             $this->Router = new Router();
 
             // Route For Account Register
-            $this->Router->POST(CONFIG_BASE_ROUTE . 'AccountRegister', function() { Account::Register($this); });
+            $this->Router->POST('AccountRegister', function() { Account::Register($this); });
 
             // Route For Account Login
-            $this->Router->POST(CONFIG_BASE_ROUTE . 'AccountLogin', function() { Account::Login($this); });
+            $this->Router->POST('AccountLogin', function() { echo "hello"; });
 
             // Execute The Routing
             $this->Router->Execute();
