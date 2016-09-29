@@ -3,7 +3,6 @@
     {
         // Variables
         public $Routes = array();
-        public $Methods = array();
         public $CallBacks = array();
 
         // Execute Request
@@ -18,8 +17,8 @@
                 // Find Route Index
                 $Key = array_keys($this->Routes, $URL)[0];
 
-                // Request Method Matches The Route's Method
-                if ($this->Methods[$Key] == $_SERVER['REQUEST_METHOD'])
+                // Allow Post Method Only
+                if ($_SERVER['REQUEST_METHOD'] == "POST")
                     call_user_func($this->CallBacks[$Key]);
             }
         }
@@ -30,7 +29,6 @@
             $URL = dirname($_SERVER['REQUEST_URI']) . '/' . $Params[0];
 
             array_push($this->Routes, $URL);
-            array_push($this->Methods, $Method);
             array_push($this->CallBacks, $Params[1]);
         }
     }
