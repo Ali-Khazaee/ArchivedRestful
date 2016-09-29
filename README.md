@@ -1,6 +1,6 @@
 > **Biogram Server**
 
-- [ ] Implementation Serialize Request
+- [x] Implementation Serialize Request
 - [ ] Implementation Authentication
 - [x] Implementation Routing
 - [ ] Implementation Log System
