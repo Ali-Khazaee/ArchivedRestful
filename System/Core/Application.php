@@ -3,6 +3,7 @@
     {
         // DataBase Variable
         public $DB;
+
         // Router Instance
         protected $Router;
 
@@ -11,26 +12,17 @@
             // Connecting To DataBase
             $this->DB = new DataBase();
 
+            // Create New Router
             $this->Router = new Router();
 
-            // Route For Registering Users
-            $this->Router->post(BIOGRAM_BASE_ROUTE.'AccountRegister', function(){
-                Account::Register($this);
-            });
+            // Route For Account Register
+            $this->Router->POST(CONFIG_BASE_ROUTE . 'AccountRegister', function() { Account::Register($this); });
 
+            // Route For Account Login
+            $this->Router->POST(CONFIG_BASE_ROUTE . 'AccountLogin', function() { Account::Login($this); });
 
-
-
-            $this->Router->run();
-
-
-            
+            // Execute The Routing
+            $this->Router->Execute();
         }
-
-
-
-
-
-
     }
 ?>

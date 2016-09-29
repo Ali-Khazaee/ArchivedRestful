@@ -25,8 +25,6 @@
                 Tracer("DataBaseError.log", "Connection Error:" . $e->getMessage());
                 exit("Connection Error:" . $e->getMessage());
             }
-
-            return $this->Manager;
         }
 
         // Insert Into Collection

@@ -8,9 +8,6 @@
     // Tracer Location Config
     define("CONFIG_TRACE_DIRECTORY", ROOT . "Storage" . DIRECTORY_SEPARATOR, true);
 
-    
-    // Biogram Api Version 1 Base Route
-    define("BIOGRAM_BASE_ROUTE", '/api/v1/');
-
-
+    // API URL
+    define("CONFIG_BASE_ROUTE", '/', true);
 ?>
