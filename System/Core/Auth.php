@@ -1,10 +1,5 @@
 <?php
-
-
-    // inspired from Library :
-    // https://github.com/firebase/php-jwt/blob/master/src/JWT.php
-
-    class Token
+    class Auth
     {
 
         // Decode Token string into PHP object
@@ -125,3 +120,4 @@
 
 
     }
+?>

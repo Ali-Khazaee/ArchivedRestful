@@ -4,5 +4,4 @@
 
     // Default Database Name
     define("TOKEN_SECRET", "theBiogramSpecificTokenSecretToUseInJsonWebTokenAuthentication");
-
 ?>

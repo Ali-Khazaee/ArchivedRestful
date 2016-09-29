@@ -14,6 +14,9 @@
     // Load DataBase Driver
     include_once(ROOT . "System/Core/DataBase.php");
 
+    // Load Auth
+    include_once(ROOT . "System/Core/Auth.php");
+
     // Load Module Account
     include_once(ROOT . "System/Module/Account.php");
 ?>
