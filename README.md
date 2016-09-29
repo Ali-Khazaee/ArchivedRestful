@@ -2,7 +2,7 @@
 
 - [ ] Implementation Serialize Request
 - [ ] Implementation Authentication
-- [ ] Implementation Routing
+- [x] Implementation Routing
 - [ ] Implementation Log System
 - [x] Implementation MongoDB Methods
 - [ ] Implementation Security
