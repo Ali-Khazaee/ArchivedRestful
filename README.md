@@ -6,5 +6,4 @@
 - [ ] Implementation Log System
 - [x] Implementation MongoDB Methods
 - [ ] Implementation Security
-- [ ] Implementation Load Balancing
 - [ ] Implementation Testing
