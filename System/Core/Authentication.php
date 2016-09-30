@@ -3,13 +3,9 @@
     {
 
         // Decode Token string into PHP object
-        public static function Decode($data, $secret)
+        public static function Decode($data)
         {
             $timestamp = time();
-
-            if (empty($secret)) {
-                throw new InvalidArgumentException('Key may not be empty');
-            }
 
             $parts = explode('.', $data);
             if (count($parts) != 3) {
@@ -31,7 +27,7 @@
 
 
             // Check if the Token signature is invalid
-            if (!static::verify("$headb64.$bodyb64", $signature, $secret)) {
+            if (!static::verify("$headb64.$bodyb64", $signature)) {
                 throw new UnexpectedValueException('Invalid Token: Signature verification failed');
             }
 
@@ -47,7 +43,7 @@
 
 
         // Encode PHP object into Token string
-        public static function Encode($data, $secret)
+        public static function Encode($data)
         {
 
             $header = array('typ' => 'JWT', 'alg' => 'SHA256');
@@ -58,7 +54,7 @@
 
             $signing_input = implode('.', $segments);
 
-            $signature = static::sign($signing_input, $secret);
+            $signature = static::sign($signing_input);
 
             $segments[] = static::Base64Encode($signature);
 
@@ -68,15 +64,16 @@
 
 
         // Sign the token header and body with a given key
-        public static function sign($msg, $secret)
+        public static function sign($msg)
         {
 
-            $signature = '';
-            $success = openssl_sign($msg, $signature, $secret, 'SHA256');
+            $signature_output = '';
+            $success = openssl_sign($msg, $signature_output, SSL_PRIVATE_KEY, 'SHA256');
+
             if (!$success) {
                 throw new DomainException("OpenSSL unable to sign data");
             } else {
-                return $signature;
+                return $signature_output;
             }
 
         }
@@ -84,14 +81,14 @@
 
 
 
-        private static function verify($msg, $signature, $secret)
+        private static function verify($msg, $signature)
         {
 
-            $success = openssl_verify($msg, $signature, $secret, 'SHA256');
+            $success = openssl_verify($msg, $signature, SSL_PUBLIC_KEY, 'SHA256');
             if (!$success) {
                 throw new DomainException("OpenSSL unable to verify data: " . openssl_error_string());
             } else {
-                return $signature;
+                return $success;
             }
 
         }

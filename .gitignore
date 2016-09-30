@@ -1,3 +1,5 @@
 .idea
 /Storage/*
 /Test/*
+/Storage/private_key.pem
+/Storage/public_key.pem

@@ -19,7 +19,7 @@
             $this->Router->POST('AccountRegister', function() { Account::Register($this); });
 
             // Route For Account Login
-            $this->Router->POST('AccountLogin', function() { echo "hello"; });
+            $this->Router->POST('AccountLogin', function() { Account::Login($this); });
 
             // Execute The Routing
             $this->Router->Execute();
