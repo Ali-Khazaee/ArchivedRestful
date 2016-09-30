@@ -16,7 +16,7 @@
     }
 
     // JSON Response
-    function JSON($Message, $Code = 200)
+    function JSON( $Message, $Code = 200)
     {
         // Clear Headers
         header_remove();
