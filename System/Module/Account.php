@@ -70,6 +70,7 @@
         /*
          * Result Translate
          * - 1 = Username or Password Incorrect
+         * - 2 = Password Empty
          * - 100 = Success
          */
         public static function Login($App)
@@ -94,16 +95,49 @@
             // Getting Data
             $User = $App->DB->find('account', ['Username' => $Username])->toArray();
 
-            if (empty($User)) {
-                JSON(["Status" => "Failed", "Message" => 1]);
+            if (!empty($User) && $User[0]->Password == $Password) {
+
+                /**
+                 * Login Successful!
+                 * User can use this generated token to access
+                 * protected resources, by providing this token
+                 * in future http requests in header !
+                 *
+                 * Header format must be as follow :
+                 * Authorization: Bearer $token_key (OAUTH Standard)
+                 */
+                $token = self::CreateUserToken($User, $App);
+                JSON([
+                    "Status" => "Success",
+                    "Message" => 100,
+                    "Data" => [
+                        "Token" => $token
+                    ]
+                ]);
+
             } else {
-                self::CreateUserToken($User);
+                JSON(["Status" => "Failed", "Message" => 1]);
             }
 
         }
 
 
-        protected static function CreateUserToken($User)
+        // Just for testing token auth
+        public static function UpdateUsername($App)
+        {
+            // Getting Data
+            $Data = json_decode(file_get_contents("php://input"));
+            $NewUsername = $Data->NewUsername;
+
+            // get userId from request  header token
+            $UserId = self::GetUserIdFromToken($App);
+
+            $App->DB->update('account', ['_id' =>new \MongoDB\BSON\ObjectID($UserId)], ['Username' => $NewUsername]);
+
+        }
+
+
+        protected static function CreateUserToken($User, $App)
         {
 
             // time token is created
@@ -129,14 +163,39 @@
                 ]
             ];
 
-            $Auth = new Auth();
 
-            // testing encode and decode
-            $Token = $Auth->Encode($data);
-            $Token = $Auth->Decode($Token);
-            var_dump($Token); die;
+            return $App->Auth->Encode($data);
 
         }
+
+
+
+       /*
+        * Result Translate
+        *  1 = Provided Token is not valid, Try login and get a new token.
+        */
+        private static function GetUserIdFromToken($App)
+        {
+
+            // get token from request header
+            $request_token = str_replace('Bearer ', '', $_SERVER['HTTP_AUTHORIZATION']);
+
+            try{
+
+                $decoded_token = $App->Auth->Decode($request_token);
+                return $decoded_token->data->UserId;
+
+            } catch(Exception  $e){
+
+                // if can not decode token
+                if($e instanceof UnexpectedValueException ){
+                    JSON(["Status" => "Failed", "Message" => 1]);
+                } else {
+                    throw $e;
+                }
+            }
+        }
+
 
 
     }
