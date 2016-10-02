@@ -1,6 +1,26 @@
 <?php
     class Auth
     {
+		// Get Token
+		public function GetToken()
+		{
+			if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
+				JSON("Empty Token!", 300);
+
+			return $_SERVER['HTTP_TOKEN'];
+		}
+
+		// Get Token Data
+		public function Get($Data)
+		{
+			$Decoded = $this->Decode($this->GetToken());
+
+			if (isset($Decoded->$Data)
+                return $Decoded->$Data;
+
+			JSON("Data Doesn't Exist In Token!", 300);
+		}
+
 		// Create Token
 		public function CreateToken($CustomData, $App)
         {
