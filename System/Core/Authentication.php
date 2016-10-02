@@ -1,6 +1,35 @@
 <?php
     class Auth
     {
+		// Create Token
+		public function CreateToken($CustomData, $App)
+        {
+            // Token Created Time
+            $CreateTime = time();
+
+			// Token Expired Time - One Hour
+            $ExpireTime = $CreateTime + 3600;
+
+            // Token Config
+            $Config =
+			[
+				// Is User
+				'iss'  => "Biogram",
+				// Not Valid After
+				'exp'  => $ExpireTime,
+				// Not Valid Before
+				'nbf'  => $CreateTime,
+				// Created Time
+                'iat'  => $CreateTime,
+				// Unique Identify
+                'jti'  => base64_encode(mcrypt_create_iv(32)),
+                // Custom Data
+                'data' => $CustomData
+            ];
+
+			// Create Token
+            return $App->Auth->Encode($Config);
+        }
 
         // Decode Token string into PHP object
         public static function Decode($data)

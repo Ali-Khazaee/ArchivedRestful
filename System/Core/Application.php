@@ -4,10 +4,11 @@
         // DataBase Variable
         public $DB;
 
+		// Auth Instance
+        public $Auth;
+
         // Router Instance
         protected $Router;
-
-        public $Auth;
 
         public function __construct()
         {
@@ -17,7 +18,7 @@
             // Create New Router
             $this->Router = new Router();
 
-            // Create new Auth
+            // Create New Auth
             $this->Auth = new Auth();
 
             // Route For Account Register
@@ -29,6 +30,7 @@
             // just for testing token auth
             $this->Router->POST('UpdateUsername', function() { Account::UpdateUsername($this); });
 
+			$this->Router->POST('Test', function() { echo $this->Auth->CreateToken("Ali", $this); });
 
             // Execute The Routing
             $this->Router->Execute();
