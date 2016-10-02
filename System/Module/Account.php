@@ -1,5 +1,4 @@
 <?php
-
     class Account
     {
         /*
@@ -65,7 +64,6 @@
 
             JSON(["Status" => "Failed", "Message" => 5]);
         }
-
 
         /*
          * Result Translate
@@ -199,4 +197,4 @@
 
 
     }
-
+?>

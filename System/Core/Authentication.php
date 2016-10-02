@@ -31,102 +31,88 @@
             return $App->Auth->Encode($Config);
         }
 
-        // Decode Token string into PHP object
-        public static function Decode($data)
+		// Encode Data Into Token
+        public function Encode($Data)
         {
-            $timestamp = time();
+			// Custom Header - UseLess
+            $Header = array('type' => 'Bio');
 
-            $parts = explode('.', $data);
-            if (count($parts) != 3) {
-                throw new UnexpectedValueException('wrong token format!');
-            }
+			// Encode Header
+            $Segments[] = $this->Base64Encode(json_encode($Header));
 
-            list($headb64, $bodyb64, $cryptob64) = $parts;
+			// Encode Data
+            $Segments[] = $this->Base64Encode(json_encode($Data));
 
-            if (null === ($header = json_decode(static::Base64Decode($headb64)))) {
-                throw new UnexpectedValueException('Invalid token header');
-            }
+			// Prepare Segments
+            $Signing = implode('.', $Segments);
 
-            if (null === $body = json_decode(static::Base64Decode($bodyb64))) {
-                throw new UnexpectedValueException('Invalid token body');
-            }
+			// Sign Data With Key
+            $Signature = $this->Sign($Signing);
 
-            $signature = static::Base64Decode($cryptob64);
+			// Insert Sign
+            $Segments[] = $this->Base64Encode($Signature);
 
-
-
-            // Check if the Token signature is invalid
-            if (!static::verify("$headb64.$bodyb64", $signature)) {
-                throw new UnexpectedValueException('Invalid Token: Signature verification failed');
-            }
-
-
-            // Check if token has expired.
-            if (isset($body->exp) && ($timestamp) >= $body->exp){
-                throw new UnexpectedValueException('Expired token');
-            }
-
-            return $body;
+			// Return Encoded Data
+            return implode('.', $Segments);
         }
 
-
-
-        // Encode PHP object into Token string
-        public static function Encode($data)
+		// Base64 Encode 
+        public function Base64Encode($input)
         {
-
-            $header = array('typ' => 'JWT', 'alg' => 'SHA256');
-
-            $segments = array();
-            $segments[] = static::Base64Encode(json_encode($header));
-            $segments[] = static::Base64Encode(json_encode($data));
-
-            $signing_input = implode('.', $segments);
-
-            $signature = static::sign($signing_input);
-
-            $segments[] = static::Base64Encode($signature);
-
-            return implode('.', $segments);
+            return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
         }
 
-
-
-        // Sign the token header and body with a given key
-        public static function sign($msg)
+		// Sign The Token
+        public function Sign($Message)
         {
+            $Signature = '';
+            $Success = openssl_sign($Message, $Signature, SSL_PRIVATE_KEY, 'SHA256');
 
-            $signature_output = '';
-            $success = openssl_sign($msg, $signature_output, SSL_PRIVATE_KEY, 'SHA256');
+			if ($Success)
+				return $Signature;
 
-            if (!$success) {
-                throw new DomainException("OpenSSL unable to sign data");
-            } else {
-                return $signature_output;
-            }
-
+			throw new Exception("OpenSSL Unable To Sign!");
         }
 
-
-
-
-        private static function verify($msg, $signature)
+        // Decode Token Into Data
+        public function Decode($Data)
         {
+            $Segments = explode('.', $Data);
 
-            $success = openssl_verify($msg, $signature, SSL_PUBLIC_KEY, 'SHA256');
-            if (!$success) {
-                throw new DomainException("OpenSSL unable to verify data: " . openssl_error_string());
-            } else {
-                return $success;
-            }
+			// Count Segment
+            if (count($Segments) != 3)
+                throw new Exception('Wrong Token Format!');
 
+			// List Data
+			$Header = $Segments[0];
+			$Content = $Segments[1];
+			$Crypt = $Segments[2];
+
+			// Header Data - UseLess
+            if (empty($this->Base64Decode($Header)))
+                throw new Exception('Invalid Token Header!');
+
+			// Decode Content
+            if (($ContentData = json_decode($this->Base64Decode($Content))) === NULL)
+                throw new Exception('Invalid Token Content!');
+
+			// Decode Signature
+            $Signature = $this->Base64Decode($Crypt);
+
+            // Verify Data
+            if ($this->Verify("$Header.$Content", $Signature))
+                throw new Exception('Invalid Token Signature Verification Failed!');
+
+            // Token Expire Time
+            if (isset($ContentData->exp) && time() >= $ContentData->exp)
+                throw new Exception('Token Expired!');
+
+			// Return Data As JSON
+            return $ContentData;
         }
 
-
-
-
-        // Decode a string with URL-safe Base64
-        public static function Base64Decode($input)
+		// Base64 Decode
+        public function Base64Decode($input)
         {
             $remainder = strlen($input) % 4;
             if ($remainder) {
@@ -136,14 +122,15 @@
             return base64_decode(strtr($input, '-_', '+/'));
         }
 
-
-        //  Encode a string with URL-safe Base64
-        public static function Base64Encode($input)
+		// Verify Data And Signature
+        private static function Verify($Message, $Signature)
         {
-            return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
+            $Success = openssl_verify($Message, $Signature, SSL_PUBLIC_KEY, 'SHA256');
+
+			if ($Success)
+				return false;
+
+			throw new Exception("OpenSSL Unable To Verify Data: " . openssl_error_string());
         }
-
-
-
     }
 ?>
