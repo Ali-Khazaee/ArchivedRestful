@@ -15,6 +15,13 @@
          * - 10 = Username Taken
          * - 100 = Success
          */
+
+		 /* Karaye Anjam Nashode Baraye In Method!
+		  * - Username Ba Adad Va . - Shoro Nashe!
+		  * - Username Ba Adad Va . - B Payan Narese!
+		  * - EnCrypt Kardane Password
+		  * - Ezafe Kardan Zamane Sakhte Account Va Email e Avaliye e account
+		  */
         public static function Register($App)
         {
             // Getting Data
@@ -49,7 +56,7 @@
 
             // Variables
             $Username = $Data->Username;
-            $Password = $Data->Password; // Encrypt Me Later !! why?
+            $Password = $Data->Password;
             $Email = $Data->Email;
 
             // Check for Username Duplication
@@ -116,85 +123,6 @@
             } else {
                 JSON(["Status" => "Failed", "Message" => 1]);
             }
-
         }
-
-
-        // Just for testing token auth
-        public static function UpdateUsername($App)
-        {
-            // Getting Data
-            $Data = json_decode(file_get_contents("php://input"));
-            $NewUsername = $Data->NewUsername;
-
-            // get userId from request  header token
-            $UserId = self::GetUserIdFromToken($App);
-
-            $App->DB->update('account', ['_id' =>new \MongoDB\BSON\ObjectID($UserId)], ['Username' => $NewUsername]);
-
-        }
-
-
-        protected static function CreateUserToken($User, $App)
-        {
-
-            // time token is created
-            $now = time();
-
-            $expire = $now + 2592000;   // Adding 1 month (3600*24*30)
-
-            // Create Token for Request - OAuth Standard
-            $data = [
-                // issued at: time token is created
-                'iat'  => time(),
-                // A unique identifier for token
-                'jti'  => base64_encode(mcrypt_create_iv(32)),
-                // Issuer Server
-                'iss'  => "Biogram",
-                // Token Is Not Valid  before "nbf" (not before)
-                'nbf'  => $now,
-                // Expire Date
-                'exp'  => $expire,
-                // Data related to the user
-                'data' => [
-                    'UserId'   => $User[0]->_id->__toString()
-                ]
-            ];
-
-
-            return $App->Auth->Encode($data);
-
-        }
-
-
-
-       /*
-        * Result Translate
-        *  1 = Provided Token is not valid, Try login and get a new token.
-        */
-        private static function GetUserIdFromToken($App)
-        {
-
-            // get token from request header
-            $request_token = str_replace('Bearer ', '', $_SERVER['HTTP_AUTHORIZATION']);
-
-            try{
-
-                $decoded_token = $App->Auth->Decode($request_token);
-                return $decoded_token->data->UserId;
-
-            } catch(Exception  $e){
-
-                // if can not decode token
-                if($e instanceof UnexpectedValueException ){
-                    JSON(["Status" => "Failed", "Message" => 1]);
-                } else {
-                    throw $e;
-                }
-            }
-        }
-
-
-
     }
 ?>

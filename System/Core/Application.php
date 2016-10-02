@@ -27,11 +27,6 @@
             // Route For Account Login
             $this->Router->POST('AccountLogin', function() { Account::Login($this); });
 
-            // just for testing token auth
-            $this->Router->POST('UpdateUsername', function() { Account::UpdateUsername($this); });
-
-			$this->Router->POST('Test', function() { echo $this->Auth->CreateToken("Ali", $this); });
-
             // Execute The Routing
             $this->Router->Execute();
         }

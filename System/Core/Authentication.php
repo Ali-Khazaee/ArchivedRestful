@@ -91,7 +91,7 @@
 			if ($Success)
 				return $Signature;
 
-			throw new Exception("OpenSSL Unable To Sign!");
+			JSON("OpenSSL Unable To Sign!", 300);
         }
 
         // Decode Token Into Data
@@ -101,7 +101,7 @@
 
 			// Count Segment
             if (count($Segments) != 3)
-                throw new Exception('Wrong Token Format!');
+                JSON("Wrong Token Format!", 300);
 
 			// List Data
 			$Header = $Segments[0];
@@ -110,36 +110,39 @@
 
 			// Header Data - UseLess
             if (empty($this->Base64Decode($Header)))
-                throw new Exception('Invalid Token Header!');
+                JSON("Invalid Token Header!", 300);
 
 			// Decode Content
             if (($ContentData = json_decode($this->Base64Decode($Content))) === NULL)
-                throw new Exception('Invalid Token Content!');
+                JSON("Invalid Token Content!", 300);
 
 			// Decode Signature
             $Signature = $this->Base64Decode($Crypt);
 
             // Verify Data
             if ($this->Verify("$Header.$Content", $Signature))
-                throw new Exception('Invalid Token Signature Verification Failed!');
+                JSON("Invalid Token Signature Verification Failed!", 300);
 
             // Token Expire Time
             if (isset($ContentData->exp) && time() >= $ContentData->exp)
-                throw new Exception('Token Expired!');
+                JSON("Token Expired!", 300);
 
 			// Return Data As JSON
             return $ContentData;
         }
 
 		// Base64 Decode
-        public function Base64Decode($input)
+        public function Base64Decode($Message)
         {
-            $remainder = strlen($input) % 4;
-            if ($remainder) {
-                $padlen = 4 - $remainder;
-                $input .= str_repeat('=', $padlen);
+            $Remainder = strlen($Message) % 4;
+
+            if ($Remainder)
+			{
+                $PadLen = 4 - $Remainder;
+                $Message .= str_repeat('=', $PadLen);
             }
-            return base64_decode(strtr($input, '-_', '+/'));
+
+            return base64_decode(strtr($Message, '-_', '+/'));
         }
 
 		// Verify Data And Signature
@@ -150,7 +153,7 @@
 			if ($Success)
 				return false;
 
-			throw new Exception("OpenSSL Unable To Verify Data: " . openssl_error_string());
+			JSON("OpenSSL Unable To Verify Data: " . openssl_error_string(), 300);
         }
     }
 ?>
