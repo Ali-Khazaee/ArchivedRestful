@@ -1,25 +1,25 @@
 <?php
     class Auth
     {
-		// Get Token
-		public function GetToken()
-		{
-			if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
-				JSON("Empty Token!", 300);
+        // Get Token
+        public function GetToken()
+        {
+            if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
+                JSON("Empty Token!", 300);
 
-			return $_SERVER['HTTP_TOKEN'];
-		}
+            return $_SERVER['HTTP_TOKEN'];
+        }
 
-		// Get Token Data
-		public function Get()
-		{
-			$Decoded = $this->Decode($this->GetToken());
+        // Get Token Data
+        public function Get()
+        {
+            $Decoded = $this->Decode($this->GetToken());
 
-			if (isset($Decoded))
+            if (isset($Decoded))
                 return $Decoded;
 
-			JSON("Data Doesn't Exist In Token!", 300);
-		}
+            JSON("Data Doesn't Exist In Token!", 300);
+        }
 
 
 
@@ -51,69 +51,69 @@
 
         }
 
-		// Create Token
-		public function CreateToken($CustomData, $App)
+        // Create Token
+        public function CreateToken($CustomData, $App)
         {
             // Token Created Time
             $CreateTime = time();
 
-			// Token Expired Time - One Hour
+            // Token Expired Time - One Hour
             $ExpireTime = $CreateTime + 3600;
 
             // Token Config
             $Config =
-			[
-				// Is User
-				'iss'  => "Biogram",
-				// Not Valid After
-				'exp'  => $ExpireTime,
-				// Not Valid Before
-				'nbf'  => $CreateTime,
-				// Created Time
+            [
+                // Is User
+                'iss'  => "Biogram",
+                // Not Valid After
+                'exp'  => $ExpireTime,
+                // Not Valid Before
+                'nbf'  => $CreateTime,
+                // Created Time
                 'iat'  => $CreateTime,
-				// Unique Identify
+                // Unique Identify
                 'jti'  => base64_encode(mcrypt_create_iv(32)),
                 // Custom Data
                 'data' => $CustomData
             ];
 
-			// Create Token
+            // Create Token
             return $App->Auth->Encode($Config);
         }
 
-		// Encode Data Into Token
+        // Encode Data Into Token
         public function Encode($Data)
         {
 
-			// Encode Data
+            // Encode Data
             $Segments[] = $this->Base64Encode(json_encode($Data));
 
-			// Sign Data With Key
+            // Sign Data With Key
             $Signature = $this->Sign($Segments[0]);
 
-			// Insert Sign
+            // Insert Sign
             $Segments[] = $this->Base64Encode($Signature);
 
-			// Return Encoded Data
+            // Return Encoded Data
             return implode('.', $Segments);
         }
 
-		// Base64 Encode 
+        // Base64 Encode 
         public function Base64Encode($input)
         {
             return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
         }
 
-		// Sign The Token
+        // Sign The Token
         public function Sign($Message)
         {
             $Signature = '';
             $Success = openssl_sign($Message, $Signature, SSL_PRIVATE_KEY, 'SHA256');
 
-			if ($Success)
-				return $Signature;
+            if ($Success)
+                return $Signature;
 
-			JSON("OpenSSL Unable To Sign!", 300);
+            JSON("OpenSSL Unable To Sign!", 300);
         }
 
         // Decode Token Into Data
@@ -121,36 +121,36 @@
         {
             $Segments = explode('.', $Data);
 
-			// Count Segment
+            // Count Segment
             if (count($Segments) != 2)
                 JSON("Wrong Token Format!", 300);
 
-			// List Data
-			$Content = $Segments[0];
-			$Crypt = $Segments[1];
+            // List Data
+            $Content = $Segments[0];
+            $Crypt = $Segments[1];
 
-			// Decode Content
+            // Decode Content
             if (($ContentData = json_decode($this->Base64Decode($Content))) === NULL)
                 JSON("Invalid Token Content!", 300);
 
-			// Decode Signature
+            // Decode Signature
             $Signature = $this->Base64Decode($Crypt);
 
             // Verify Data
-            if ($this->Verify("$Content", $Signature))
+            if ($this->Verify($Content, $Signature))
                 JSON("Invalid Token Signature Verification Failed!", 300);
 
-			// Return Data As JSON
+            // Return Data As JSON
             return $ContentData;
         }
 
-		// Base64 Decode
+        // Base64 Decode
         public function Base64Decode($Message)
         {
             $Remainder = strlen($Message) % 4;
 
             if ($Remainder)
-			{
+            {
                 $PadLen = 4 - $Remainder;
                 $Message .= str_repeat('=', $PadLen);
             }
@@ -158,15 +158,15 @@
             return base64_decode(strtr($Message, '-_', '+/'));
         }
 
-		// Verify Data And Signature
+        // Verify Data And Signature
         private static function Verify($Message, $Signature)
         {
             $Success = openssl_verify($Message, $Signature, SSL_PUBLIC_KEY, 'SHA256');
 
-			if ($Success)
-				return false;
+            if ($Success)
+                return false;
 
-			JSON("OpenSSL Unable To Verify Data: " . openssl_error_string(), 300);
+            JSON("OpenSSL Unable To Verify Data: " . openssl_error_string(), 300);
         }
     }
 ?>

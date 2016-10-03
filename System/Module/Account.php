@@ -16,12 +16,12 @@
          * - 100 = Success
          */
 
-		 /* Karaye Anjam Nashode Baraye In Method!
-		  * - Username Ba Adad Va . - Shoro Nashe!
-		  * - Username Ba Adad Va . - B Payan Narese!
-		  * - EnCrypt Kardane Password
-		  * - Ezafe Kardan Zamane Sakhte Account Va Email e Avaliye e account
-		  */
+         /* Karaye Anjam Nashode Baraye In Method!
+          * - Username Ba Adad Va . - Shoro Nashe!
+          * - Username Ba Adad Va . - B Payan Narese!
+          * - EnCrypt Kardane Password
+          * - Ezafe Kardan Zamane Sakhte Account Va Email e Avaliye e account
+          */
         public static function Register($App)
         {
             // Getting Data
