@@ -158,7 +158,7 @@
         }
 
         // Verify Data And Signature
-        private static function Verify($Message, $Signature)
+        private function Verify($Message, $Signature)
         {
             $Success = openssl_verify($Message, $Signature, SSL_PUBLIC_KEY, 'SHA256');
 
