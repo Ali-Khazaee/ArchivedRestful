@@ -27,6 +27,9 @@
             // Route For Account Login
             $this->Router->POST('AccountLogin', function() { Account::Login($this); });
 
+            // Route For Updata Username JUST FOR TESTING
+            $this->Router->POST('UpdateUsername', function() { Account::UpdateUsername($this); });
+
             // Execute The Routing
             $this->Router->Execute();
         }

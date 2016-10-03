@@ -12,6 +12,7 @@
 	$Config = array("config" => ROOT . "Storage/openssl.cnf", "digest_alg" => "SHA256", "private_key_bits" => 2048, "private_key_type" => OPENSSL_KEYTYPE_RSA);
     $NewKey = openssl_pkey_new($Config);
 
+
 	// Public Key
 	$Details = openssl_pkey_get_details($NewKey);
 

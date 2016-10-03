@@ -111,7 +111,7 @@
                  * Header format must be as follow :
                  * Authorization: Bearer $token_key (OAUTH Standard)
                  */
-                $token = self::CreateUserToken($User, $App);
+                $token = $App->Auth->CreateToken(['UserId' => $User[0]->_id->__toString() ], $App);
                 JSON([
                     "Status" => "Success",
                     "Message" => 100,
@@ -123,6 +123,29 @@
             } else {
                 JSON(["Status" => "Failed", "Message" => 1]);
             }
+        }
+
+
+        // JUST FOR TESTING
+        public static function UpdateUsername($App){
+
+            /*
+            * Result Translate
+            *  1 = Token Expired, generates new token if expired and
+            *  pass it to client, If not expired, continue executing the code
+            */
+            $App->Auth->RegenerateTokenIfExpired($App);
+
+            /*
+             * doing other works :
+             * 1 - get request data (new username)
+             * 2 - search in "accounts" table with token's UserId
+             * 3 - update username
+             */
+            $Token = $App->Auth->Get();
+            $UserId = $Token->data->UserId;
+            var_dump("user id is : ". $UserId); die;
+
         }
     }
 ?>

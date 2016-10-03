@@ -11,15 +11,45 @@
 		}
 
 		// Get Token Data
-		public function Get($Data)
+		public function Get()
 		{
 			$Decoded = $this->Decode($this->GetToken());
 
-			if (isset($Decoded->$Data)
-                return $Decoded->$Data;
+			if (isset($Decoded))
+                return $Decoded;
 
 			JSON("Data Doesn't Exist In Token!", 300);
 		}
+
+
+
+        /*
+        * IF Old Token is Expired : Generate new Token from Old Token with SAME UserId !
+        * ELSE : Continue the Code Execution.
+        * Result Translate
+        *  1 = Token Expired
+        */
+        public function RegenerateTokenIfExpired($App)
+        {
+            // Get Old Token Data
+            $Data = $this->Get();
+
+            // Check if Token is Expired
+            if (isset($Data->exp) && time() >= $Data->exp){
+
+                // Create New Token with the same UserId
+                $NewToken = $this->CreateToken(['UserId' => $Data->data->UserId], $App);
+
+                JSON([
+                    "Status" => "Failed",
+                    "Message" => 1,
+                    "Data" => [
+                        "NewToken" => $NewToken
+                    ]
+                ]);
+            }
+
+        }
 
 		// Create Token
 		public function CreateToken($CustomData, $App)
@@ -54,20 +84,12 @@
 		// Encode Data Into Token
         public function Encode($Data)
         {
-			// Custom Header - UseLess
-            $Header = array('type' => 'Bio');
-
-			// Encode Header
-            $Segments[] = $this->Base64Encode(json_encode($Header));
 
 			// Encode Data
             $Segments[] = $this->Base64Encode(json_encode($Data));
 
-			// Prepare Segments
-            $Signing = implode('.', $Segments);
-
 			// Sign Data With Key
-            $Signature = $this->Sign($Signing);
+            $Signature = $this->Sign($Segments[0]);
 
 			// Insert Sign
             $Segments[] = $this->Base64Encode($Signature);
@@ -100,17 +122,12 @@
             $Segments = explode('.', $Data);
 
 			// Count Segment
-            if (count($Segments) != 3)
+            if (count($Segments) != 2)
                 JSON("Wrong Token Format!", 300);
 
 			// List Data
-			$Header = $Segments[0];
-			$Content = $Segments[1];
-			$Crypt = $Segments[2];
-
-			// Header Data - UseLess
-            if (empty($this->Base64Decode($Header)))
-                JSON("Invalid Token Header!", 300);
+			$Content = $Segments[0];
+			$Crypt = $Segments[1];
 
 			// Decode Content
             if (($ContentData = json_decode($this->Base64Decode($Content))) === NULL)
@@ -120,12 +137,8 @@
             $Signature = $this->Base64Decode($Crypt);
 
             // Verify Data
-            if ($this->Verify("$Header.$Content", $Signature))
+            if ($this->Verify("$Content", $Signature))
                 JSON("Invalid Token Signature Verification Failed!", 300);
-
-            // Token Expire Time
-            if (isset($ContentData->exp) && time() >= $ContentData->exp)
-                JSON("Token Expired!", 300);
 
 			// Return Data As JSON
             return $ContentData;
