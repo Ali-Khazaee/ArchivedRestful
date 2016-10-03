@@ -84,7 +84,6 @@
         // Encode Data Into Token
         public function Encode($Data)
         {
-
             // Encode Data
             $Segments[] = $this->Base64Encode(json_encode($Data));
 
