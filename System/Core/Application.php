@@ -4,7 +4,7 @@
         // DataBase Variable
         public $DB;
 
-		// Auth Instance
+        // Auth Instance
         public $Auth;
 
         // Router Instance
