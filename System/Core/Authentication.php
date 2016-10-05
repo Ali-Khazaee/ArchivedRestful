@@ -1,85 +1,150 @@
 <?php
     class Auth
     {
-		// Get Token
-		public function GetToken()
-		{
-			if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
-				JSON("Empty Token!", 300);
 
-			return $_SERVER['HTTP_TOKEN'];
-		}
 
 		// Get Token Data
-		public function Get()
+		public function GetToken()
 		{
-			$Decoded = $this->Decode($this->GetToken());
 
-			if (isset($Decoded))
-                return $Decoded;
+            if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
+                JSON("Empty Token!", 300);
 
-			JSON("Data Doesn't Exist In Token!", 300);
+			$Decoded = $this->Decode($_SERVER['HTTP_TOKEN']);
+
+			if (!isset($Decoded->Data))
+                JSON("Data Doesn't Exist In Token!", 300);
+
+            // This line is acting as a filter to all requests
+            $this->CheckTokenExpire($Decoded);
+
+            return $Decoded;
 		}
 
 
-
-        /*
-        * IF Old Token is Expired : Generate new Token from Old Token with SAME UserId !
-        * ELSE : Continue the Code Execution.
-        * Result Translate
-        *  1 = Token Expired
-        */
-        public function RegenerateTokenIfExpired($App)
+        // Get Refresh Token Data
+        public function GetRefreshToken()
         {
-            // Get Old Token Data
-            $Data = $this->Get();
 
+            if (!isset($_SERVER['HTTP_REFRESHTOKEN']) || empty($_SERVER['HTTP_REFRESHTOKEN']))
+                JSON("Empty Refresh Token!", 300);
+
+            $Decoded = $this->Decode($_SERVER['HTTP_REFRESHTOKEN']);
+
+            if (!isset($Decoded->Data))
+                JSON("Data Doesn't Exist In Refresh Token!", 300);
+
+            return $Decoded;
+        }
+
+
+
+        // Filter :  Check if Token is Expired
+        public function CheckTokenExpire($Data)
+        {
             // Check if Token is Expired
-            if (isset($Data->exp) && time() >= $Data->exp){
+            if (isset($Data->Exp) && time() >= $Data->Exp){
 
-                // Create New Token with the same UserId
-                $NewToken = $this->CreateToken(['UserId' => $Data->data->UserId], $App);
-
-                JSON([
-                    "Status" => "Failed",
-                    "Message" => 1,
-                    "Data" => [
-                        "NewToken" => $NewToken
-                    ]
-                ]);
+                // Token is Expired And Client should update it's tokens (access and refresh)
+                // By Calling /Authenticate Route
+                // And then, call previous request with new tokens
+                JSON("Token is expired!", 403);
             }
 
         }
 
+
+        public function Authenticate($App){
+
+
+            if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
+                JSON("Empty Token!", 300);
+
+            $Decoded = $this->Decode($_SERVER['HTTP_TOKEN']);
+
+            if (!isset($Decoded->Data))
+                JSON("Data Doesn't Exist In Token!", 300);
+
+            $Token = $Decoded;
+
+            $RefreshToken = $this->GetRefreshToken();
+
+            if($Token->Data->UserId != $RefreshToken->Data->UserId)
+                JSON("Refresh Token And Token does not match", 300);
+
+            // Search refresh_tokens table if not exist : invalid refresh, login again!
+            $OldRefresh = $App->DB->Find('refresh_tokens', ['UserId' => $RefreshToken->Data->UserId, 'DeviceName' => $RefreshToken->Data->DeviceName]);
+
+            if(empty($OldRefresh)){
+                JSON("Refresh Token is not valid!", 300);
+            }
+
+            // Create new refresh and update database
+            $UpdatedRefreshToken = $this->UpdateRefreshToken(['UserId' => $RefreshToken->Data->UserId, 'DeviceName' => $RefreshToken->Data->DeviceName], $App);
+
+            // Create new token
+            $NewToken = $this->CreateToken(['UserId' => $Token->Data->UserId]);
+
+            // Access Token And Refresh Token Created Successfully
+            // User may use these tokens in future requests
+            JSON([
+                "Status" => "Successful",
+                "Message" => 100,
+                "Data" => [
+                    "NewToken" => $NewToken,
+                    "NewRefreshToken" => $UpdatedRefreshToken
+                ]
+            ]);
+
+        }
+
+
 		// Create Token
-		public function CreateToken($CustomData, $App)
+		public function CreateToken($CustomData)
         {
             // Token Created Time
             $CreateTime = time();
 
 			// Token Expired Time - One Hour
-            $ExpireTime = $CreateTime + 3600;
+            $ExpireTime = $CreateTime + 100; // TODO: changed to 100 seconds for testing replace to One Hour
 
             // Token Config
             $Config =
 			[
-				// Is User
-				'iss'  => "Biogram",
 				// Not Valid After
-				'exp'  => $ExpireTime,
-				// Not Valid Before
-				'nbf'  => $CreateTime,
-				// Created Time
-                'iat'  => $CreateTime,
-				// Unique Identify
-                'jti'  => base64_encode(mcrypt_create_iv(32)),
+				'Exp'  => $ExpireTime,
                 // Custom Data
-                'data' => $CustomData
+                'Data' => $CustomData
             ];
 
 			// Create Token
-            return $App->Auth->Encode($Config);
+            return $this->Encode($Config);
         }
+
+
+        // Create New Refresh Token And Update DataBase
+        public function UpdateRefreshToken($CustomData, $App)
+        {
+            $RefreshToken = $this->CreateToken($CustomData);
+
+            $App->DB->Update('refresh_tokens', ['UserId' => $CustomData['UserId'], 'DeviceName'=> $CustomData['DeviceName']], ['RefreshToken' => $RefreshToken]);
+
+            return $RefreshToken;
+
+        }
+
+
+
+        // Create New Refresh Token And Insert into DataBase
+        public function CreateRefreshToken($CustomData, $App)
+        {
+            $RefreshToken = $this->CreateToken($CustomData);
+
+            $App->DB->Insert('refresh_tokens', ['UserId' => $CustomData['UserId'], 'DeviceName'=> $CustomData['DeviceName'], 'RefreshToken' => $RefreshToken ]);
+
+            return $RefreshToken;
+        }
+
 
 		// Encode Data Into Token
         public function Encode($Data)

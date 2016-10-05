@@ -22,6 +22,9 @@
             $this->Auth = new Auth();
 
             // Route For Account Register
+            $this->Router->POST('Authenticate', function() { $this->Auth->Authenticate($this); });
+
+            // Route For Account Register
             $this->Router->POST('AccountRegister', function() { Account::Register($this); });
 
             // Route For Account Login

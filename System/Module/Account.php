@@ -76,6 +76,7 @@
          * Result Translate
          * - 1 = Username or Password Incorrect
          * - 2 = Password Empty
+         * - 3 = DeviceName Empty
          * - 100 = Success
          */
         public static function Login($App)
@@ -92,10 +93,15 @@
             if (!isset($Data->Password) || empty($Data->Password))
                 JSON(["Status" => "Failed", "Message" => 2]);
 
+            // DeviceName Filter
+            if (!isset($Data->DeviceName) || empty($Data->DeviceName))
+                JSON(["Status" => "Failed", "Message" => 3]);
+
 
             // Variables
             $Username = $Data->Username;
             $Password = $Data->Password;
+            $DeviceName = $Data->DeviceName;
 
             // Getting Data
             $User = $App->DB->find('account', ['Username' => $Username])->toArray();
@@ -109,14 +115,18 @@
                  * in future http requests in header !
                  *
                  * Header format must be as follow :
-                 * Authorization: Bearer $token_key (OAUTH Standard)
+                 * Token:$token_key
                  */
-                $token = $App->Auth->CreateToken(['UserId' => $User[0]->_id->__toString() ], $App);
+
+                $RefreshToken = $App->Auth->CreateRefreshToken(['UserId' => $User[0]->_id->__toString(), 'DeviceName' => $DeviceName ], $App);
+
+                $Token = $App->Auth->CreateToken(['UserId' => $User[0]->_id->__toString() ], $App);
                 JSON([
                     "Status" => "Success",
                     "Message" => 100,
                     "Data" => [
-                        "Token" => $token
+                        "Token" => $Token,
+                        "RefreshToken" => $RefreshToken
                     ]
                 ]);
 
@@ -129,22 +139,17 @@
         // JUST FOR TESTING
         public static function UpdateUsername($App){
 
-            /*
-            * Result Translate
-            *  1 = Token Expired, generates new token if expired and
-            *  pass it to client, If not expired, continue executing the code
-            */
-            $App->Auth->RegenerateTokenIfExpired($App);
 
-            /*
-             * doing other works :
-             * 1 - get request data (new username)
-             * 2 - search in "accounts" table with token's UserId
-             * 3 - update username
-             */
-            $Token = $App->Auth->Get();
-            $UserId = $Token->data->UserId;
-            var_dump("user id is : ". $UserId); die;
+            // If Token is expired Server replies : JSON("Token is expired!", 403);
+            // And Client should call /Authenticate Route with old TOKEN and old REFRESH_TOKEN in header
+            // And Get A New Token And Refresh Token
+            // And Call This (UpdateUserName) Route Again with new Access Token
+            $Token = $App->Auth->GetToken();
+            $UserId = $Token->Data->UserId;
+            var_dump("Your Token is Valid. userId : \n ");
+            print_r($UserId);
+            // Then Update accounts table with provided UserId . . .
+
 
         }
     }
