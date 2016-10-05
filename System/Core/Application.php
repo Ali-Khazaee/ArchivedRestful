@@ -21,20 +21,20 @@
             // Create New Auth
             $this->Auth = new Auth();
 
-            // Route For Account Register
+            // Authenticate
             $this->Router->POST('Authenticate', function() { $this->Auth->Authenticate($this); });
 
-            // Route For Account Register
-            $this->Router->POST('AccountRegister', function() { Account::Register($this); });
+            // Account > Register
+            $this->Router->POST('AccountRegister', function() { Account::Register($this); }, true);
 
-            // Route For Account Login
-            $this->Router->POST('AccountLogin', function() { Account::Login($this); });
+            // Account > Login
+            $this->Router->POST('AccountLogin', function() { Account::Login($this); }, true);
 
-            // Route For Updata Username JUST FOR TESTING
-            $this->Router->POST('UpdateUsername', function() { Account::UpdateUsername($this); });
+            // Account > Updata Username
+            $this->Router->POST('AccountUpdateUsername', function() { Account::UpdateUsername($this); });
 
             // Execute The Routing
-            $this->Router->Execute();
+            $this->Router->Execute($this);
         }
     }
 ?>

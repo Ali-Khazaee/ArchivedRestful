@@ -3,10 +3,11 @@
     {
         // Variables
         public $Routes = array();
+        public $SkipAuth = array();
         public $CallBacks = array();
 
         // Execute Request
-        public function Execute()
+        public function Execute($App)
         {
             $URL = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             $this->Routes = preg_replace('/\/+/', '/', $this->Routes);
@@ -16,6 +17,10 @@
             {
                 // Find Route Index
                 $Key = array_keys($this->Routes, $URL)[0];
+
+                // Skip Authentication
+                if ($this->SkipAuth[$Key] == false)
+                    $App->Auth->CheckToken();
 
                 // Allow Post Method Only
                 if ($_SERVER['REQUEST_METHOD'] == "POST")
@@ -29,6 +34,7 @@
             $URL = dirname($_SERVER['REQUEST_URI']) . '/' . $Params[0];
 
             array_push($this->Routes, $URL);
+            array_push($this->SkipAuth, isset($Params[3]) ? $Params[3] : false);
             array_push($this->CallBacks, $Params[1]);
         }
     }

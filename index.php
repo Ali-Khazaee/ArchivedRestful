@@ -7,5 +7,4 @@
 
     // Run The Application
     $App = new Application();
-
-
+?>
