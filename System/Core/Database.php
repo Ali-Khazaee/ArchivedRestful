@@ -28,12 +28,11 @@
         }
 
         // Insert Into Collection
-        public function Insert($Collection, $Data, $withMongoId = true)
+        public function Insert($Collection, $Data)
         {
             $Bulk = new BulkWrite;
 
-            if($withMongoId)
-                $Data = array_merge(['_id' => new MongoDB\BSON\ObjectID], $Data);
+            $Data = array_merge(['_id' => new MongoDB\BSON\ObjectID], $Data);
 
             $Bulk->insert($Data);
 

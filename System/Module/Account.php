@@ -136,7 +136,7 @@
             $Token = $App->Auth->CreateToken(['UserId' => $UserId, 'Session' => $Session]);
 
             // Save Token to database
-            $App->Auth->saveToken(['UserId' => $UserId, 'Session' => $Session, 'Token' => $Token], $App);
+            $App->Auth->SaveToken(['UserId' => $UserId, 'Session' => $Session, 'Token' => $Token], $App);
 
             JSON(["Status" => "Success", "Message" => 100, "Token" => $Token]);
         }
