@@ -21,9 +21,6 @@
             // Create New Auth
             $this->Auth = new Auth();
 
-            // Authenticate
-            $this->Router->POST('Authenticate', function() { $this->Auth->Authenticate($this); }, true);
-
             // Account > Register
             $this->Router->POST('AccountRegister', function() { Account::Register($this); }, true);
 
@@ -31,7 +28,7 @@
             $this->Router->POST('AccountLogin', function() { Account::Login($this); }, true);
 
             // Account > Updata Username
-            $this->Router->POST('AccountUpdateUsername', function() { Account::UpdateUsername($this); });
+            $this->Router->POST('AccountLogout', function() { Account::Logout($this); });
 
             // Execute The Routing
             $this->Router->Execute($this);

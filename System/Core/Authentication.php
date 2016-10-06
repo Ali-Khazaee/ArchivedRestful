@@ -31,6 +31,12 @@
                 JSON(["Status" => "Failed", "Message" => 6], 401);
         }
 
+        // Save Token to DataBase
+        public function SaveToken($Data, $App)
+        {
+            $App->DB->Insert('tokens', ['UserId' => $Data['UserId'], 'Session' => $Data['Session'], 'Token' => $Data['Token']], false);
+        }
+
         // Create Token
         public function CreateToken($CustomData)
         {

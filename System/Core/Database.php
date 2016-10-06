@@ -28,11 +28,13 @@
         }
 
         // Insert Into Collection
-        public function Insert($Collection, $Data)
+        public function Insert($Collection, $Data, $withMongoId = true)
         {
             $Bulk = new BulkWrite;
 
-            $Data = array_merge(['_id' => new MongoDB\BSON\ObjectID], $Data);
+            if($withMongoId)
+                $Data = array_merge(['_id' => new MongoDB\BSON\ObjectID], $Data);
+
             $Bulk->insert($Data);
 
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);

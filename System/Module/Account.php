@@ -74,7 +74,7 @@
             if (!empty($_Email))
                 JSON(["Status" => "Failed", "Message" => 12]);
 
-            $App->DB->Insert('account', ['AccountID' => $AccountID, 'Username' => $Username, 'Password' => $Password, 'Email' => $Email, 'CreationTime' => $CreationTime]);
+            $App->DB->Insert('account', ['Username' => $Username, 'Password' => $Password, 'Email' => $Email, 'CreationTime' => $CreationTime]);
 
             JSON(["Status" => "Success", "Message" => 100]);
         }
@@ -124,6 +124,7 @@
             $Session = $Data->Session; // Ino Bayad Ezafe Konim
 
             $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
+            $UserId =  $Account[0]->_id->__toString();
 
             if (empty($Account))
                 JSON(["Status" => "Failed", "Message" => 9]);
@@ -132,9 +133,17 @@
                 JSON(["Status" => "Failed", "Message" => 11]);
 
             // in _id e khode Mongo DB khobe?? akharin bar didam 20 30 kalame bod! b darde ID mikhore ? Age Mikhore AccountID e Register o var darim
-            $Token = $App->Auth->CreateToken(['UserId' => $Account[0]->_id->__toString()]);
+            $Token = $App->Auth->CreateToken(['UserId' => $UserId]);
+
+            // Save Token to database
+            $App->Auth->saveToken(['UserId' => $UserId, 'Session' => $Session, 'Token' => $Token], $App);
 
             JSON(["Status" => "Success", "Message" => 100, "Token" => $Token]);
+        }
+
+        public static function Logout()
+        {
+
         }
     }
 ?>
