@@ -2,23 +2,23 @@
     class Auth
     {
 
-		// Get Token Data
-		public function GetToken()
-		{
+        // Get Token Data
+        public function GetToken()
+        {
 
             if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
                 JSON("Empty Token!", 300);
 
-			$Decoded = $this->Decode($_SERVER['HTTP_TOKEN']);
+            $Decoded = $this->Decode($_SERVER['HTTP_TOKEN']);
 
-			if (!isset($Decoded->Data))
+            if (!isset($Decoded->Data))
                 JSON("Data Doesn't Exist In Token!", 300);
 
             // This line is acting as a filter to all requests
             $this->CheckTokenExpire($Decoded);
 
             return $Decoded;
-		}
+        }
 
 
         // Get Refresh Token Data
@@ -97,29 +97,29 @@
 
         }
 
-		// Create Token
-		public function CreateToken($CustomData)
+        // Create Token
+        public function CreateToken($CustomData)
 
         {
             // Token Created Time
             $CreateTime = time();
 
 
-			// Token Expired Time - One Hour
+            // Token Expired Time - One Hour
             $ExpireTime = $CreateTime + 100; // TODO: changed to 100 seconds for testing replace to One Hour
 
             // Token Config
             $Config =
-			[
-				// Not Valid After
-				'Exp'  => $ExpireTime,
+            [
+                // Not Valid After
+                'Exp'  => $ExpireTime,
 
                 // Custom Data
                 'Data' => $CustomData
             ];
 
 
-			// Create Token
+            // Create Token
             return $this->Encode($Config);
         }
 
@@ -146,10 +146,70 @@
 
             return $RefreshToken;
         }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
+        /* Value Translate
+         * 1 - OpenSSL Unable To Verify Data
+         * 2 - Invalid Token Signature Verification Failed
+         * 3 - Invalid Token Content
+         * 4 - Wrong Token Format
+         * 5 - OpenSSL Unable To Sign
+         * 6 - Token Is Expired
+         * 7 - Data Doesn't Exist In Token
+         * 8 - Empty Token
+         */
 
-		// Encode Data Into Token
-        public function Encode($Data)
+        // Check Token
+        public function CheckToken()
+        {
+            // Header Shouldn't Be Empty
+            if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
+                JSON(["Status" => "Failed", "Message" => 8], 401);
+
+            // Decode Token
+            $Decode = $this->Decode($_SERVER['HTTP_TOKEN']);
+
+            // Token Data Shouldn't Be Empty
+            if (!isset($Decode->Data))
+                JSON(["Status" => "Failed", "Message" => 7], 401);
+
+            // Check Expired
+            if (isset($Decode->Exp) && time() >= $Decode->Exp)
+                JSON(["Status" => "Failed", "Message" => 6], 401);
+        }
+
+        // Create Token
+        public function CreateToken($CustomData)
+        {
+            // Token Expired Time - 60 Days
+            $ExpireTime = time() + 5184000;
+
+            // Token Config
+            $Config =
+            [
+                // Not Valid After
+                'Exp' => $ExpireTime,
+                // Custom Data
+                'Data' => $CustomData
+            ];
+
+            // Create Token
+            return $this->Encode($Config);
+        }
+
+        // Encode Data Into Token
+        private function Encode($Data)
         {
             // Encode Data
             $Segments[] = $this->Base64Encode(json_encode($Data));
@@ -165,13 +225,13 @@
         }
 
         // Base64 Encode 
-        public function Base64Encode($input)
+        private function Base64Encode($input)
         {
             return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
         }
 
         // Sign The Token
-        public function Sign($Message)
+        private function Sign($Message)
         {
             $Signature = '';
             $Success = openssl_sign($Message, $Signature, SSL_PRIVATE_KEY, 'SHA256');
@@ -179,17 +239,18 @@
             if ($Success)
                 return $Signature;
 
-            JSON("OpenSSL Unable To Sign!", 300);
+            JSON(["Status" => "Failed", "Message" => 5], 401);
         }
 
         // Decode Token Into Data
         public function Decode($Data)
         {
+            // Explode Segments By .
             $Segments = explode('.', $Data);
 
             // Count Segment
             if (count($Segments) != 2)
-                JSON("Wrong Token Format!", 300);
+                JSON(["Status" => "Failed", "Message" => 4], 401);
 
             // List Data
             $Content = $Segments[0];
@@ -197,21 +258,21 @@
 
             // Decode Content
             if (($ContentData = json_decode($this->Base64Decode($Content))) === NULL)
-                JSON("Invalid Token Content!", 300);
+                JSON(["Status" => "Failed", "Message" => 3], 401);
 
             // Decode Signature
             $Signature = $this->Base64Decode($Crypt);
 
             // Verify Data
             if ($this->Verify($Content, $Signature))
-                JSON("Invalid Token Signature Verification Failed!", 300);
+                JSON(["Status" => "Failed", "Message" => 2], 401);
 
             // Return Data As JSON
             return $ContentData;
         }
 
         // Base64 Decode
-        public function Base64Decode($Message)
+        private function Base64Decode($Message)
         {
             $Remainder = strlen($Message) % 4;
 
@@ -232,7 +293,7 @@
             if ($Success)
                 return false;
 
-            JSON("OpenSSL Unable To Verify Data: " . openssl_error_string(), 300);
+            JSON(["Status" => "Failed", "Message" => 1], 401);
         }
     }
 ?>

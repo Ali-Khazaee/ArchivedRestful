@@ -22,7 +22,7 @@
             $this->Auth = new Auth();
 
             // Authenticate
-            $this->Router->POST('Authenticate', function() { $this->Auth->Authenticate($this); });
+            $this->Router->POST('Authenticate', function() { $this->Auth->Authenticate($this); }, true);
 
             // Account > Register
             $this->Router->POST('AccountRegister', function() { Account::Register($this); }, true);
