@@ -58,7 +58,7 @@
             if (!preg_match('/[^A-Za-z0-9]/', $Data->Username))
                 JSON(["Status" => "Failed", "Message" => 10]);
 
-            $AccountID = UNIQUEID!!!!!
+//            $AccountID = UNIQUEID!!!!!
             $Username = $Data->Username;
             $Password = $Data->Password;
             $Email = $Data->Email;
@@ -132,7 +132,7 @@
                 JSON(["Status" => "Failed", "Message" => 11]);
 
             // in _id e khode Mongo DB khobe?? akharin bar didam 20 30 kalame bod! b darde ID mikhore ? Age Mikhore AccountID e Register o var darim
-            $Token = $App->Auth->CreateToken(['UserId' => $User[0]->_id->__toString()]);
+            $Token = $App->Auth->CreateToken(['UserId' => $Account[0]->_id->__toString()]);
 
             JSON(["Status" => "Success", "Message" => 100, "Token" => $Token]);
         }
