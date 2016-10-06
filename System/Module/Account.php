@@ -116,8 +116,8 @@
             if (strlen($Data->Password) >= 33)
                 JSON(["Status" => "Failed", "Message" => 7]);
 
-            if (!preg_match('/[^A-Za-z0-9]/', $Data->Username))
-                JSON(["Status" => "Failed", "Message" => 8]);
+//            if (!preg_match('/[^A-Za-z0-9]/', $Data->Username))
+//                JSON(["Status" => "Failed", "Message" => 8]);
 
             $Username = $Data->Username;
             $Password = $Data->Password;
@@ -133,7 +133,7 @@
                 JSON(["Status" => "Failed", "Message" => 11]);
 
             // in _id e khode Mongo DB khobe?? akharin bar didam 20 30 kalame bod! b darde ID mikhore ? Age Mikhore AccountID e Register o var darim
-            $Token = $App->Auth->CreateToken(['UserId' => $UserId]);
+            $Token = $App->Auth->CreateToken(['UserId' => $UserId, 'Session' => $Session]);
 
             // Save Token to database
             $App->Auth->saveToken(['UserId' => $UserId, 'Session' => $Session, 'Token' => $Token], $App);
@@ -141,9 +141,16 @@
             JSON(["Status" => "Success", "Message" => 100, "Token" => $Token]);
         }
 
-        public static function Logout()
+        // Logout and Delete Token From DataBase
+        public static function Logout($App)
         {
+            // Token ---> CheckToken() is done for this route before!
+            $Token = $_SERVER['HTTP_TOKEN'];
 
+            // Delete Token From DataBase
+            $App->DB->Delete('tokens',  ['Token' => $Token]);
+
+            JSON(["Status" => "Success", "Message" => 100]);
         }
     }
 ?>

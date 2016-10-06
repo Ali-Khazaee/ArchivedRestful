@@ -8,6 +8,7 @@
      * 6 - Token Is Expired
      * 7 - Data Doesn't Exist In Token
      * 8 - Empty Token
+     * 9 - Token Is Invalid (Does not exists in database)
      */
 
     class Auth
@@ -54,6 +55,41 @@
 
             // Create Token
             return $this->Encode($Config);
+        }
+
+        // Authentication for update token
+        public function Authenticate($App)
+        {
+            if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
+                JSON("Empty Token!", 300);
+
+            $Token = $_SERVER['HTTP_TOKEN'];
+            $Decoded = $this->Decode($Token);
+
+            if (!isset($Decoded->Data))
+                JSON("Data Doesn't Exist In Token!", 300);
+
+            // Search tokens table
+            // if not exist : invalid token, login again!
+            // if exists : create new token and update tokens table
+            $OldToken = $App->DB->Find('tokens', ['Token' =>$Token])->toArray();
+
+            if(empty($OldToken[0])){
+                JSON(["Status" => "Failed", "Message" => 9], 401);
+            }
+
+            $NewToken = $this->CreateToken(['UserId' => $Decoded->Data->UserId, 'Session' => $Decoded->Data->Session]);
+
+            $App->DB->Update('tokens', ['Token' => $Token], ['Token' => $NewToken]);
+
+            //Token Created Successfully
+            JSON([
+                "Status" => "Successful",
+                "Message" => 100,
+                "Data" => [
+                    "NewToken" => $NewToken
+                ]
+            ]);
         }
 
         // Encode Data Into Token

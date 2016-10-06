@@ -34,7 +34,7 @@
             $URL = dirname($_SERVER['REQUEST_URI']) . '/' . $Params[0];
 
             array_push($this->Routes, $URL);
-            array_push($this->SkipAuth, isset($Params[3]) ? $Params[3] : false);
+            array_push($this->SkipAuth, isset($Params[2]) ? $Params[2] : false);
             array_push($this->CallBacks, $Params[1]);
         }
     }
