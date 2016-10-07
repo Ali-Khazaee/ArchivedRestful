@@ -11,11 +11,11 @@
             if (!isset($Decode->Data))
                 JSON(["Status" => "Failed", "Message" => $Lang["AUTH_EMPTY_DATA"]], 401);
 
-            if (!isset($Decode->Exp) || time() <= $Decode->Exp)
+            if (!isset($Decode->EXP) || time() <= $Decode->EXP)
                 JSON(["Status" => "Failed", "Message" => $Lang["AUTH_EXPIRED_TOKEN"]], 401);
         }
 
-        public function SaveToken($Data, $App) // Check This Function!
+        public function SaveToken($Data, $App) // @TODO Check This Function!
         {
             // Delete Similar Session
             $App->DB->Delete('account', ['_id' => $Data['ID'], 'Session' => $Data['Token']]);
@@ -25,13 +25,16 @@
 
         public function CreateToken($CustomData)
         {
-            // Token Expired Time - 180 Days
-            $ExpireTime = time() + 15552000;
+            $ID = $CustomData["ID"];
+            $ExpireTime = time() + 15552000; // 180 Days
+
+            unset($CustomData["ID"]);
 
             $Config =
             [
-                'Exp'  => $ExpireTime, // Not Valid After
-                'Data' => $CustomData  // Custom Data
+                'ID'  => $ID,
+                'EXP' => $ExpireTime,
+                'DATA'  => $CustomData
             ];
 
             return $this->Encode($Config);
