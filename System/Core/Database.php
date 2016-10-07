@@ -6,10 +6,8 @@
 
     class DataBase
     {
-        // DataBase Manager
         protected $Manager;
 
-        // Connection
         public function __construct()
         {
             try
@@ -27,7 +25,6 @@
             }
         }
 
-        // Insert Into Collection
         public function Insert($Collection, $Data)
         {
             $Bulk = new BulkWrite;
@@ -39,7 +36,6 @@
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        // Delete From Collection
         public function Delete($Collection, $Condition)
         {
             $Bulk = new BulkWrite;
@@ -49,17 +45,15 @@
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        // Update The Collection
         public function Update($Collection, $Conditions, $Data)
         {
             $Bulk = new BulkWrite;
 
-            $Bulk->update($Conditions, ['$set' => $Data]);
+            $Bulk->update($Conditions, $Data);
 
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        // Find Item In Collection
         public function Find($Collection, $Conditions)
         {
             $Query = new Query($Conditions);
