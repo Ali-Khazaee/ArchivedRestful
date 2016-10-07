@@ -30,6 +30,9 @@
             // Account > Logout
             $this->Router->POST('AccountLogout', function() { Account::Logout($this); });
 
+            // TESTING : Account > UploadAvatarImage
+            $this->Router->POST('UploadAvatarImage', function() { Account::UploadAvatarImage($this); }, true);
+
             // Execute The Routing
             $this->Router->Execute($this);
         }

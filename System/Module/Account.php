@@ -127,5 +127,11 @@
 
             JSON(["Status" => "Success", "Message" => 100]);
         }
+
+        public static function UploadAvatarImage($App){
+
+            $Destination = $App->File->Upload();
+
+        }
     }
 ?>

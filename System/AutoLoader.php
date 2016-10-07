@@ -23,6 +23,9 @@
     // Load Router
     include_once(ROOT . "System/Core/Router.php");
 
+    // Load Router
+    include_once(ROOT . "System/Core/File.php");
+
     // Load Module Account
     include_once(ROOT . "System/Module/Account.php");
 ?>
