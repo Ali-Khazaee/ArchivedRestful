@@ -49,8 +49,29 @@
     $Lang["ACC_REG_ERROR_INVALID_USERNAME"] = 40;
     $Lang["ACC_REG_ERROR_ALREADY_USERNAME"] = 41;
     $Lang["ACC_REG_ERROR_ALREADY_EMAIL"] = 42;
-    $Lang["ACC_REG_ERROR_"] = 43;
-    $Lang["ACC_REG_ERROR_"] = 44;
-    $Lang["ACC_REG_ERROR_"] = 45;
+    // Register Reserve 43
+    // Register Reserve 44
+    // Register Reserve 45
+    // Register Reserve 46
+    // Register Reserve 47
+    // Register Reserve 48
+    // Register Reserve 49
+    // Register Reserve 50
+
+    $Lang["ACC_LOGIN_ERROR_EMPTY_USERNAME"] = 31;
+    $Lang["ACC_LOGIN_ERROR_EMPTY_PASSWORD"] = 32;
+    $Lang["ACC_LOGIN_ERROR_EMPTY_SESSION"] = 32;
+    $Lang["ACC_LOGIN_ERROR_SHORT_USERNAME"] = 35;
+    $Lang["ACC_LOGIN_ERROR_SHORT_PASSWORD"] = 36;
+    $Lang["ACC_LOGIN_ERROR_LONG_USERNAME"] = 37;
+    $Lang["ACC_LOGIN_ERROR_LONG_PASSWORD"] = 38;
+    $Lang["ACC_LOGIN_ERROR_INVALID_USERNAME"] = 40;
+    $Lang["ACC_LOGIN_ERROR_NOT_EXIST_USERNAME"] = 40;
+    $Lang["ACC_LOGIN_ERROR_WRONG_USERNAME_PASSWORD"] = 40;
+    $Lang["ACC_LOGIN_ERROR_INVALID_USERNAME"] = 40;
+    $Lang["ACC_LOGIN_ERROR_INVALID_USERNAME"] = 40;
+    $Lang["ACC_LOGIN_ERROR_INVALID_USERNAME"] = 40;
+    $Lang["ACC_LOGIN_ERROR_INVALID_USERNAME"] = 40;
+    $Lang["ACC_LOGIN_ERROR_INVALID_USERNAME"] = 40;
 
 ?>

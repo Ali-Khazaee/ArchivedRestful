@@ -52,81 +52,73 @@
 
             $App->DB->Insert('account', ['Username' => $Username, 'Password' => $Password, 'Email' => $Email, 'CreationTime' => $CreationTime, 'LastOnlineTime' => $CreationTime]);
 
+            // TODO SendMail
+            // TODO Log
+
             JSON(["Status" => "Success", "Message" => $Lang["SUCCESS"]]);
         }
-
-        /*
-         * - 1 = Username Empty
-         * - 2 = Password Empty
-         * - 3 = Session Empty
-         * - 4 = Username Short
-         * - 5 = Username Long
-         * - 6 = Password Short
-         * - 7 = Password Long
-         * - 8 = Username Invalid
-         * - 12 = Email Taken
-         */
 
         public static function Login($App)
         {
             $Data = json_decode(file_get_contents("php://input"));
 
             if (!isset($Data->Username) || empty($Data->Username))
-                JSON(["Status" => "Failed", "Message" => 1]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_EMPTY_USERNAME"]]);
 
             if (!isset($Data->Password) || empty($Data->Password))
-                JSON(["Status" => "Failed", "Message" => 2]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_EMPTY_PASSWORD"]]);
 
             if (!isset($Data->Session) || empty($Data->Session))
-                JSON(["Status" => "Failed", "Message" => 3]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_EMPTY_SESSION"]]);
 
             if (strlen($Data->Username) <= 2)
-                JSON(["Status" => "Failed", "Message" => 4]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_SHORT_USERNAME"]]);
 
             if (strlen($Data->Username) >= 33)
-                JSON(["Status" => "Failed", "Message" => 5]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_LONG_USERNAME"]]);
 
             if (strlen($Data->Password) <= 4)
-                JSON(["Status" => "Failed", "Message" => 6]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_SHORT_PASSWORD"]]);
 
             if (strlen($Data->Password) >= 33)
-                JSON(["Status" => "Failed", "Message" => 7]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_LONG_PASSWORD"]]);
 
-//            if (!preg_match('/[^A-Za-z0-9]/', $Data->Username))
-//                JSON(["Status" => "Failed", "Message" => 8]);
+            if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Data->Username))
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_INVALID_USERNAME"]]);
 
             $Username = $Data->Username;
             $Password = $Data->Password;
-            $Session = $Data->Session; // Ino Bayad Ezafe Konim
+            $Session = $Data->Session;
+            $LoginTime = time();
 
             $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
-            $UserId =  $Account[0]->_id->__toString();
 
             if (empty($Account))
-                JSON(["Status" => "Failed", "Message" => 9]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_NOT_EXIST_USERNAME"]]);
 
-            if ($Account[0]->Password != $Password)
-                JSON(["Status" => "Failed", "Message" => 11]);
+            if (!password_verify($Password, $Account[0]->Password->__toString()))
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_LOGIN_ERROR_WRONG_USERNAME_PASSWORD"]]);
 
-            // in _id e khode Mongo DB khobe?? akharin bar didam 20 30 kalame bod! b darde ID mikhore ? Age Mikhore AccountID e Register o var darim
-            $Token = $App->Auth->CreateToken(['UserId' => $UserId, 'Session' => $Session]);
+            $ID = $Account[0]->_id->__toString();
 
-            // Save Token to database
-            $App->Auth->SaveToken(['UserId' => $UserId, 'Session' => $Session, 'Token' => $Token], $App);
+            $Token = $App->Auth->CreateToken(['_id' => $ID, 'Session' => $Session]); // Fix This
 
-            JSON(["Status" => "Success", "Message" => 100, "Token" => $Token]);
+            $App->Auth->SaveToken(['_id' => $ID, 'Session' => $Session, 'Token' => $Token], $App); // And This
+
+            // TODO SendMail
+            // TODO Log
+
+            JSON(["Status" => "Success", "Message" => $Lang["SUCCESS"], "Token" => $Token]);
         }
 
-        // Logout and Delete Token From DataBase
         public static function Logout($App)
         {
-            // Token ---> CheckToken() is done for this route before!
+            // This Is Safe
             $Token = $_SERVER['HTTP_TOKEN'];
 
-            // Delete Token From DataBase
-            $App->DB->Delete('tokens',  ['Token' => $Token]);
+            $App->DB->Delete('account', ['Token' => $Token]); // Fix Me
 
-            JSON(["Status" => "Success", "Message" => 100]);
+            JSON(["Status" => "Success", "Message" => $Lang["SUCCESS"]]);
         }
     }
 ?>
