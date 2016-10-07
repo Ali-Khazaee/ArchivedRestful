@@ -1,82 +1,58 @@
 <?php
     class Account
     {
-        /*
-         * - 1 = Username Empty
-         * - 2 = Password Empty
-         * - 3 = Email Empty
-         * - 4 = Email Wrong
-         * - 5 = Username Short
-         * - 6 = Username Long
-         * - 7 = Password Short
-         * - 8 = Password Long
-         * - 9 = Email Long
-         * - 10 = Username Invalid
-         * - 11 = Username Taken
-         * - 12 = Email Taken
-         * - 100 = Success
-         */
-
-         /* Karaye Anjam Nashode Baraye In Method!
-          * - Username Ba Adad Va . - Shoro Nashe!
-          * - Username Ba Adad Va . - B Payan Narese!
-          * - Username Bejoz Kalamate A-Za-z0-9 Va _ Va . nokhte Faghat betone yek Bar Tekrar she Poshte Sare Ham
-          * - EnCrypt Kardane Password
-          */
-
         public static function Register($App)
         {
             $Data = json_decode(file_get_contents("php://input"));
 
             if (!isset($Data->Username) || empty($Data->Username))
-                JSON(["Status" => "Failed", "Message" => 1]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_EMPTY_USERNAME"]]);
 
             if (!isset($Data->Password) || empty($Data->Password))
-                JSON(["Status" => "Failed", "Message" => 2]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_EMPTY_PASSWORD"]]);
 
             if (!isset($Data->Email) || empty($Data->Email))
-                JSON(["Status" => "Failed", "Message" => 3]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_EMPTY_EMAIL"]]);
 
             if (!filter_var($Data->Email, FILTER_VALIDATE_EMAIL))
-                JSON(["Status" => "Failed", "Message" => 4]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_INVALID_EMAIL"]]);
 
             if (strlen($Data->Username) <= 2)
-                JSON(["Status" => "Failed", "Message" => 5]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_SHORT_USERNAME"]]);
 
             if (strlen($Data->Username) >= 33)
-                JSON(["Status" => "Failed", "Message" => 6]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_LONG_USERNAME"]]);
 
             if (strlen($Data->Password) <= 4)
-                JSON(["Status" => "Failed", "Message" => 7]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_SHORT_PASSWORD"]]);
 
             if (strlen($Data->Password) >= 33)
-                JSON(["Status" => "Failed", "Message" => 8]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_LONG_PASSWORD"]]);
 
             if (strlen($Data->Email) >= 65)
-                JSON(["Status" => "Failed", "Message" => 9]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_LONG_EMAIL"]]);
 
             if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Data->Username))
-                JSON(["Status" => "Failed", "Message" => 10]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_INVALID_USERNAME"]]);
 
-//            $AccountID = UNIQUEID!!!!!
             $Username = $Data->Username;
-            $Password = $Data->Password;
+            $Password = password_hash($Data->Password, PASSWORD_BCRYPT);
             $Email = $Data->Email;
             $CreationTime = time();
 
             $_Username = $App->DB->find('account', ['Username' => $Username])->toArray();
 
             if (!empty($_Username))
-                JSON(["Status" => "Failed", "Message" => 11]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_ALREADY_USERNAME"]]);
 
             $_Email = $App->DB->find('account', ['Email' => $Email])->toArray();
 
             if (!empty($_Email))
-                JSON(["Status" => "Failed", "Message" => 12]);
+                JSON(["Status" => "Failed", "Message" => $Lang["ACC_REG_ERROR_ALREADY_EMAIL"]]);
 
-            $App->DB->Insert('account', ['Username' => $Username, 'Password' => $Password, 'Email' => $Email, 'CreationTime' => $CreationTime]);
+            $App->DB->Insert('account', ['Username' => $Username, 'Password' => $Password, 'Email' => $Email, 'CreationTime' => $CreationTime, 'LastOnlineTime' => $CreationTime]);
 
-            JSON(["Status" => "Success", "Message" => 100]);
+            JSON(["Status" => "Success", "Message" => $Lang["SUCCESS"]]);
         }
 
         /*

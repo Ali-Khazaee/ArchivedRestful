@@ -2,6 +2,9 @@
     // Don't Allow Access Directly
     if (!defined("ROOT")) { exit(); }
 
+    // Default
+    $Lang["SUCCESS"] = 1000;
+
     $Lang["DATABASE_ERROR_CON"] = 1;
     // DB Reserve 2
     // DB Reserve 3
@@ -33,5 +36,21 @@
     // Auth Reserve 28
     // Auth Reserve 29
     // Auth Reserve 30
+
+    $Lang["ACC_REG_ERROR_EMPTY_USERNAME"] = 31;
+    $Lang["ACC_REG_ERROR_EMPTY_PASSWORD"] = 32;
+    $Lang["ACC_REG_ERROR_EMPTY_EMAIL"] = 33;
+    $Lang["ACC_REG_ERROR_INVALID_EMAIL"] = 34;
+    $Lang["ACC_REG_ERROR_SHORT_USERNAME"] = 35;
+    $Lang["ACC_REG_ERROR_SHORT_PASSWORD"] = 36;
+    $Lang["ACC_REG_ERROR_LONG_USERNAME"] = 37;
+    $Lang["ACC_REG_ERROR_LONG_PASSWORD"] = 38;
+    $Lang["ACC_REG_ERROR_LONG_EMAIL"] = 39;
+    $Lang["ACC_REG_ERROR_INVALID_USERNAME"] = 40;
+    $Lang["ACC_REG_ERROR_ALREADY_USERNAME"] = 41;
+    $Lang["ACC_REG_ERROR_ALREADY_EMAIL"] = 42;
+    $Lang["ACC_REG_ERROR_"] = 43;
+    $Lang["ACC_REG_ERROR_"] = 44;
+    $Lang["ACC_REG_ERROR_"] = 45;
 
 ?>
