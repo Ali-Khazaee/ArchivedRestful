@@ -55,7 +55,7 @@
             if (strlen($Data->Email) >= 65)
                 JSON(["Status" => "Failed", "Message" => 9]);
 
-            if (!preg_match('/[^A-Za-z0-9]/', $Data->Username))
+            if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Data->Username))
                 JSON(["Status" => "Failed", "Message" => 10]);
 
 //            $AccountID = UNIQUEID!!!!!

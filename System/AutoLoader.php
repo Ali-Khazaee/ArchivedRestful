@@ -17,6 +17,9 @@
     // Load DataBase Driver
     include_once(ROOT . "System/Core/DataBase.php");
 
+    // Load Language
+    include_once(ROOT . "System/Core/Language.php");
+
     // Load Router
     include_once(ROOT . "System/Core/Router.php");
 

@@ -1,7 +1,7 @@
 <?php
     class Application
     {
-        // DataBase Variable
+        // DataBase Instance
         public $DB;
 
         // Auth Instance
@@ -27,7 +27,7 @@
             // Account > Login
             $this->Router->POST('AccountLogin', function() { Account::Login($this); }, true);
 
-            // Account > Updata Username
+            // Account > Logout
             $this->Router->POST('AccountLogout', function() { Account::Logout($this); });
 
             // Execute The Routing

@@ -6,7 +6,7 @@
     function ErrorHandler($errno, $errstr, $errfile, $errline)
     {
         echo "Line $errline IN $errfile -- $errstr</br>";
-        Tracer("error.log", "Line $errline IN $errfile -- $errstr");
+        Tracer("ApplicationError.log", "Line $errline IN $errfile -- $errstr");
     }
 
     // Tracer
