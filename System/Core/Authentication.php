@@ -17,10 +17,17 @@
 
         public function SaveToken($Data, $App) // Check This Function!
         {
-            // Delete Similar Session
-            $App->DB->Delete('account', ['_id' => $Data['ID'], 'Session' => $Data['Token']]);
+            $Time = time();
 
-            $App->DB->Insert('account', ['_id' => $Data['ID'], 'Session' => (['Name' => $Data['Name'], 'Token' => $Data['Token'], 'CreationTime' => time()])]);
+            // Delete Similar Session
+            $App->DB->Update('account',
+                ['_id' => new MongoDB\BSON\ObjectID($Data['UserId'])],
+                ['$pull' => ['Session' => ['Name' => $Data['Session'] ]]]);
+
+            // Delete Similar Session
+            $App->DB->Update('account',
+                ['_id' => new MongoDB\BSON\ObjectID($Data['UserId'])],
+                ['$push' => ['Session' => ['Token' => $Data['Token'], 'Name' => $Data['Session'], 'Time' => $Time ]]]);
         }
 
         public function CreateToken($CustomData)

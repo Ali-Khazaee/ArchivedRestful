@@ -97,7 +97,7 @@
 
             $Username = $Data->Username;
             $Password = $Data->Password;
-            $Session = $Data->Session; // Ino Bayad Ezafe Konim
+            $Session = $Data->Session;
 
             $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
             $UserId =  $Account[0]->_id->__toString();
@@ -108,8 +108,7 @@
             if ($Account[0]->Password != $Password)
                 JSON(["Status" => "Failed", "Message" => 11]);
 
-            // in _id e khode Mongo DB khobe?? akharin bar didam 20 30 kalame bod! b darde ID mikhore ? Age Mikhore AccountID e Register o var darim
-            $Token = $App->Auth->CreateToken(['UserId' => $UserId, 'Session' => $Session]);
+            $Token = $App->Auth->CreateToken(['UserId' => $UserId]);
 
             // Save Token to database
             $App->Auth->SaveToken(['UserId' => $UserId, 'Session' => $Session, 'Token' => $Token], $App);

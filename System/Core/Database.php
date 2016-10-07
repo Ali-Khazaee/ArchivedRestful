@@ -54,7 +54,7 @@
         {
             $Bulk = new BulkWrite;
 
-            $Bulk->update($Conditions, ['$set' => $Data]);
+            $Bulk->update($Conditions, $Data);
 
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
