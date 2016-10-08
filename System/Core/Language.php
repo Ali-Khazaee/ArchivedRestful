@@ -73,6 +73,16 @@
             // Login Reserve 47
             // Login Reserve 48
             // Login Reserve 49
+
+            // Upload
+            case "UPLOAD_EMPTY_FILE":           return 51;
+            // Login Reserve 44
+            // Login Reserve 45
+            // Login Reserve 46
+            // Login Reserve 47
+            // Login Reserve 48
+            // Login Reserve 49
+
         }
     }
 ?>

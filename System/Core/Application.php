@@ -13,6 +13,9 @@
         // Router Instance
         protected $Router;
 
+        // Router Instance
+        public $Upload;
+
         public function __construct()
         {
             // Connecting To DataBase
@@ -23,6 +26,9 @@
 
             // Create New Auth
             $this->Auth = new Auth();
+
+            // Create New Auth
+            $this->Upload = new Upload();
 
             // Account > Register
             $this->Router->POST('AccountRegister', function() { Account::Register($this); }, true);
