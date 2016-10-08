@@ -3,6 +3,8 @@
     {
         public static function Register($App)
         {
+            exit($Lang["GEN_SUCCESS"]);
+
             $Data = json_decode(file_get_contents("php://input"));
 
             if (!isset($Data->Username) || empty($Data->Username))
@@ -60,6 +62,8 @@
 
         public static function Login($App)
         {
+            global $Lang;
+
             $Data = json_decode(file_get_contents("php://input"));
 
             if (!isset($Data->Username) || empty($Data->Username))
@@ -88,22 +92,20 @@
 
             $Username = $Data->Username;
             $Password = $Data->Password;
+            $Session = $Data->Session;
 
             $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
 
             if (empty($Account))
                 JSON(["Status" => "Failed", "Message" => $Lang["LOGIN_NOT_EXIST_USERNAME"]]);
 
-            if (!password_verify($Password, $Account[0]->Password->__toString()))
+            if (!password_verify($Password, $Account[0]->Password))
                 JSON(["Status" => "Failed", "Message" => $Lang["LOGIN_WRONG_USERNAME_PASSWORD"]]);
 
-            $LoginTime = time();
-            $Session = $Data->Session;
             $ID = $Account[0]->_id->__toString();
+            $Token = $App->Auth->CreateToken(["ID" => $ID]);
 
-            $Token = $App->Auth->CreateToken($ID);
-
-            $App->Auth->SaveToken(['_id' => $ID, 'Session' => $Session, 'Token' => $Token], $App); // Fix Me
+            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreationTime' => time()]]]);
 
             // @TODO SendMail
             // @TODO Log
@@ -113,10 +115,11 @@
 
         public static function Logout($App)
         {
-            // This Is Safe
             $Token = $_SERVER['HTTP_TOKEN'];
+            $Decode = $App->Auth->Decode($Token);
+            $ID = $Decode->ID;
 
-            $App->DB->Delete('account', ['Token' => $Token]); // Fix Me
+            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$pull' => ['Session' => ["Token" => $Token]]]);
 
             JSON(["Status" => "Success", "Message" => $Lang["GEN_SUCCESS"]]);
         }

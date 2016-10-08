@@ -8,19 +8,11 @@
 
             $Decode = $this->Decode($_SERVER['HTTP_TOKEN']);
 
-            if (!isset($Decode->Data))
+            if (!isset($Decode->ID))
                 JSON(["Status" => "Failed", "Message" => $Lang["AUTH_EMPTY_DATA"]], 401);
 
-            if (!isset($Decode->EXP) || time() <= $Decode->EXP)
+            if (!isset($Decode->EXP) || time() >= $Decode->EXP)
                 JSON(["Status" => "Failed", "Message" => $Lang["AUTH_EXPIRED_TOKEN"]], 401);
-        }
-
-        public function SaveToken($Data, $App) // @TODO Check This Function!
-        {
-            // Delete Similar Session
-            $App->DB->Delete('account', ['_id' => $Data['ID'], 'Session' => $Data['Token']]);
-
-            $App->DB->Insert('account', ['_id' => $Data['ID'], 'Session' => (['Name' => $Data['Name'], 'Token' => $Data['Token'], 'CreationTime' => time()])]);
         }
 
         public function CreateToken($CustomData)
@@ -32,9 +24,9 @@
 
             $Config =
             [
-                'ID'  => $ID,
-                'EXP' => $ExpireTime,
-                'DATA'  => $CustomData
+                'ID'   => $ID,
+                'EXP'  => $ExpireTime,
+                'DATA' => $CustomData
             ];
 
             return $this->Encode($Config);

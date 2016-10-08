@@ -2,7 +2,7 @@
     // Don't Allow Access Directly
     if (!defined("ROOT")) { exit(); }
 
-    // Load Helper Function
+    // Load Helper
     include_once(ROOT . "System/Core/Helper.php");
 
     // Load Config
@@ -14,7 +14,7 @@
     // Load Authentication
     include_once(ROOT . "System/Core/Authentication.php");
 
-    // Load DataBase Driver
+    // Load DataBase
     include_once(ROOT . "System/Core/DataBase.php");
 
     // Load Language
@@ -26,6 +26,6 @@
     // Load Upload
     include_once(ROOT . "System/Core/Upload.php");
 
-    // Load Module Account
+    // Load Account
     include_once(ROOT . "System/Module/Account.php");
 ?>
