@@ -123,5 +123,11 @@
 
             JSON(["Status" => "Success", "Message" => $Lang["GEN_SUCCESS"]]);
         }
+
+        public static function UploadAvatarImage($App){
+
+            $Destination = $App->File->Upload();
+
+        }
     }
 ?>
