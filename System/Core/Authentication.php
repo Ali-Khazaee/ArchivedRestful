@@ -67,7 +67,7 @@
             $Segments = explode('.', $Data);
 
             if (count($Segments) != 2)
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_WRONG_SEGMENT_COUNT"]], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_WRONG_SEGMENT_COUNT")], 401);
 
             if (($ContentData = json_decode($this->Base64Decode($Segments[0]))) === NULL)
                 JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_CONTENT")], 401);

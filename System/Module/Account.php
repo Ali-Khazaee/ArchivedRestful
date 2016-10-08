@@ -120,6 +120,9 @@
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$pull' => ['Session' => ["Token" => $Token]]]);
 
+            // @TODO SendMail
+            // @TODO Log
+
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS")]);
         }
 
