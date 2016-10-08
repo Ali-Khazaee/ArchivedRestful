@@ -1,8 +1,9 @@
 <?php
+    // Don't Allow Access Directly
+    if (!defined("ROOT")) { exit(); }
 
-    class File
+    class Upload
     {
-
         // Make Directory For Upload
         public function Make_Directory()
         {
@@ -15,11 +16,9 @@
             return $Directory;
         }
 
-
         public function Upload($File)
         {
             $Directory = $this->Make_Directory();
-
         }
-
     }
+?>

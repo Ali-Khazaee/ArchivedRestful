@@ -1,4 +1,7 @@
 <?php
+    // Don't Allow Access Directly
+    if (!defined("ROOT")) { exit(); }
+
     class Account
     {
         public static function Register($App)

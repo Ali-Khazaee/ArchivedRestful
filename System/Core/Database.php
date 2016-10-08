@@ -1,4 +1,7 @@
 <?php
+    // Don't Allow Access Directly
+    if (!defined("ROOT")) { exit(); }
+
     // DataBase Driver
     use MongoDB\Driver\Manager;
     use MongoDB\Driver\Query;
