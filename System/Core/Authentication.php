@@ -7,15 +7,15 @@
         public function CheckToken()
         {
             if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
-                JSON(["Status" => "Failed", "Message" => $Lang["AUTH_EMPTY_TOKEN"]], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_TOKEN")], 401);
 
             $Decode = $this->Decode($_SERVER['HTTP_TOKEN']);
 
             if (!isset($Decode->ID))
-                JSON(["Status" => "Failed", "Message" => $Lang["AUTH_EMPTY_DATA"]], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_DATA")], 401);
 
             if (!isset($Decode->EXP) || time() >= $Decode->EXP)
-                JSON(["Status" => "Failed", "Message" => $Lang["AUTH_EXPIRED_TOKEN"]], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EXPIRED_TOKEN")], 401);
         }
 
         public function CreateToken($CustomData)
@@ -59,7 +59,7 @@
             if ($Success)
                 return $Signature;
 
-            JSON(["Status" => "Failed", "Message" => $Lang["AUTH_CANNOT_SIGN"]], 401);
+            JSON(["Status" => "Failed", "Message" => Lang("AUTH_CANNOT_SIGN")], 401);
         }
 
         public function Decode($Data)
@@ -67,15 +67,15 @@
             $Segments = explode('.', $Data);
 
             if (count($Segments) != 2)
-                JSON(["Status" => "Failed", "Message" => $Lang["AUTH_WRONG_SEGMENT_COUNT"]], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_WRONG_SEGMENT_COUNT"]], 401);
 
             if (($ContentData = json_decode($this->Base64Decode($Segments[0]))) === NULL)
-                JSON(["Status" => "Failed", "Message" => $Lang["AUTH_EMPTY_CONTENT"]], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_CONTENT")], 401);
 
             $Signature = $this->Base64Decode($Segments[1]);
 
             if ($this->Verify($Segments[0], $Signature))
-                JSON(["Status" => "Failed", "Message" => $Lang["AUTH_VERIFY_FAILED"]], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_VERIFY_FAILED")], 401);
 
             return $ContentData;
         }
@@ -100,7 +100,7 @@
             if ($Success)
                 return false;
 
-            JSON(["Status" => "Failed", "Message" => $Lang["AUTH_OPENSSL_VERIFY_FAILED"]], 401);
+            JSON(["Status" => "Failed", "Message" => Lang("AUTH_OPENSSL_VERIFY_FAILED")], 401);
         }
     }
 ?>
