@@ -128,9 +128,10 @@
 
         public static function UploadAvatarImage($App)
         {
+
             $Destination = $App->Upload->UploadFile();
 
-        
+
         }
     }
 ?>

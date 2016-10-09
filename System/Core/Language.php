@@ -83,6 +83,11 @@
             // Login Reserve 48
             // Login Reserve 49
 
+            // Upload
+            case "RATELIMIT_MAX_REQUESTS_EXCEED":           return 61;
+            // Login Reserve 44
+            // Login Reserve 45
+
         }
     }
 ?>
