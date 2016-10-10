@@ -11,9 +11,9 @@
         public $Auth;
 
         // Router Instance
-        protected $Router;
+        public $Router;
 
-        // Router Instance
+        // Upload Instance
         public $Upload;
 
         public function __construct()
@@ -39,8 +39,11 @@
             // Account > Logout
             $this->Router->POST('AccountLogout', function() { Account::Logout($this); });
 
-            // TESTING : Account > UploadAvatarImage
-            $this->Router->POST('UploadAvatarImage', function() { Account::UploadAvatarImage($this); }, true);
+            // Account > Upload
+            $this->Router->POST('UploadAvatarImage', function()
+            {
+                var_dump($_FILES);
+            }, true);
 
             // Execute The Routing
             $this->Router->Execute($this);

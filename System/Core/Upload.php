@@ -2,9 +2,32 @@
     // Don't Allow Access Directly
     if (!defined("ROOT")) { exit(); }
 
-
     class Upload
     {
+        public function __construct()
+        {
+            
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
 //        protected $FileInfo;
 
