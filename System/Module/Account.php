@@ -128,7 +128,9 @@
 
         public static function UpdateProfileImage($App)
         {
-            $App->Upload->DoUpload();
+            // Example: 1 request every 1 minute
+            $App->RateLimit->Call(1 ,60000);
+            echo "Ok You Can Continue !";
         }
     }
 ?>

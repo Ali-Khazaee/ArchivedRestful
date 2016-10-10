@@ -2,48 +2,61 @@
 
     class RateLimit
     {
-        public function Call($MaxNumberOfRequests, $ExpireSeconds)
+        // Call Rate limiter
+        public function Call($MaxNumberOfRequests, $MilliSeconds)
         {
+            // Get User Ip Address
             $Ip = $_SERVER['REMOTE_ADDR'];
 
+            // Check if User Is Requested Before
             $Data = $this->Fetch($Ip);
 
+            // If User Does not Requested Before : Create new Cache
             if ($Data == false) {
 
                 $Remaining = ($MaxNumberOfRequests - 1);
-                $this->Save($Ip, ['Remaining' => $Remaining, 'Created' => time()], $ExpireSeconds);
+                $this->Save($Ip, ['Remaining' => $Remaining, 'Created' => microtime(true)*1000]);
 
             } else {
 
-                // Take the current request rate limit and update it
-                if (($Data['Remaining'] - 1) >= 0) {
-                    $Remaining = $Data['Remaining'];
+                // If More Than $MilliSeconds milliseconds has passed : reset number of requests
+                if((microtime(true)*1000 - $Data['Created']) > $MilliSeconds){
+                    $this->Reset($Ip, $MaxNumberOfRequests);
                 } else {
-                    $Remaining = -1;
+                    // If User still Allow to request : decrease number of requests and save
+                    if ( $Data['Remaining'] >= 1) {
+                        $Remaining = $Data['Remaining'] - 1;
+                        $this->Save($Ip, ['Remaining' => $Remaining, 'Created'   => $Data['Created']]);
+                    // If Number of requests Exceeded :  Fail
+                    } else {
+                        $this->Fail();
+                    }
                 }
 
-                $Expire = $ExpireSeconds - (time() - $Data['Created']);
-                $this->Save($Ip, ['Remaining' => $Remaining, 'Created'   => $Data['Created']], $Expire);
             }
 
-            // Check if the current Request is allowed to pass
-            if ($Remaining < 0) {
-                // Too Many Requests
-                $this->Fail();
-            }
         }
 
+        // Fetch User info from cache
         protected function Fetch($key)
         {
-            return apc_fetch($key);
+            return apcu_fetch($key);
         }
 
-        protected function Save($key, $value, $expire)
+        // Save User info to Cache
+        protected function Save($key, $value)
         {
-            apc_store($key, $value, $expire);
+            // Expire cache after 1 hour
+            apcu_store($key, $value, 3600);
         }
 
+        // Reset cache and then expire after 1 hour
+        protected function Reset($Ip, $MaxNumberOfRequests)
+        {
+            apcu_store($Ip, ['Remaining' => $MaxNumberOfRequests -1 , 'Created'   => microtime(true)*1000], 3600);
+        }
 
+        // Fail : Number Of Allowed Requests Exceeded
         protected function Fail()
         {
             JSON(["Status" => "Fail", "Message" => Lang("RATELIMIT_MAX_REQUESTS_EXCEED")], 429);

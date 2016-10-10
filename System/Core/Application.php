@@ -16,6 +16,9 @@
         // Upload Instance
         public $Upload;
 
+        // RateLimit Instance
+        public $RateLimit;
+
         public function __construct()
         {
             // Connecting To DataBase
@@ -29,6 +32,9 @@
 
             // Create New Auth
             $this->Upload = new Upload();
+
+            // Create New RateLimit
+            $this->RateLimit = new RateLimit();
 
             // Account > Register
             $this->Router->POST('Register', function() { Account::Register($this); }, true);
