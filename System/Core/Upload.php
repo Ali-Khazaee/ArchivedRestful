@@ -4,95 +4,44 @@
 
     class Upload
     {
-        public function __construct()
+        public function DoUpload()
         {
-            
-        }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+            if(!isset($_FILES['UploadFile']))
+                JSON("Upload Nashode File"); // @TODO Fix Me
 
-//        protected $FileInfo;
+            $FileName    = $_FILES['UploadFile']['name'];
+            $FileSize    = $_FILES['UploadFile']['size'];
+            $FileTemp    = $_FILES['UploadFile']['tmp_name'];
+            $FileType    = $_FILES['UploadFile']['type'];                   // @TODO Check Me Later!!
+            $FileMime    = explode('.', $FileName);
+            $FileFormat  = strtolower(end($FileMime));
+            $AllowFormat = array("jpeg", "jpg", "png");                     // @TODO Add More Formats
 
-//        public function __construct(){
+            if (!in_array($FileFormat, $AllowFormat))
+                JSON("Not Allowed"); // @TODO Fix Me
 
-                // Collect file info
+            if ($FileSize > 2097152)
+                JSON("Upload Sizesh Ziade"); // @TODO Fix Me
 
-//                    $_FILES[$File]['tmp_name'],
-//                    $_FILES[$File]['name']
-//        }
+            // @TODO FILE NAME
+            $EncodeFileName = "ali.png";
 
-        public function UploadFile(){
-//            if (!isset($_FILES[$File])) {
-//                JSON(["Status" => "Failed", "Message" => Lang("UPLOAD_EMPTY_FILE")]);
-//            }
+            $Channel = curl_init();
+            curl_setopt($Channel, CURLOPT_URL, $this->GetRandomServer());
+            curl_setopt($Channel, CURLOPT_HEADER, false);
+            curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD", "TOKEN" => "Access", "FILE" => new CurlFile($FileTemp, $FileType), "FILENAME" => $EncodeFileName]);
+            $Result = curl_exec($Channel);
+            curl_close($Channel);
 
-            var_dump($_POST); die;
+            var_dump($Result);
+            // @TODO Log
+            // @TODO Save To DB
         }
 
-
-        public function FileInfo($fullPathName){
-            $this->FileInfo = new SplFileInfo($fullPathName);
-        }
-
-
-        public function GetMimetype()
+        private function GetRandomServer() // @TODO Fix Me
         {
-            if (isset($this->mimetype) === false) {
-                $finfo = new finfo(FILEINFO_MIME);
-                $mimetype = $finfo->file($this->getPathname());
-                $mimetypeParts = preg_split('/\s*[;,]\s*/', $mimetype);
-                $this->mimetype = strtolower($mimetypeParts[0]);
-                unset($finfo);
-            }
-
-            return $this->mimetype;
+            return "http://127.0.0.1/1/Server/index.php";
         }
-
-
-
-//        public function isUploadedFile()
-//        {
-//            return is_uploaded_file($this->getPathname());
-//        }
-
-
-
-        // Make Directory For Upload
-        public function Make_Directory()
-        {
-            $Date = date('Y,m,d');
-            $Parts = explode(',',$Date);
-            $Year = $Parts[0];
-            $Month = $Parts[1];
-            $Day = $Parts[2];
-            $Directory = $Year . DIRECTORY_SEPARATOR . $Month . DIRECTORY_SEPARATOR . $Day . DIRECTORY_SEPARATOR;
-            return $Directory;
-        }
-
-//        public function Upload($File)
-//        {
-//            $Directory = $this->Make_Directory();
-//        }
-
-
-
     }
 ?>

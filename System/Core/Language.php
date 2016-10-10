@@ -75,19 +75,22 @@
             // Login Reserve 49
 
             // Upload
-            case "UPLOAD_EMPTY_FILE":           return 51;
-            // Login Reserve 44
-            // Login Reserve 45
-            // Login Reserve 46
-            // Login Reserve 47
-            // Login Reserve 48
-            // Login Reserve 49
-
-            // Upload
-            case "RATELIMIT_MAX_REQUESTS_EXCEED":           return 61;
-            // Login Reserve 44
-            // Login Reserve 45
-
+            case "UPLOAD_EMPTY_FILE": return 50;
+            // Upload Reserve 51
+            // Upload Reserve 52
+            // Upload Reserve 53
+            // Upload Reserve 54
+            // Upload Reserve 55
+            // Upload Reserve 56
+            // Upload Reserve 57
+            // Upload Reserve 58
+            // Upload Reserve 59
+            // Upload Reserve 60
+            // Upload Reserve 61
+            // Upload Reserve 62
+            // Upload Reserve 63
+            // Upload Reserve 64
+            // Upload Reserve 65
         }
     }
 ?>

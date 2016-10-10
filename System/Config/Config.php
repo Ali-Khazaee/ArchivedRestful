@@ -2,15 +2,18 @@
     // Don't Allow Access Directly
     if (!defined("ROOT")) { exit(); }
 
-    // Load Auth Config
+    // Load Auth
     include_once(ROOT . "System/Config/Auth.php");
 
-    // Load Core Config
+    // Load Core
     include_once(ROOT . "System/Config/Core.php");
 
-    // Load DataBase Config
+    // Load DataBase
     include_once(ROOT . "System/Config/DataBase.php");
 
-    // Load ErrorHandling Config
+    // Load ErrorHandling
     include_once(ROOT . "System/Config/ErrorHandling.php");
+
+    // Load Upload
+    include_once(ROOT . "System/Config/Upload.php");
 ?>

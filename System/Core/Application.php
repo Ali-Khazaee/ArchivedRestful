@@ -31,19 +31,16 @@
             $this->Upload = new Upload();
 
             // Account > Register
-            $this->Router->POST('AccountRegister', function() { Account::Register($this); }, true);
+            $this->Router->POST('Register', function() { Account::Register($this); }, true);
 
             // Account > Login
-            $this->Router->POST('AccountLogin', function() { Account::Login($this); }, true);
+            $this->Router->POST('Login', function() { Account::Login($this); }, true);
 
             // Account > Logout
-            $this->Router->POST('AccountLogout', function() { Account::Logout($this); });
+            $this->Router->POST('Logout', function() { Account::Logout($this); });
 
-            // Account > Upload
-            $this->Router->POST('UploadAvatarImage', function()
-            {
-                var_dump($_FILES);
-            }, true);
+            // Account > Update Profile Image
+            $this->Router->POST('UpdateProfileImage', function() { Account::UpdateProfileImage($this); }, true);
 
             // Execute The Routing
             $this->Router->Execute($this);

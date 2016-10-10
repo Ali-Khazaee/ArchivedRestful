@@ -126,12 +126,9 @@
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS")]);
         }
 
-        public static function UploadAvatarImage($App)
+        public static function UpdateProfileImage($App)
         {
-
-            $Destination = $App->Upload->UploadFile();
-
-
+            $App->Upload->DoUpload();
         }
     }
 ?>

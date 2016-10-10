@@ -25,9 +25,8 @@
                 if ($this->SkipAuth[$Key] == false)
                     $App->Auth->CheckToken();
 
-                // Allow Post Method Only
-                if ($_SERVER['REQUEST_METHOD'] == "POST")
-                    call_user_func($this->CallBacks[$Key]);
+                // Call Request Method
+                call_user_func($this->CallBacks[$Key]);
             }
         }
 
