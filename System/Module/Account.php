@@ -128,9 +128,21 @@
 
         public static function UpdateProfileImage($App)
         {
-            // Example: 1 request every 1 minute
-            $App->RateLimit->Call(1 ,60000);
-            echo "Ok You Can Continue !";
+            // Rate Limit : 1 request every 10 seconds
+            $App->RateLimit->Call(1 ,10000);
+
+            $Token = $_SERVER['HTTP_TOKEN'];
+            $Decode = $App->Auth->Decode($Token);
+            $UserId = $Decode->ID;
+
+            $Data = $App->Upload->DoUpload($UserId);
+
+            $Data = json_decode($Data);
+
+            var_dump($Data); die;
+
+            // TODO : save to database
+//            $App->DB->Insert('images', ['OwnerID' => $UserId, 'ServerID' => $ServerId, 'UploadedTime' => time()] );
         }
     }
 ?>

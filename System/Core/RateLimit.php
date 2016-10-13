@@ -59,6 +59,7 @@
         // Fail : Number Of Allowed Requests Exceeded
         protected function Fail()
         {
-            JSON(["Status" => "Fail", "Message" => Lang("RATELIMIT_MAX_REQUESTS_EXCEED")], 429);
+            // TODO : add message to language
+            JSON(["Status" => "Fail", "Message" => "RATELIMIT_MAX_REQUESTS_EXCEED"], 429);
         }
     }

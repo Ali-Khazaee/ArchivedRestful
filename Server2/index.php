@@ -29,7 +29,7 @@
         exit(json_encode($Message));
     }
 
-    if (!isset($_POST["TOKEN"]) || $_POST["TOKEN"] != "Access") // @TODO Change Me Later
+    if (!isset($_POST["TOKEN"]) || $_POST["TOKEN"] != "server2RandomToken") // @TODO Change Me Later
         JSON("no access"); // @TODO add me in language, will need it for clients
 
     if (!isset($_POST["ACTION"]))
@@ -63,7 +63,7 @@
         break;
         case "HARD_SPACE":
         {
-            // @TODO Fix Me
+            echo disk_free_space("/") - 1000;
         }
         break;
     }
