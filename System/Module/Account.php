@@ -139,10 +139,12 @@
 
             $Data = json_decode($Data);
 
-            var_dump($Data); die;
+            $ServerId = $Data->Data->ServerId;
+            $ImagePath = $Data->Data->ImagePath;
 
-            // TODO : save to database
-//            $App->DB->Insert('images', ['OwnerID' => $UserId, 'ServerID' => $ServerId, 'UploadedTime' => time()] );
+            $App->DB->Insert('images', ['OwnerID' => $UserId, 'ServerID' => $ServerId, 'UploadedTime' => time(), 'Url' => $ImagePath] );
+
+            JSON(["Status" => "Success", "Message" => "Successfully Uploaded!"]); // TODO: add to language
         }
     }
 ?>
