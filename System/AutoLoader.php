@@ -29,6 +29,9 @@
     // Load Upload
     include_once(ROOT . "System/Core/RateLimit.php");
 
+    // Load Upload
+    include_once(ROOT . "System/Core/Log.php");
+
     // Load Account
     include_once(ROOT . "System/Module/Account.php");
 ?>

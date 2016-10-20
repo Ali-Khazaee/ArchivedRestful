@@ -11,8 +11,9 @@
 
         public function DoUpload($UserId)
         {
-            if(!isset($_FILES['UploadFile']))
-                JSON("Upload Nashode File"); // @TODO Fix Me
+            if(!isset($_FILES['UploadFile']) || empty($_FILES['UploadFile']))
+                JSON(["Status" => "Failed", "Message" => Lang('UPLOAD_EMPTY_FILE')]);
+
 
             $FileName    = $_FILES['UploadFile']['name'];
             $FileSize    = $_FILES['UploadFile']['size'];
@@ -22,10 +23,10 @@
             $AllowFormat = array("jpeg", "jpg", "png");                     // @TODO Add More Formats
 
             if (!in_array($FileFormat, $AllowFormat))
-                JSON("Not Allowed"); // @TODO Fix Me
+                JSON(["Status" => "Failed", "Message" => Lang('UPLOAD_NOT_ALLOWED_FORMAT')]);
 
             if ($FileSize > 2097152)
-                JSON("Upload Sizesh Ziade"); // @TODO Fix Me
+                JSON(["Status" => "Failed", "Message" => Lang('UPLOAD_MAX_SIZE_LIMIT')]);
 
             // Create File Name
             $EncodeFileName = $this->MakeFileName($UserId, $FileFormat);
@@ -41,7 +42,6 @@
             $Result = curl_exec($Channel);
             curl_close($Channel);
 
-            // @TODO Log
             return $Result;
         }
 

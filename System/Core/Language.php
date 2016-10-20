@@ -75,10 +75,10 @@
             // Login Reserve 49
 
             // Upload
-            case "UPLOAD_EMPTY_FILE": return 50;
-            // Upload Reserve 51
-            // Upload Reserve 52
-            // Upload Reserve 53
+            case "UPLOAD_EMPTY_FILE":           return 50;
+            case "UPLOAD_SUCCESSFUL":           return 51;
+            case "UPLOAD_NOT_ALLOWED_FORMAT":   return 52;
+            case "UPLOAD_MAX_SIZE_LIMIT":       return 53;
             // Upload Reserve 54
             // Upload Reserve 55
             // Upload Reserve 56

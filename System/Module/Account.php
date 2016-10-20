@@ -56,7 +56,11 @@
             $App->DB->Insert('account', ['Username' => $Username, 'Password' => $Password, 'Email' => $Email, 'CreationTime' => $CreationTime, 'LastOnlineTime' => $CreationTime]);
 
             // @TODO SendMail
-            // @TODO Log
+
+            // Create Log
+            $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
+            $UserID = $Account[0]->_id->__toString();
+            $App->Log->Create($UserID, 'Register');
 
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS")]);
         }
@@ -101,13 +105,15 @@
             if (!password_verify($Password, $Account[0]->Password))
                 JSON(["Status" => "Failed", "Message" => Lang("LOGIN_WRONG_USERNAME_PASSWORD")]);
 
-            $ID = $Account[0]->_id->__toString();
-            $Token = $App->Auth->CreateToken(["ID" => $ID]);
+            $UserID = $Account[0]->_id->__toString();
+            $Token = $App->Auth->CreateToken(["ID" => $UserID]);
 
-            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreationTime' => time()]]]);
+            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($UserID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreationTime' => time()]]]);
 
             // @TODO SendMail
-            // @TODO Log
+
+            // Create Log
+            $App->Log->Create($UserID, 'Login');
 
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS"), "Token" => $Token]);
         }
@@ -116,12 +122,14 @@
         {
             $Token = $_SERVER['HTTP_TOKEN'];
             $Decode = $App->Auth->Decode($Token);
-            $ID = $Decode->ID;
+            $UserID = $Decode->ID;
 
-            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$pull' => ['Session' => ["Token" => $Token]]]);
+            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($UserID)], ['$pull' => ['Session' => ["Token" => $Token]]]);
 
             // @TODO SendMail
-            // @TODO Log
+
+            // Create Log
+            $App->Log->Create($UserID, 'Logout');
 
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS")]);
         }
@@ -144,7 +152,10 @@
 
             $App->DB->Insert('images', ['OwnerID' => $UserId, 'ServerID' => $ServerId, 'UploadedTime' => time(), 'Url' => $ImagePath] );
 
-            JSON(["Status" => "Success", "Message" => "Successfully Uploaded!"]); // TODO: add to language
+            // Create Log
+            $App->Log->Create($UserId, 'UpdateProfileImage');
+
+            JSON(["Status" => "Success", "Message" => Lang('UPLOAD_SUCCESSFUL')]);
         }
     }
 ?>

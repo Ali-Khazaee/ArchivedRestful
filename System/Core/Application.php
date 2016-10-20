@@ -36,6 +36,9 @@
             // Create New RateLimit
             $this->RateLimit = new RateLimit();
 
+            // Create New Log
+            $this->Log = new Log($this);
+
             // Account > Register
             $this->Router->POST('Register', function() { Account::Register($this); }, true);
 
