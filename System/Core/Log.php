@@ -11,8 +11,11 @@
         }
 
         // Create Log
-        public function Create($UserID,$EventName){
-            $this->App->DB->Insert('logs', ['UserID' => $UserID, 'EventName' => $EventName, 'CreationTime' => time()] );
+        public function Create($Type,$Data){
+
+            // Get User Ip Address
+            $IP = $_SERVER['REMOTE_ADDR'];
+            $this->App->DB->Insert('logs', ['IP' => $IP, 'Type' => $Type, 'Data' => $Data, 'CreatedTime' => time()] );
         }
 
     }

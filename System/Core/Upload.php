@@ -14,7 +14,6 @@
             if(!isset($_FILES['UploadFile']) || empty($_FILES['UploadFile']))
                 JSON(["Status" => "Failed", "Message" => Lang('UPLOAD_EMPTY_FILE')]);
 
-
             $FileName    = $_FILES['UploadFile']['name'];
             $FileSize    = $_FILES['UploadFile']['size'];
             $FileTemp    = $_FILES['UploadFile']['tmp_name'];

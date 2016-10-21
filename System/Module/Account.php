@@ -60,7 +60,7 @@
             // Create Log
             $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
             $UserID = $Account[0]->_id->__toString();
-            $App->Log->Create($UserID, 'Register');
+            $App->Log->Create('Register', ['UserID' => $UserID]);
 
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS")]);
         }
@@ -105,15 +105,15 @@
             if (!password_verify($Password, $Account[0]->Password))
                 JSON(["Status" => "Failed", "Message" => Lang("LOGIN_WRONG_USERNAME_PASSWORD")]);
 
-            $UserID = $Account[0]->_id->__toString();
-            $Token = $App->Auth->CreateToken(["ID" => $UserID]);
+            $ID = $Account[0]->_id->__toString();
+            $Token = $App->Auth->CreateToken(["ID" => $ID]);
 
-            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($UserID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreationTime' => time()]]]);
+            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreationTime' => time()]]]);
 
             // @TODO SendMail
 
             // Create Log
-            $App->Log->Create($UserID, 'Login');
+            $App->Log->Create('Login', ['UserID' => $ID]);
 
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS"), "Token" => $Token]);
         }
@@ -122,14 +122,14 @@
         {
             $Token = $_SERVER['HTTP_TOKEN'];
             $Decode = $App->Auth->Decode($Token);
-            $UserID = $Decode->ID;
+            $ID = $Decode->ID;
 
-            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($UserID)], ['$pull' => ['Session' => ["Token" => $Token]]]);
+            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$pull' => ['Session' => ["Token" => $Token]]]);
 
             // @TODO SendMail
 
             // Create Log
-            $App->Log->Create($UserID, 'Logout');
+            $App->Log->Create('Logout',['UserID' => $ID]);
 
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS")]);
         }
@@ -141,19 +141,19 @@
 
             $Token = $_SERVER['HTTP_TOKEN'];
             $Decode = $App->Auth->Decode($Token);
-            $UserId = $Decode->ID;
+            $ID = $Decode->ID;
 
-            $Data = $App->Upload->DoUpload($UserId);
+            $Data = $App->Upload->DoUpload($ID);
 
             $Data = json_decode($Data);
 
             $ServerId = $Data->Data->ServerId;
             $ImagePath = $Data->Data->ImagePath;
 
-            $App->DB->Insert('images', ['OwnerID' => $UserId, 'ServerID' => $ServerId, 'UploadedTime' => time(), 'Url' => $ImagePath] );
+            $App->DB->Insert('images', ['OwnerID' => $ID, 'ServerID' => $ServerId, 'UploadedTime' => time(), 'Url' => $ImagePath] );
 
             // Create Log
-            $App->Log->Create($UserId, 'UpdateProfileImage');
+            $App->Log->Create('UpdateProfileImage', ['UserID' => $ID]);
 
             JSON(["Status" => "Success", "Message" => Lang('UPLOAD_SUCCESSFUL')]);
         }
