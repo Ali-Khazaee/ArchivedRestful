@@ -30,4 +30,15 @@
         // Return The Encoded JSON
         exit(json_encode($Message));
     }
+
+    function _Mail($To, $Subject, $Message, $Custom = null){
+
+        $Header  = "MIME-Version: 1.0" . "\r\n";
+        $Header .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+        $Header .= "From: BattleGame <no-reply@battlegame.ir>" . "\r\n";
+        $Header .= "Reply-To: support@battlegame.ir" . "\r\n";
+        $Header .= $Custom;
+
+        mail($To, $Subject, $Message, $Header);
+    }
 ?>

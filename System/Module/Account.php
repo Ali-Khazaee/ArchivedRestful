@@ -55,7 +55,12 @@
 
             $App->DB->Insert('account', ['Username' => $Username, 'Password' => $Password, 'Email' => $Email, 'CreationTime' => $CreationTime, 'LastOnlineTime' => $CreationTime]);
 
-            // @TODO SendMail
+            // Send Email
+            $User = $App->DB->Find('account', ['Username' => $Username])->toArray();
+            $Email = $User[0]->Email;
+            $Sub = "Account Register";
+            $Msg = " Hello Dear ..... Thank you for ur choice"; // @TODO: fix message
+            _Mail($Email, $Sub, $Msg);
 
             // Create Log
             $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
@@ -110,7 +115,11 @@
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreationTime' => time()]]]);
 
-            // @TODO SendMail
+            // Send Email
+            $Email = $Account[0]->Email;
+            $Sub = "Account Login";
+            $Msg = " Hello Dear ..... Thank you for ur choice"; // @TODO: fix message
+            _Mail($Email, $Sub, $Msg);
 
             // Create Log
             $App->Log->Create('Login', ['UserID' => $ID]);
@@ -126,7 +135,12 @@
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$pull' => ['Session' => ["Token" => $Token]]]);
 
-            // @TODO SendMail
+            // Send Email
+            $User = $App->DB->Find('account', ['_id' => new MongoDB\BSON\ObjectID($ID)])->toArray();
+            $Email = $User[0]->Email;
+            $Sub = "Account Logout";
+            $Msg = " Hello Dear ..... Thank you for ur choice"; // @TODO: fix message
+            _Mail($Email, $Sub, $Msg);
 
             // Create Log
             $App->Log->Create('Logout',['UserID' => $ID]);
