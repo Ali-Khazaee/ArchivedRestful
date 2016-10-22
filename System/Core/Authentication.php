@@ -1,5 +1,4 @@
 <?php
-    // Don't Allow Access Directly
     if (!defined("ROOT")) { exit(); }
 
     class Auth
@@ -21,7 +20,7 @@
         public function CreateToken($CustomData)
         {
             $ID = $CustomData["ID"];
-            $ExpireTime = time() + 15552000; // 180 Days
+            $ExpireTime = time() + 15552000; // 180 Days @TODO Make me 365Days
 
             unset($CustomData["ID"]);
 

@@ -1,39 +1,31 @@
 <?php
-    // Don't Allow Access Directly
     if (!defined("ROOT")) { exit(); }
 
     class Router
     {
-        // Variables
         public $Routes = array();
         public $SkipAuth = array();
         public $CallBacks = array();
 
-        // Execute Request
         public function Execute($App)
         {
-            $URL = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            $this->Routes = preg_replace('/\/+/', '/', $this->Routes);
+            $URL = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // @TODO in bayad OKAY she ( substr avalin kalame / )
+            $this->Routes = preg_replace('/\/+/', '/', $this->Routes); // @TODO in nabayad bashe
 
-            // Route Is Defined
             if (in_array($URL, $this->Routes))
             {
-                // Find Route Index
                 $Key = array_keys($this->Routes, $URL)[0];
 
-                // Skip Authentication
                 if ($this->SkipAuth[$Key] == false)
                     $App->Auth->CheckToken();
 
-                // Call Request Method
                 call_user_func($this->CallBacks[$Key]);
             }
         }
 
-        // Default Function
         public function __call($Method, $Params)
         {
-            $URL = dirname($_SERVER['REQUEST_URI']) . '/' . $Params[0];
+            $URL = dirname($_SERVER['REQUEST_URI']) . '/' . $Params[0]; // @TODO in nabayad bashe
 
             array_push($this->Routes, $URL);
             array_push($this->SkipAuth, isset($Params[2]) ? $Params[2] : false);
