@@ -6,6 +6,7 @@
         public $Routes = array();
         public $SkipAuth = array();
         public $CallBacks = array();
+        public $RateLimit = array();
 
         public function Execute($App)
         {
@@ -19,6 +20,8 @@
                 if ($this->SkipAuth[$Key] == false)
                     $App->Auth->CheckToken();
 
+                $App->RateLimit->Call($this->RateLimit[$Key]);
+
                 call_user_func($this->CallBacks[$Key]);
             }
         }
@@ -29,6 +32,7 @@
 
             array_push($this->Routes, $URL);
             array_push($this->SkipAuth, isset($Params[2]) ? $Params[2] : false);
+            array_push($this->RateLimit, isset($Params[3]) ? $Params[3] : $Params[0].'.20.10000');
             array_push($this->CallBacks, $Params[1]);
         }
     }

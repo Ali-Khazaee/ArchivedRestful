@@ -150,7 +150,7 @@
         public static function UpdateProfileImage($App)
         {
             // Rate Limit : 1 request every 10 seconds
-            $App->RateLimit->Call(1 ,10000);
+            $App->RateLimit->Call(1 ,30000);
 
             $Token = $_SERVER['HTTP_TOKEN'];
             $Decode = $App->Auth->Decode($Token);

@@ -3,8 +3,9 @@
 
     class RateLimit
     {
-        public function Call($Request, $Time)
+        public function Call($Input)
         {
+            var_dump($Input); die;
             $IP = $_SERVER['REMOTE_ADDR'];
             $CreatedTime = microtime(true) * 1000;
             $Result = $this->Fetch($IP);

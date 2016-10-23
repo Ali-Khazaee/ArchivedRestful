@@ -19,11 +19,11 @@
 
             $this->Log = new Log($this); // @TODO in esmesh Bayad Avaz She!
 
-            $this->Router->POST('Register', function() { Account::Register($this); }, true);
+            $this->Router->POST('Register', function() { Account::Register($this); }, true, 'Register.1.60000');
             $this->Router->POST('Login',    function() { Account::Login($this);    }, true);
-            $this->Router->POST('Logout',   function() { Account::Logout($this);   }      );
+            $this->Router->POST('Logout',   function() { Account::Logout($this);   } );
 
-            $this->Router->POST('UpdateProfileImage', function() { Account::UpdateProfileImage($this); }, true);
+            $this->Router->POST('UpdateProfileImage', function() { Account::UpdateProfileImage($this); }, true, 'UpdateProfileImage.1.10000');
 
             $this->Router->Execute($this);
         }
