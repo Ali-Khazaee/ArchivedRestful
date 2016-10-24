@@ -1,7 +1,7 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
-    class Log
+    class SetLog
     {
         private $App;
 

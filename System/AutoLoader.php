@@ -19,7 +19,7 @@
 
     include_once(ROOT . "System/Core/RateLimit.php");
 
-    include_once(ROOT . "System/Core/Log.php");
+    include_once(ROOT . "System/Core/SetLog.php");
 
     include_once(ROOT . "System/Module/Account.php");
 ?>

@@ -5,33 +5,37 @@
     {
         public function Call($Input)
         {
-            var_dump($Input); die;
+            $Input = explode('.', $Input);
+            $RequestName = $Input[0];
+            $Request = $Input[1];
+            $Time = $Input[2];
             $IP = $_SERVER['REMOTE_ADDR'];
+            $Key = $RequestName . '_' . $IP;
             $CreatedTime = microtime(true) * 1000;
-            $Result = $this->Fetch($IP);
+            $Result = $this->Fetch($Key);
 
             // Create New Limit
             if ($Result == false)
             {
-                $this->Save($IP, ['Remaining' => ($Request - 1), 'Created' => $CreatedTime]);
+                $this->Save($Key, ['Remaining' => ($Request - 1), 'Created' => $CreatedTime]);
             }
             else
             {
                 // Reset The Limit
                 if ($CreatedTime - $Result['Created'] > $Time)
                 {
-                    $this->Update($IP, $Request);
+                    $this->Update($Key, $Request);
                 }
                 else
                 {
                     // Decrease Remaining
                     if ($Result['Remaining'] >= 1)
                     {
-                        $this->Save($IP, ['Remaining' => $Result['Remaining'] - 1, 'Created' => $Result['Created']]);
+                        $this->Save($Key, ['Remaining' => $Result['Remaining'] - 1, 'Created' => $Result['Created']]);
                     }
                     else
                     {
-                        $this->Failed();
+                        $this->Failed($Key);
                     }
                 }
             }
@@ -47,13 +51,14 @@
             apcu_store($Key, $Value, 3600);
         }
 
-        private function Update($IP, $Request)
+        private function Update($Key, $Request)
         {
-            apcu_store($IP, ['Remaining' => $Request - 1, 'Created' => microtime(true) * 1000], 3600);
+            apcu_store($Key, ['Remaining' => $Request - 1, 'Created' => microtime(true) * 1000], 3600);
         }
 
-        private function Failed()
+        private function Failed($Key)
         {
+            Tracer("Flood.log" , $Key);
             JSON(["Status" => "Failed", "Message" => "RATELIMIT_MAX_REQUESTS_EXCEED"], 429);
         }
     }

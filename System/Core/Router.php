@@ -10,12 +10,11 @@
 
         public function Execute($App)
         {
-            $URL = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // @TODO in bayad OKAY she ( substr avalin kalame / )
-            $this->Routes = preg_replace('/\/+/', '/', $this->Routes); // @TODO in nabayad bashe
+            $RouteName = substr($_SERVER['REQUEST_URI'], 1);
 
-            if (in_array($URL, $this->Routes))
+            if (in_array($RouteName, $this->Routes))
             {
-                $Key = array_keys($this->Routes, $URL)[0];
+                $Key = array_keys($this->Routes, $RouteName)[0];
 
                 if ($this->SkipAuth[$Key] == false)
                     $App->Auth->CheckToken();
@@ -28,12 +27,10 @@
 
         public function __call($Method, $Params)
         {
-            $URL = dirname($_SERVER['REQUEST_URI']) . '/' . $Params[0]; // @TODO in nabayad bashe
-
-            array_push($this->Routes, $URL);
-            array_push($this->SkipAuth, isset($Params[2]) ? $Params[2] : false);
-            array_push($this->RateLimit, isset($Params[3]) ? $Params[3] : $Params[0].'.20.10000');
+            array_push($this->Routes, $Params[0]);
             array_push($this->CallBacks, $Params[1]);
+            array_push($this->SkipAuth, isset($Params[2]) ? $Params[2] : false);
+            array_push($this->RateLimit, isset($Params[3]) ? $Params[3] : $Params[0].'.20.1000');
         }
     }
 ?>

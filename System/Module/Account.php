@@ -64,7 +64,7 @@
             // Create Log
             $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
             $UserID = $Account[0]->_id->__toString();
-            $App->Log->Create('Register', ['UserID' => $UserID]);
+            $App->SetLog->Create('Register', ['UserID' => $UserID]);
 
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS")]);
         }
@@ -121,7 +121,7 @@
             _Mail($Email, $Sub, $Msg);
 
             // Create Log
-            $App->Log->Create('Login', ['UserID' => $ID]);
+            $App->SetLog->Create('Login', ['UserID' => $ID]);
 
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS"), "Token" => $Token]);
         }
@@ -142,7 +142,7 @@
             _Mail($Email, $Sub, $Msg);
 
             // Create Log
-            $App->Log->Create('Logout',['UserID' => $ID]);
+            $App->SetLog->Create('Logout',['UserID' => $ID]);
 
             JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS")]);
         }
@@ -166,7 +166,7 @@
             $App->DB->Insert('images', ['OwnerID' => $ID, 'ServerID' => $ServerId, 'UploadedTime' => time(), 'Url' => $ImagePath] );
 
             // Create Log
-            $App->Log->Create('UpdateProfileImage', ['UserID' => $ID]);
+            $App->SetLog->Create('UpdateProfileImage', ['UserID' => $ID]);
 
             JSON(["Status" => "Success", "Message" => Lang('UPLOAD_SUCCESSFUL')]);
         }
