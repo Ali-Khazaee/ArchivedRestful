@@ -5,91 +5,66 @@
     {
         switch ($Name)
         {
-            // General Lang
-            case "GEN_SUCCESS":          return 1000;
-            case "GEN_LONG_USERNAME":    return 800;
-            case "GEN_LONG_PASSWORD":    return 801;
-            case "GEN_SHORT_USERNAME":   return 802;
-            case "GEN_SHORT_PASSWORD":   return 803;
-            case "GEN_EMPTY_USERNAME":   return 804;
-            case "GEN_EMPTY_PASSWORD":   return 805;
-            case "GEN_INVALID_USERNAME": return 806;
-
-            // DataBase
-            case "DATABASE_CONNECTION": return 1;
-            // DB Reserve 2
-            // DB Reserve 3
-            // DB Reserve 4
-            // DB Reserve 5
-            // DB Reserve 6
-            // DB Reserve 7
-            // DB Reserve 8
-            // DB Reserve 9
-            // DB Reserve 10
+            // General
+            case "SUCCESS":                      return 1000;
 
             // Authentication
-            case "AUTH_EMPTY_TOKEN":           return 11;
-            case "AUTH_EMPTY_DATA":            return 12;
-            case "AUTH_EXPIRED_TOKEN":         return 13;
-            case "AUTH_CANNOT_SIGN":           return 14;
-            case "AUTH_WRONG_SEGMENT_COUNT":   return 15;
-            case "AUTH_VERIFY_FAILED":         return 16;
-            case "AUTH_OPENSSL_VERIFY_FAILED": return 17;
-            // Auth Reserve 18
-            // Auth Reserve 19
-            // Auth Reserve 20
-            // Auth Reserve 21
-            // Auth Reserve 22
-            // Auth Reserve 23
-            // Auth Reserve 24
-            // Auth Reserve 25
-            // Auth Reserve 26
-            // Auth Reserve 27
-            // Auth Reserve 28
-            // Auth Reserve 29
-            // Auth Reserve 30
+            case "AUTH_EMPTY_TOKEN":             return 1001;
+            case "AUTH_EMPTY_DATA":              return 1002;
+            case "AUTH_EXPIRED_TOKEN":           return 1003;
+            case "AUTH_CANNOT_SIGN":             return 1004;
+            case "AUTH_WRONG_SEGMENT_COUNT":     return 1005;
+            case "AUTH_VERIFY_FAILED":           return 1006;
+            case "AUTH_OPENSSL_VERIFY_FAILED":   return 1007;
+            // Auth Reserve 1008
+            // Auth Reserve 1009
+            // Auth Reserve 1010
+            // Auth Reserve 1011
+            // Auth Reserve 1012
+            // Auth Reserve 1013
+            // Auth Reserve 1014
+            // Auth Reserve 1015
+            // Auth Reserve 1016
+            // Auth Reserve 1017
+            // Auth Reserve 1018
+            // Auth Reserve 1019
 
-            // Register
-            case "REGISTER_EMPTY_EMAIL":            return 31;
-            case "REGISTER_INVALID_EMAIL":          return 32;
-            case "REGISTER_LONG_EMAIL":             return 33;
-            case "REGISTER_ALREADY_EXIST_USERNAME": return 34;
-            case "REGISTER_ALREADY_EMAIL":          return 35;
-            // Register Reserve 36
-            // Register Reserve 37
-            // Register Reserve 38
-            // Register Reserve 38
-            // Register Reserve 39
-            // Register Reserve 40
-
-            // Login
-            case "LOGIN_EMPTY_SESSION":           return 41;
-            case "LOGIN_NOT_EXIST_USERNAME":      return 42;
-            case "LOGIN_WRONG_USERNAME_PASSWORD": return 43;
-            // Login Reserve 44
-            // Login Reserve 45
-            // Login Reserve 46
-            // Login Reserve 47
-            // Login Reserve 48
-            // Login Reserve 49
+            // Database
+            case "DATABASE_CONNECTION":          return 1020;
+            // DB Reserve 1021
+            // DB Reserve 1022
+            // DB Reserve 1022
+            // DB Reserve 1023
+            // DB Reserve 1024
+            // DB Reserve 1025
+            // DB Reserve 1026
+            // DB Reserve 1027
+            // DB Reserve 1028
+            // DB Reserve 1029
 
             // Upload
-            case "UPLOAD_EMPTY_FILE":           return 50;
-            case "UPLOAD_SUCCESSFUL":           return 51;
-            case "UPLOAD_NOT_ALLOWED_FORMAT":   return 52;
-            case "UPLOAD_MAX_SIZE_LIMIT":       return 53;
-            // Upload Reserve 54
-            // Upload Reserve 55
-            // Upload Reserve 56
-            // Upload Reserve 57
-            // Upload Reserve 58
-            // Upload Reserve 59
-            // Upload Reserve 60
-            // Upload Reserve 61
-            // Upload Reserve 62
-            // Upload Reserve 63
-            // Upload Reserve 64
-            // Upload Reserve 65
+            case "UPLOAD_EMPTY_FILE":            return 1030;
+            case "UPLOAD_SUCCESSFUL":            return 1031;
+            case "UPLOAD_NOT_ALLOWED_FORMAT":    return 1032;
+            case "UPLOAD_MAX_SIZE_LIMIT":        return 1033;
+            // Upload Reserve 1034
+            // Upload Reserve 1035
+            // Upload Reserve 1036
+            // Upload Reserve 1037
+            // Upload Reserve 1038
+            // Upload Reserve 1039
+
+            // RateLimit
+            case "RATELIMIT_MAX_REQUEST_EXCEED": return 1040;
+            // Upload Reserve 1041
+            // Upload Reserve 1042
+            // Upload Reserve 1043
+            // Upload Reserve 1044
+            // Upload Reserve 1045
+            // Upload Reserve 1046
+            // Upload Reserve 1047
+            // Upload Reserve 1048
+            // Upload Reserve 1049
         }
     }
 ?>

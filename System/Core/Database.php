@@ -7,7 +7,7 @@
 
     class DataBase
     {
-        protected $Manager;
+        private $Manager;
 
         public function __construct()
         {
@@ -22,7 +22,7 @@
             catch (Exception $e)
             {
                 Tracer("DataBaseError.log", "Connection Error:" . $e->getMessage());
-                JSON(["Status" => "Failed", "Message" => Lang("DATABASE_CONNECTION")], 500);
+                JSON(["Status" => "Failed", "Message" => Lang("DATABASE_CONNECTION")]);
             }
         }
 
@@ -46,18 +46,18 @@
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        public function Update($Collection, $Conditions, $Data)
+        public function Update($Collection, $Condition, $Data)
         {
             $Bulk = new BulkWrite;
 
-            $Bulk->update($Conditions, $Data);
+            $Bulk->update($Condition, $Data);
 
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        public function Find($Collection, $Conditions)
+        public function Find($Collection, $Condition)
         {
-            $Query = new Query($Conditions);
+            $Query = new Query($Condition);
 
             $Result = $this->Manager->executeQuery(DB_NAME . "." . $Collection, $Query);
 

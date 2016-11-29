@@ -11,20 +11,17 @@
 
         public function __construct()
         {
-            $this->DB = new DataBase();
-            $this->Auth = new Auth();
-            $this->Router = new Router();
-            $this->Upload = new Upload();
+            $this->DB        = new DataBase();
+            $this->Auth      = new Auth();
+            $this->Logger    = new Logger($this);
+            $this->Upload    = new Upload();
             $this->RateLimit = new RateLimit();
 
-            $this->SetLog = new SetLog($this); // @TODO in esmesh Bayad Avaz She!
-
-            $this->Router->POST('Register', function() { Account::Register($this); }, true, 'Register.1.60000');
-            $this->Router->POST('Login',    function() { Account::Login($this);    }, true);
-            $this->Router->POST('Logout',   function() { Account::Logout($this);   } );
-
-            $this->Router->POST('UpdateProfileImage', function() { Account::UpdateProfileImage($this); }, true, 'UpdateProfileImage.100.1000');
-
+            $this->Router = new Router();
+            $this->Router->Call('SignUp',             function() { SignUp($this);             }, false, 'SignUp.1.60000');
+            $this->Router->Call('SignIn',             function() { SignIn($this);             }, false, 'SignIn.1.5000');
+            $this->Router->Call('SignOut',            function() { SignOut($this);            }, true,  'SignOut.1.1000');
+            $this->Router->Call('UpdateProfileImage', function() { UpdateProfileImage($this); }, false, 'UpdateProfileImage.1.3000');
             $this->Router->Execute($this);
         }
     }

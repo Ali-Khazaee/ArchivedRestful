@@ -6,21 +6,21 @@
         public function CheckToken()
         {
             if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_TOKEN")], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_TOKEN")]);
 
             $Decode = $this->Decode($_SERVER['HTTP_TOKEN']);
 
             if (!isset($Decode->ID))
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_DATA")], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_DATA")]);
 
             if (!isset($Decode->EXP) || time() >= $Decode->EXP)
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EXPIRED_TOKEN")], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EXPIRED_TOKEN")]);
         }
 
         public function CreateToken($CustomData)
         {
             $ID = $CustomData["ID"];
-            $ExpireTime = time() + 15552000; // 180 Days @TODO Make me 365Days
+            $ExpireTime = time() + 15552000; // 180 Days
 
             unset($CustomData["ID"]);
 
@@ -58,7 +58,7 @@
             if ($Success)
                 return $Signature;
 
-            JSON(["Status" => "Failed", "Message" => Lang("AUTH_CANNOT_SIGN")], 401);
+            JSON(["Status" => "Failed", "Message" => Lang("AUTH_CANNOT_SIGN")]);
         }
 
         public function Decode($Data)
@@ -66,17 +66,17 @@
             $Segments = explode('.', $Data);
 
             if (count($Segments) != 2)
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_WRONG_SEGMENT_COUNT")], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_WRONG_SEGMENT_COUNT")]);
 
-            if (($ContentData = json_decode($this->Base64Decode($Segments[0]))) === NULL)
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_CONTENT")], 401);
+            if (($Content = json_decode($this->Base64Decode($Segments[0]))) === NULL)
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_CONTENT")]);
 
             $Signature = $this->Base64Decode($Segments[1]);
 
             if ($this->Verify($Segments[0], $Signature))
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_VERIFY_FAILED")], 401);
+                JSON(["Status" => "Failed", "Message" => Lang("AUTH_VERIFY_FAILED")]);
 
-            return $ContentData;
+            return $Content;
         }
 
         private function Base64Decode($Message)
@@ -85,8 +85,8 @@
 
             if ($Remainder)
             {
-                $PadLen = 4 - $Remainder;
-                $Message .= str_repeat('=', $PadLen);
+                $PadLength = 4 - $Remainder;
+                $Message .= str_repeat('=', $PadLength);
             }
 
             return base64_decode(strtr($Message, '-_', '+/'));
@@ -99,7 +99,7 @@
             if ($Success)
                 return false;
 
-            JSON(["Status" => "Failed", "Message" => Lang("AUTH_OPENSSL_VERIFY_FAILED")], 401);
+            JSON(["Status" => "Failed", "Message" => Lang("AUTH_OPENSSL_VERIFY_FAILED")]);
         }
     }
 ?>

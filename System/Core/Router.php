@@ -25,12 +25,12 @@
             }
         }
 
-        public function __call($Method, $Params)
+        public function Call($Route, $CallBack, $Auth, $Rate)
         {
-            array_push($this->Routes, $Params[0]);
-            array_push($this->CallBacks, $Params[1]);
-            array_push($this->SkipAuth, isset($Params[2]) ? $Params[2] : false);
-            array_push($this->RateLimit, isset($Params[3]) ? $Params[3] : $Params[0].'.20.1000');
+            array_push($this->Routes, $Route);
+            array_push($this->CallBacks, $CallBack);
+            array_push($this->SkipAuth, $Auth);
+            array_push($this->RateLimit, $Rate);
         }
     }
 ?>

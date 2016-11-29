@@ -3,63 +3,28 @@
 
     class RateLimit
     {
-        public function Call($Input)
+        public function Call($Data)
         {
-            $Input = explode('.', $Input);
-            $RequestName = $Input[0];
-            $Request = $Input[1];
-            $Time = $Input[2];
-            $IP = $_SERVER['REMOTE_ADDR'];
-            $Key = $RequestName . '_' . $IP;
-            $CreatedTime = microtime(true) * 1000;
-            $Result = $this->Fetch($Key);
+            $Export = explode('.', $Data);
 
-            // Create New Limit
-            if ($Result == false)
+            $Key    = $Export[0] . '_' . $_SERVER['REMOTE_ADDR'];
+            $Time   = microtime(true) * 1000;
+            $Result = apcu_fetch($Key);
+
+            if ($Result == false || $Time - $Result['Created'] > $Export[2])
             {
-                $this->Save($Key, ['Remaining' => ($Request - 1), 'Created' => $CreatedTime]);
+                apcu_store($Key, ['Remaining' => ($Export[1] - 1), 'Created' => $Time], 180);
+                return;
             }
-            else
+
+            if ($Result['Remaining'] >= 1)
             {
-                // Reset The Limit
-                if ($CreatedTime - $Result['Created'] > $Time)
-                {
-                    $this->Update($Key, $Request);
-                }
-                else
-                {
-                    // Decrease Remaining
-                    if ($Result['Remaining'] >= 1)
-                    {
-                        $this->Save($Key, ['Remaining' => $Result['Remaining'] - 1, 'Created' => $Result['Created']]);
-                    }
-                    else
-                    {
-                        $this->Failed($Key);
-                    }
-                }
+                apcu_store($Key, ['Remaining' => $Result['Remaining'] - 1, 'Created' => $Result['Created']], 180);
+                return;
             }
-        }
 
-        private function Fetch($Key)
-        {
-            return apcu_fetch($Key);
-        }
-
-        private function Save($Key, $Value)
-        {
-            apcu_store($Key, $Value, 3600);
-        }
-
-        private function Update($Key, $Request)
-        {
-            apcu_store($Key, ['Remaining' => $Request - 1, 'Created' => microtime(true) * 1000], 3600);
-        }
-
-        private function Failed($Key)
-        {
-            Tracer("Flood.log" , $Key);
-            JSON(["Status" => "Failed", "Message" => "RATELIMIT_MAX_REQUESTS_EXCEED"], 429);
+            Tracer("Flood.log", $Key);
+            JSON(["Status" => "Failed", "Message" => "RATELIMIT_MAX_REQUEST_EXCEED"]);
         }
     }
 ?>
