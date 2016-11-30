@@ -21,5 +21,7 @@
 
     include_once(ROOT . "System/Core/Logger.php");
 
+    include_once(ROOT . "System/Core/Mail.php");
+
     include_once(ROOT . "System/Module/Account.php");
 ?>

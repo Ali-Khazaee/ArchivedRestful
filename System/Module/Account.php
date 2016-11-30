@@ -1,6 +1,62 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
+    function SignIn($App)
+    {
+        $Username = strtolower($_POST["Username"]);
+        $Password = $_POST["Password"];
+        $Session = $_POST["Session"];
+
+        if (!isset($Username) || empty($Username))
+            JSON(["Status" => "Failed", "Message" => Lang("GEN_EMPTY_USERNAME")]);
+
+        if (!isset($Password) || empty($Password))
+            JSON(["Status" => "Failed", "Message" => Lang("GEN_EMPTY_PASSWORD")]);
+
+        if (strlen($Username) <= 2)
+            JSON(["Status" => "Failed", "Message" => Lang("GEN_SHORT_USERNAME")]);
+
+        if (strlen($Username) >= 33)
+            JSON(["Status" => "Failed", "Message" => Lang("GEN_LONG_USERNAME")]);
+
+        if (strlen($Password) <= 4)
+            JSON(["Status" => "Failed", "Message" => Lang("GEN_SHORT_PASSWORD")]);
+
+        if (strlen($Password) >= 33)
+            JSON(["Status" => "Failed", "Message" => Lang("GEN_LONG_PASSWORD")]);
+
+        if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
+            JSON(["Status" => "Failed", "Message" => Lang("GEN_INVALID_USERNAME")]);
+
+        $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
+
+        if (empty($Account))
+            JSON(["Status" => "Failed", "Message" => Lang("LOGIN_NOT_EXIST_USERNAME")]);
+
+        if (!password_verify($Password, $Account[0]->Password))
+            JSON(["Status" => "Failed", "Message" => Lang("LOGIN_WRONG_USERNAME_PASSWORD")]);
+
+        if (!isset($Session) || empty($Session))
+            $Session = "Unknown - " . $_SERVER['REMOTE_ADDR'];
+        else
+            $Session .= " - " . $_SERVER['REMOTE_ADDR'];
+
+        $ID = $Account[0]->_id->__toString();
+        $Token = $App->Auth->CreateToken(["ID" => $ID]);
+
+        $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreationTime' => time()]]]);
+
+        // Send Email
+        $Email = $Account[0]->Email;
+        $Sub = "Account Login";
+        $Msg = " Hello Dear ..... Thank you for ur choice"; // @TODO: fix message
+        _Mail($Email, $Sub, $Msg);
+
+        $App->Logger->Create('Login', ['UserID' => $ID]);
+
+        JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS"), "Token" => $Token]);
+    }
+
     function SignUp($App)
     {
         $Data = json_decode(file_get_contents("php://input"));
@@ -65,63 +121,6 @@
         $App->SetLog->Create('Register', ['UserID' => $UserID]);
 
         JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS")]);
-    }
-
-    function SignIn($App)
-    {
-        $Data = json_decode(file_get_contents("php://input"));
-
-        if (!isset($Data->Username) || empty($Data->Username))
-            JSON(["Status" => "Failed", "Message" => Lang("GEN_EMPTY_USERNAME")]);
-
-        if (!isset($Data->Password) || empty($Data->Password))
-            JSON(["Status" => "Failed", "Message" => Lang("GEN_EMPTY_PASSWORD")]);
-
-        if (!isset($Data->Session) || empty($Data->Session))
-            JSON(["Status" => "Failed", "Message" => Lang("LOGIN_EMPTY_SESSION")]);
-
-        if (strlen($Data->Username) <= 2)
-            JSON(["Status" => "Failed", "Message" => Lang("GEN_SHORT_USERNAME")]);
-
-        if (strlen($Data->Username) >= 33)
-            JSON(["Status" => "Failed", "Message" => Lang("GEN_LONG_USERNAME")]);
-
-        if (strlen($Data->Password) <= 4)
-            JSON(["Status" => "Failed", "Message" => Lang("GEN_SHORT_PASSWORD")]);
-
-        if (strlen($Data->Password) >= 33)
-            JSON(["Status" => "Failed", "Message" => Lang("GEN_LONG_PASSWORD")]);
-
-        if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Data->Username))
-            JSON(["Status" => "Failed", "Message" => Lang("GEN_INVALID_USERNAME")]);
-
-        $Username = $Data->Username;
-        $Password = $Data->Password;
-        $Session = $Data->Session;
-
-        $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
-
-        if (empty($Account))
-            JSON(["Status" => "Failed", "Message" => Lang("LOGIN_NOT_EXIST_USERNAME")]);
-
-        if (!password_verify($Password, $Account[0]->Password))
-            JSON(["Status" => "Failed", "Message" => Lang("LOGIN_WRONG_USERNAME_PASSWORD")]);
-
-        $ID = $Account[0]->_id->__toString();
-        $Token = $App->Auth->CreateToken(["ID" => $ID]);
-
-        $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreationTime' => time()]]]);
-
-        // Send Email
-        $Email = $Account[0]->Email;
-        $Sub = "Account Login";
-        $Msg = " Hello Dear ..... Thank you for ur choice"; // @TODO: fix message
-        _Mail($Email, $Sub, $Msg);
-
-        // Create Log
-        $App->SetLog->Create('Login', ['UserID' => $ID]);
-
-        JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS"), "Token" => $Token]);
     }
 
     function SignOut($App)
