@@ -18,4 +18,9 @@
         header('Content-Type: application/json');
         exit(json_encode($Message));
     }
+
+    function Logger($App, $Type, $Data)
+    {
+        $App->DB->Insert('log', ['IP' => $_SERVER['REMOTE_ADDR'], 'Type' => $Type, 'Data' => $Data, 'CreatedTime' => time()]);
+    }
 ?>
