@@ -1,6 +1,28 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
+    function UsernameIsFree($App)
+    {
+        $Username = strtolower($_POST["Username"]);
+
+        if (!isset($Username) || empty($Username))
+            JSON(["Status" => "Failed", "Message" => Lang("USERNAMEISFREE_USERNAME_EMPTY")]);
+
+        if (strlen($Username) <= 2)
+            JSON(["Status" => "Failed", "Message" => Lang("USERNAMEISFREE_USERNAME_SHORT")]);
+
+        if (strlen($Username) >= 33)
+            JSON(["Status" => "Failed", "Message" => Lang("USERNAMEISFREE_USERNAME_LONG")]);
+
+        if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
+            JSON(["Status" => "Failed", "Message" => Lang("USERNAMEISFREE_USERNAME_INVALID")]);
+
+        $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
+
+        if (empty($Account))
+            JSON(["Status" => "Success", "Message" => Lang("SUCCESS")]);
+    }
+
     function SignIn($App)
     {
         $Username = strtolower($_POST["Username"]);

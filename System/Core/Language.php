@@ -6,7 +6,8 @@
         switch ($Name)
         {
             // General
-            case "SUCCESS":                      return 1000;
+            case "FAILED":  return 999;
+            case "SUCCESS": return 1000;
 
             // Authentication
             case "AUTH_EMPTY_TOKEN":             return 1001;
@@ -15,7 +16,7 @@
             case "AUTH_CANNOT_SIGN":             return 1004;
             case "AUTH_WRONG_SEGMENT_COUNT":     return 1005;
             case "AUTH_VERIFY_FAILED":           return 1006;
-            case "AUTH_OPENSSL_VERIFY_FAILED":   return 1007;
+            // Auth Reserve 1007
             // Auth Reserve 1008
             // Auth Reserve 1009
             // Auth Reserve 1010
@@ -65,6 +66,12 @@
             // Upload Reserve 1047
             // Upload Reserve 1048
             // Upload Reserve 1049
+
+            // Username Is Free
+            case "USERNAMEISFREE_USERNAME_EMPTY":   return 1;
+            case "USERNAMEISFREE_USERNAME_SHORT":   return 2;
+            case "USERNAMEISFREE_USERNAME_LONG":    return 3;
+            case "USERNAMEISFREE_USERNAME_INVALID": return 4;
         }
     }
 ?>

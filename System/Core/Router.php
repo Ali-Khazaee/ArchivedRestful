@@ -16,7 +16,7 @@
             {
                 $Key = array_keys($this->Routes, $RouteName)[0];
 
-                if ($this->SkipAuth[$Key] == false)
+                if ($this->SkipAuth[$Key])
                     $App->Auth->CheckToken();
 
                 $App->RateLimit->Call($this->RateLimit[$Key]);

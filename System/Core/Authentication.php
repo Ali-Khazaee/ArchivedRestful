@@ -99,7 +99,7 @@
             if ($Success)
                 return false;
 
-            JSON(["Status" => "Failed", "Message" => Lang("AUTH_OPENSSL_VERIFY_FAILED")]);
+            return true;
         }
     }
 ?>
