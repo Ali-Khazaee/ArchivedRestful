@@ -72,6 +72,20 @@
             case "USERNAMEISFREE_USERNAME_SHORT":   return 2;
             case "USERNAMEISFREE_USERNAME_LONG":    return 3;
             case "USERNAMEISFREE_USERNAME_INVALID": return 4;
+
+            // Sign Up
+            case "SIGNUP_USERNAME_EMPTY":   return 1;
+            case "SIGNUP_PASSWORD_EMPTY":   return 2;
+            case "SIGNUP_EMAIL_EMPTY":      return 3;
+            case "SIGNUP_EMAIL_INVALID":    return 4;
+            case "SIGNUP_USERNAME_SHORT":   return 5;
+            case "SIGNUP_USERNAME_LONG":    return 6;
+            case "SIGNUP_PASSWORD_SHORT":   return 7;
+            case "SIGNUP_PASSWORD_LONG":    return 8;
+            case "SIGNUP_EMAIL_LONG":       return 9;
+            case "SIGNUP_USERNAME_INVALID": return 10;
+            case "SIGNUP_USERNAME_EXIST":   return 11;
+            case "SIGNUP_EMAIL_EXIST":      return 12;
         }
     }
 ?>

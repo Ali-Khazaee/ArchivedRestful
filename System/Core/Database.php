@@ -13,11 +13,7 @@
         {
             try
             {
-                $this->Manager = new Manager("mongodb://" . DB_HOST . ":" . DB_PORT,
-                [
-                    'username' => DB_USERNAME,
-                    'password' => DB_PASSWORD
-                ]);
+                $this->Manager = new Manager("mongodb://" . DB_USERNAME . ":" . DB_PASSWORD . "@" . DB_HOST . ":" . DB_PORT . "/" . DB_NAME);
             }
             catch (Exception $e)
             {
@@ -30,11 +26,15 @@
         {
             $Bulk = new BulkWrite;
 
-            $Data = array_merge(['_id' => new MongoDB\BSON\ObjectID], $Data);
+            $ID = new MongoDB\BSON\ObjectID;
+
+            $Data = array_merge(['_id' => $ID], $Data);
 
             $Bulk->insert($Data);
 
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
+
+            return $ID;
         }
 
         public function Delete($Collection, $Condition)
