@@ -71,25 +71,26 @@
         else
             $Session .= " - " . $_SERVER['REMOTE_ADDR'];
 
-        // call ratelimit foe suceessful sign up
+        // call rate limit before successful sign up
         $App->RateLimit->call('SuccessfulSignUp.1.60000');
 
-        $ID = $App->DB->Insert('account', ['Username' => $Username, 'Password' => password_hash($Password, PASSWORD_BCRYPT), 'Email' => $Email, 'CreatedTime' => time()]);
+        $ID = $App->DB->Insert('account', ['Username' => $Username, 'Password' => password_hash($Password, PASSWORD_BCRYPT), 'Email' => $Email, 'CreatedTime' => time()])->__toString();
 
-        var_dump($ID);
-        var_dump($ID->__toString());
-        //$Token = $App->Auth->CreateToken(["ID" => $ID]);
 
-        //$App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
+        $Token = $App->Auth->CreateToken(["ID" => $ID]);
 
         JSON(["Status" => "Success", "Message" => Lang("SUCCESS")]);
+
+        $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
+
+        JSON(["Status" => "Success", "Message" => Lang("SUCCESS"), "Token" => $Token]);
     }
 
     function SignIn($App)
     {
         $Username = strtolower($_POST["Username"]);
         $Password = $_POST["Password"];
-        $Session = $_POST["Session"];
+        $Session  = $_POST["Session"];
 
         if (!isset($Username) || empty($Username))
             JSON(["Status" => "Failed", "Message" => Lang("SIGNIN_USERNAME_EMPTY")]);
@@ -112,7 +113,7 @@
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
             JSON(["Status" => "Failed", "Message" => Lang("SIGNIN_USERNAME_INVALID")]);
 
-        $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
+        $Account = $App->DB->Find('account', ['Username' => $Username])->toArray();
 
         if (empty($Account))
             JSON(["Status" => "Failed", "Message" => Lang("SIGNIN_USERNAME_NOT_EXIST")]);
@@ -130,9 +131,7 @@
 
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        Logger($App, 'SignIn', ['UserID' => $ID]);
-
-        JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS"), "Token" => $Token]);
+        JSON(["Status" => "Success", "Message" => Lang("SUCCESS"), "Token" => $Token]);
     }
 
     function SignOut($App)
