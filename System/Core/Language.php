@@ -86,6 +86,17 @@
             case "SIGNUP_USERNAME_INVALID": return 10;
             case "SIGNUP_USERNAME_EXIST":   return 11;
             case "SIGNUP_EMAIL_EXIST":      return 12;
+
+            // Sign In
+            case "SIGNIN_USERNAME_EMPTY":     return 1;
+            case "SIGNIN_PASSWORD_EMPTY":     return 2;
+            case "SIGNIN_USERNAME_SHORT":     return 3;
+            case "SIGNIN_USERNAME_LONG":      return 4;
+            case "SIGNIN_PASSWORD_SHORT":     return 5;
+            case "SIGNIN_PASSWORD_LONG":      return 6;
+            case "SIGNIN_USERNAME_INVALID":   return 7;
+            case "SIGNIN_USERNAME_NOT_EXIST": return 8;
+            case "SIGNIN_DATA_WRONG":         return 9;
         }
     }
 ?>

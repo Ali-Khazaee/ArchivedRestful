@@ -77,14 +77,14 @@
 
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        JSON(["Status" => "Success", "Message" => Lang("SUCCESS")]);
+        JSON(["Status" => "Success", "Message" => Lang("SUCCESS"), "Token" => $Token]);
     }
 
     function SignIn($App)
     {
         $Username = strtolower($_POST["Username"]);
         $Password = $_POST["Password"];
-        $Session = $_POST["Session"];
+        $Session  = $_POST["Session"];
 
         if (!isset($Username) || empty($Username))
             JSON(["Status" => "Failed", "Message" => Lang("SIGNIN_USERNAME_EMPTY")]);
@@ -107,7 +107,7 @@
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
             JSON(["Status" => "Failed", "Message" => Lang("SIGNIN_USERNAME_INVALID")]);
 
-        $Account = $App->DB->find('account', ['Username' => $Username])->toArray();
+        $Account = $App->DB->Find('account', ['Username' => $Username])->toArray();
 
         if (empty($Account))
             JSON(["Status" => "Failed", "Message" => Lang("SIGNIN_USERNAME_NOT_EXIST")]);
@@ -125,9 +125,7 @@
 
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        Logger($App, 'SignIn', ['UserID' => $ID]);
-
-        JSON(["Status" => "Success", "Message" => Lang("GEN_SUCCESS"), "Token" => $Token]);
+        JSON(["Status" => "Success", "Message" => Lang("SUCCESS"), "Token" => $Token]);
     }
 
     function SignOut($App)
