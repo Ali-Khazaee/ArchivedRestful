@@ -71,6 +71,9 @@
         else
             $Session .= " - " . $_SERVER['REMOTE_ADDR'];
 
+        // call ratelimit foe suceessful sign up
+        $App->RateLimit->call('SuccessfulSignUp.1.60000');
+
         $ID = $App->DB->Insert('account', ['Username' => $Username, 'Password' => password_hash($Password, PASSWORD_BCRYPT), 'Email' => $Email, 'CreatedTime' => time()]);
 
         var_dump($ID);
@@ -78,7 +81,6 @@
         //$Token = $App->Auth->CreateToken(["ID" => $ID]);
 
         //$App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
-
 
         JSON(["Status" => "Success", "Message" => Lang("SUCCESS")]);
     }
