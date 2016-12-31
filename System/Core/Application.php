@@ -19,7 +19,7 @@
             $Router->Call('UsernameIsFree', function() { UsernameIsFree($this); }, false, 'UsernameIsFree.1.4000');
             $Router->Call('SignUp',         function() { SignUp($this);         }, false, 'SignUp.1.1000');
             $Router->Call('SignIn',         function() { SignIn($this);         }, false, 'SignIn.1.5000');
-            $Router->Call('SignOut',        function() { SignOut($this);        }, true,  'SignOut.1.1000');
+            $Router->Call('CategoryList',   function() { CategoryList($this);   }, false, 'CategoryList.1.5000');
             $Router->Execute($this);
         }
     }

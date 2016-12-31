@@ -17,7 +17,7 @@
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
             JSON(["Status" => "Failed", "Message" => Lang("USERNAMEISFREE_USERNAME_INVALID")]);
 
-        if (empty($App->DB->find('account', ['Username' => $Username])->toArray()))
+        if (empty($App->DB->Find('account', ['Username' => $Username])->toArray()))
             JSON(["Status" => "Success", "Message" => Lang("SUCCESS")]);
 
         JSON(["Status" => "Failed", "Message" => Lang("FAILED")]);
@@ -60,10 +60,12 @@
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
             JSON(["Status" => "Failed", "Message" => Lang("SIGNUP_USERNAME_INVALID")]);
 
-        if (!empty($App->DB->find('account', ['Username' => $Username])->toArray()))
+        $App->RateLimit->Call('SignUpQuery.1.5000');
+
+        if (!empty($App->DB->Find('account', ['Username' => $Username])->toArray()))
             JSON(["Status" => "Failed", "Message" => Lang("SIGNUP_USERNAME_EXIST")]);
 
-        if (!empty($App->DB->find('account', ['Email' => $Email])->toArray()))
+        if (!empty($App->DB->Find('account', ['Email' => $Email])->toArray()))
             JSON(["Status" => "Failed", "Message" => Lang("SIGNUP_EMAIL_EXIST")]);
 
         if (!isset($Session) || empty($Session))
@@ -71,11 +73,9 @@
         else
             $Session .= " - " . $_SERVER['REMOTE_ADDR'];
 
-        // call rate limit before successful sign up
-        $App->RateLimit->call('SuccessfulSignUp.1.60000');
+        $App->RateLimit->Call('SignUpCreated.1.60000');
 
         $ID = $App->DB->Insert('account', ['Username' => $Username, 'Password' => password_hash($Password, PASSWORD_BCRYPT), 'Email' => $Email, 'CreatedTime' => time()])->__toString();
-
 
         $Token = $App->Auth->CreateToken(["ID" => $ID]);
 
