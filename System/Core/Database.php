@@ -55,9 +55,9 @@
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        public function Find($Collection, $Condition)
+        public function Find($Collection, $Condition, $Option)
         {
-            $Query = new Query($Condition);
+            $Query = new Query($Condition, $Option);
 
             $Result = $this->Manager->executeQuery(DB_NAME . "." . $Collection, $Query);
 
