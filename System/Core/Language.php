@@ -97,6 +97,11 @@
             case "SIGNIN_USERNAME_INVALID":   return 7;
             case "SIGNIN_USERNAME_NOT_EXIST": return 8;
             case "SIGNIN_DATA_WRONG":         return 9;
+
+            // Category Save
+            case "CATEGORYSAVE_EMPTY":      return 1;
+            case "CATEGORYSAVE_NOT_ENOUGH": return 2;
+            case "CATEGORYSAVE_ALREADY":    return 3;
         }
     }
 ?>

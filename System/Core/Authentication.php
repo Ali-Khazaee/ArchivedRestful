@@ -3,6 +3,8 @@
 
     class Auth
     {
+        public $ID = "NULL";
+
         public function CheckToken()
         {
             if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
@@ -15,6 +17,8 @@
 
             if (!isset($Decode->EXP) || time() >= $Decode->EXP)
                 JSON(["Status" => "Failed", "Message" => Lang("AUTH_EXPIRED_TOKEN")]);
+
+            $this->ID = $Decode->ID;
         }
 
         public function CreateToken($CustomData)

@@ -16,10 +16,11 @@
             $this->RateLimit = new RateLimit();
 
             $Router = new Router();
-            $Router->Call('UsernameIsFree', function() { UsernameIsFree($this); }, false, 'UsernameIsFree.1.4000');
+            $Router->Call('UsernameIsFree', function() { UsernameIsFree($this); }, false, 'UsernameIsFree.1.3000');
             $Router->Call('SignUp',         function() { SignUp($this);         }, false, 'SignUp.1.1000');
-            $Router->Call('SignIn',         function() { SignIn($this);         }, false, 'SignIn.1.5000');
-            $Router->Call('CategoryList',   function() { CategoryList($this);   }, false, 'CategoryList.1.5000');
+            $Router->Call('SignIn',         function() { SignIn($this);         }, false, 'SignIn.1.2000');
+            $Router->Call('CategoryList',   function() { CategoryList($this);   }, false, 'CategoryList.1.2000');
+            $Router->Call('CategorySave',   function() { CategorySave($this);   }, true,  'CategorySave.1.2000');
             $Router->Execute($this);
         }
     }
