@@ -102,6 +102,10 @@
             case "CATEGORYSAVE_EMPTY":      return 1;
             case "CATEGORYSAVE_NOT_ENOUGH": return 2;
             case "CATEGORYSAVE_ALREADY":    return 3;
+
+            // Profile Set
+            case "PROFILESET_USERNAME_SHORT": return 1;
+            case "PROFILESET_USERNAME_LONG":  return 2;
         }
     }
 ?>
