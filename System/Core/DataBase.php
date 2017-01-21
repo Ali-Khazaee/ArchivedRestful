@@ -1,8 +1,6 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
-    use MongoDB\Driver\Manager;
-    use MongoDB\Driver\Query;
     use MongoDB\Driver\BulkWrite;
 
     class DataBase
@@ -13,7 +11,7 @@
         {
             try
             {
-                $this->Manager = new Manager("mongodb://" . DB_USERNAME . ":" . DB_PASSWORD . "@" . DB_HOST . ":" . DB_PORT . "/" . DB_NAME);
+                $this->Manager = new MongoDB\Driver\Manager("mongodb://" . DB_USERNAME . ":" . DB_PASSWORD . "@" . DB_HOST . ":" . DB_PORT . "/" . DB_NAME);
             }
             catch (Exception $e)
             {
@@ -57,7 +55,7 @@
 
         public function Find($Collection, $Condition, $Option = [])
         {
-            $Query = new Query($Condition, $Option);
+            $Query = new MongoDB\Driver\Query($Condition, $Option);
 
             $Result = $this->Manager->executeQuery(DB_NAME . "." . $Collection, $Query);
 

@@ -23,5 +23,7 @@
 
     include_once(ROOT . "System/Module/Profile.php");
 
+    include_once(ROOT . "System/Module/Post.php");
+
     include_once(ROOT . "System/Module/Misc.php");
 ?>
