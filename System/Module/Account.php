@@ -79,11 +79,9 @@
 
         $Token = $App->Auth->CreateToken(["ID" => $ID]);
 
-        JSON(["Status" => "Success", "Message" => Lang("SUCCESS")]);
-
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        JSON(["Status" => "Success", "Message" => Lang("SUCCESS"), "Token" => $Token]);
+        JSON(["Status" => "Success", "Message" => Lang("SUCCESS"), "Token" => $Token, "AccountID" => $ID]);
     }
 
     function SignIn($App)
@@ -131,7 +129,7 @@
 
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        JSON(["Status" => "Success", "Message" => Lang("SUCCESS"), "Token" => $Token]);
+        JSON(["Status" => "Success", "Message" => Lang("SUCCESS"), "Token" => $Token, "AccountID" => $ID]);
     }
 
     function SignOut($App)

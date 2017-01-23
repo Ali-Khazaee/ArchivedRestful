@@ -35,7 +35,7 @@
             return $ID;
         }
 
-        public function Delete($Collection, $Condition)
+        public function Remove($Collection, $Condition)
         {
             $Bulk = new BulkWrite;
 

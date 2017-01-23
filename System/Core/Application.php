@@ -16,8 +16,10 @@
             $this->RateLimit = new RateLimit();
 
             $Router = new Router();
-            $Router->Call('CommentSend', function() { CommentSend($this); }, true,  'CommentSend.1.3000');
-            $Router->Call('CommentList', function() { CommentList($this); }, false, 'CommentList.1.3000');
+            $Router->Call('CommentSend',   function() { CommentSend($this);   }, true, 'CommentSend.1.3000');
+            $Router->Call('CommentList',   function() { CommentList($this);   }, true, 'CommentList.1.1500');
+            $Router->Call('CommentLike',   function() { CommentLike($this);   }, true, 'CommentLike.1.1000');
+            $Router->Call('CommentRemove', function() { CommentRemove($this); }, true, 'CommentRemove.1.3000');
 
             $Router->Call('UsernameIsFree', function() { UsernameIsFree($this); }, false, 'UsernameIsFree.1.3000');
             $Router->Call('SignUp',         function() { SignUp($this);         }, false, 'SignUp.1.1000');
