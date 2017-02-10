@@ -5,17 +5,17 @@
     {
         public $DB;
         public $Auth;
-        public $Upload;
         public $RateLimit;
 
         public function __construct()
         {
             $this->DB        = new DataBase();
             $this->Auth      = new Auth();
-            $this->Upload    = new Upload();
             $this->RateLimit = new RateLimit();
 
             $Router = new Router();
+            $Router->Call('ActivityHomeWrite', function() { ActivityHomeWrite($this); }, true, 'ActivityHomeWrite.1.3000');
+
             $Router->Call('CommentSend',   function() { CommentSend($this);   }, true, 'CommentSend.1.3000');
             $Router->Call('CommentList',   function() { CommentList($this);   }, true, 'CommentList.1.1500');
             $Router->Call('CommentLike',   function() { CommentLike($this);   }, true, 'CommentLike.1.1000');
