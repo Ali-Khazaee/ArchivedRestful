@@ -14,12 +14,13 @@
             $this->RateLimit = new RateLimit();
 
             $Router = new Router();
-            $Router->Call('ActivityHomeWrite', function() { ActivityHomeWrite($this); }, true, 'ActivityHomeWrite.1.3000');
-
-            $Router->Call('CommentSend',   function() { CommentSend($this);   }, true, 'CommentSend.1.3000');
-            $Router->Call('CommentList',   function() { CommentList($this);   }, true, 'CommentList.1.1500');
-            $Router->Call('CommentLike',   function() { CommentLike($this);   }, true, 'CommentLike.1.1000');
-            $Router->Call('CommentRemove', function() { CommentRemove($this); }, true, 'CommentRemove.1.3000');
+            $Router->Call('ActivityWorld',              function() { ActivityWorld($this);              }, true, 'ActivityWorld.1.3000');
+            $Router->Call('ActivityWorldLike',          function() { ActivityWorldLike($this);          }, true, 'ActivityWorldLike.1.3000');
+            $Router->Call('ActivityWorldCommentSend',   function() { ActivityWorldCommentSend($this);   }, true, 'ActivityWorldCommentSend.1.3000');
+            $Router->Call('ActivityWorldCommentList',   function() { ActivityWorldCommentList($this);   }, true, 'ActivityWorldCommentList.1.1500');
+            $Router->Call('ActivityWorldCommentLike',   function() { ActivityWorldCommentLike($this);   }, true, 'ActivityWorldCommentLike.1.1000');
+            $Router->Call('ActivityWorldCommentRemove', function() { ActivityWorldCommentRemove($this); }, true, 'ActivityWorldCommentRemove.1.3000');
+            $Router->Call('ActivityWorldWrite',         function() { ActivityWorldWrite($this);         }, true, 'ActivityWorldWrite.1.3000');
 
             $Router->Call('UsernameIsFree', function() { UsernameIsFree($this); }, false, 'UsernameIsFree.1.3000');
             $Router->Call('SignUp',         function() { SignUp($this);         }, false, 'SignUp.1.1000');
