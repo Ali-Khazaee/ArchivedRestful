@@ -16,6 +16,7 @@
             $Router = new Router();
             $Router->Call('ActivityWorld',              function() { ActivityWorld($this);              }, true, 'ActivityWorld.1.3000');
             $Router->Call('ActivityWorldLike',          function() { ActivityWorldLike($this);          }, true, 'ActivityWorldLike.1.3000');
+            $Router->Call('ActivityWorldLikeList',      function() { ActivityWorldLikeList($this);      }, true, 'ActivityWorldLikeList.1.3000');
             $Router->Call('ActivityWorldCommentSend',   function() { ActivityWorldCommentSend($this);   }, true, 'ActivityWorldCommentSend.1.3000');
             $Router->Call('ActivityWorldCommentList',   function() { ActivityWorldCommentList($this);   }, true, 'ActivityWorldCommentList.1.1500');
             $Router->Call('ActivityWorldCommentLike',   function() { ActivityWorldCommentLike($this);   }, true, 'ActivityWorldCommentLike.1.1000');

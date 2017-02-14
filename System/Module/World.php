@@ -20,7 +20,7 @@
             {
                 $Username = $Username[0]->Username;
                 $PostID = new MongoDB\BSON\ObjectID($Post->_id->__toString());
-                $Like = $App->DB->Find('post_world_like', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "PostID" => $PostID]]])->toArray();
+                $Like = $App->DB->Find('post_world_like', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "PostID" => new MongoDB\BSON\ObjectID($PostID)]]])->toArray();
 
                 if (isset($Like[0]))
                     $Like = true;
@@ -66,9 +66,31 @@
         if (isset($Post[0]))
             $App->DB->Remove('post_world_like', $Query, ['limit' => 1]);
         else
-            $App->DB->Insert('post_world_like', ["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "PostID" => new MongoDB\BSON\ObjectID($PostID)]);
+            $App->DB->Insert('post_world_like', ["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "PostID" => new MongoDB\BSON\ObjectID($PostID), "Time" => time()]);
 
         JSON(["Message" => 1000]); 
+    }
+
+    function ActivityWorldLikeList($App)
+    {
+        $LikeArray = array();
+        $PostID = $_POST["PostID"];
+        $SkipCount = isset($_POST["Skip"]) ? $_POST["Skip"] : 0;
+
+        if (!isset($PostID) || empty($PostID))
+            JSON(["Message" => 1]);
+
+        $LikeList = $App->DB->Find('post_world_like', ['PostID' => new MongoDB\BSON\ObjectID($PostID)], ['skip' => $SkipCount, 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
+
+        foreach ($LikeList as $Like)
+        {
+            $Username = $App->DB->Find('account', ['_id' => new MongoDB\BSON\ObjectID($Like->OwnerID)])->toArray();
+
+            if (isset($Username[0]))
+                array_push($LikeArray, array("OwnerID" => $Like->OwnerID->__toString(), "Username" => $Username[0]->Username, "Time" => $Like->Time));
+        }
+
+        JSON(["Message" => 1000, "Result" => json_encode($LikeArray)]);
     }
 
     function ActivityWorldCommentSend($App)
@@ -83,7 +105,7 @@
             JSON(["Message" => 2]);
 
         $Time = time();
-        $CommentID = $App->DB->Insert('post_world_comment', ['PostID' => $PostID, 'OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Time' => $Time, 'Message' => $Message])->__toString();
+        $CommentID = $App->DB->Insert('post_world_comment', ['PostID' => new MongoDB\BSON\ObjectID($PostID), 'OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Time' => $Time, 'Message' => $Message])->__toString();
 
         JSON(["Message" => 1000, "CommentID" => $CommentID, "Time" => $Time]);
     }
@@ -99,9 +121,9 @@
             JSON(["Message" => 1]);
 
         if ($CommentTime)
-            $CommentList = $App->DB->Find('post_world_comment', ['PostID' => $PostID, 'Time' => ['$gt' => (int)$CommentTime]], ['limit' => 8, 'sort' => ['Time' => 1]])->toArray();
+            $CommentList = $App->DB->Find('post_world_comment', ['PostID' => new MongoDB\BSON\ObjectID($PostID), 'Time' => ['$gt' => (int)$CommentTime]], ['limit' => 8, 'sort' => ['Time' => 1]])->toArray();
         else
-            $CommentList = $App->DB->Find('post_world_comment', ['PostID' => $PostID], ['skip' => $SkipCount, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+            $CommentList = $App->DB->Find('post_world_comment', ['PostID' => new MongoDB\BSON\ObjectID($PostID)], ['skip' => $SkipCount, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
 
         foreach ($CommentList as $Comment)
         {
@@ -111,14 +133,14 @@
             {
                 $User = $Username[0]->Username;
                 $CommentID = new MongoDB\BSON\ObjectID($Comment->_id->__toString());
-                $Like = $App->DB->Find('post_world_comment_like', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "CommentID" => $CommentID]]])->toArray();
+                $Like = $App->DB->Find('post_world_comment_like', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "CommentID" => new MongoDB\BSON\ObjectID($CommentID)]]])->toArray();
 
                 if (isset($Like[0]))
                     $Like = true;
                 else
                     $Like = false;
 
-                $LikeCount = $App->DB->Find('post_world_comment_like', ["CommentID" => $CommentID])->toArray();
+                $LikeCount = $App->DB->Find('post_world_comment_like', ["CommentID" => new MongoDB\BSON\ObjectID($CommentID)])->toArray();
 
                 if (isset($LikeCount[0]))
                     $LikeCount = count($LikeCount);
@@ -190,6 +212,9 @@
 
         if (!isset($State) || empty($State))
             JSON(["Message" => 1]);
+
+        if (strlen($Message) >= 150)
+            $Message = substr($Message, 0, 150);
 
         $Data = array();
 
@@ -264,12 +289,12 @@
                 $URL = curl_exec($Channel);
                 curl_close($Channel);
 
-                $Data = $Server . $URL;
+                array_push($Data, ($Server . $URL));
             }
         }
         elseif ($State == 3)
         {
-            $Data = $LinkURL;
+            array_push($Data, $LinkURL);
         }
 
         if ($Category == NULL || $Category > 17 || $Category < 0)
