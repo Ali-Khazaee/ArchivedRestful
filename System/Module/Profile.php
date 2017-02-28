@@ -1,6 +1,19 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
+    function ActivityProfile($App)
+    {
+        $Account = $App->DB->Find('account', ["_id" => new MongoDB\BSON\ObjectID($App->Auth->ID)])->toArray();
+        $PostCount = $App->DB->Find('post_world', ["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID)])->toArray();
+
+        if (isset($PostCount[0]))
+            $PostCount = count($PostCount);
+        else
+            $PostCount = 0;
+
+        JSON(["Message" => 1000, "Data" => json_encode(array("Username" => $Account[0]->Username, "PostCount" => $PostCount))]);
+    }
+
     function ProfileGet($App)
     {
         $Result = $App->DB->Find('account', ["_id" => new MongoDB\BSON\ObjectID($App->Auth->ID)])->toArray();

@@ -23,6 +23,8 @@
             $Router->Call('ActivityWorldCommentRemove', function() { ActivityWorldCommentRemove($this); }, true, 'ActivityWorldCommentRemove.1.3000');
             $Router->Call('ActivityWorldWrite',         function() { ActivityWorldWrite($this);         }, true, 'ActivityWorldWrite.1.3000');
 
+            $Router->Call('ActivityProfile',            function() { ActivityProfile($this);            }, true, 'ActivityProfile.1.3000');
+
             $Router->Call('UsernameIsFree', function() { UsernameIsFree($this); }, false, 'UsernameIsFree.1.3000');
             $Router->Call('SignUp',         function() { SignUp($this);         }, false, 'SignUp.1.1000');
             $Router->Call('SignIn',         function() { SignIn($this);         }, false, 'SignIn.1.2000');
