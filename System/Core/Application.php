@@ -14,6 +14,8 @@
             $this->RateLimit = new RateLimit();
 
             $Router = new Router();
+            $Router->Call('ActivityWelcomeSignIn', function() { ActivityWelcomeSignIn($this); }, true, 'ActivityWelcomeSignIn.1.3000');
+
             $Router->Call('ActivityWorld',              function() { ActivityWorld($this);              }, true, 'ActivityWorld.1.3000');
             $Router->Call('ActivityWorldLike',          function() { ActivityWorldLike($this);          }, true, 'ActivityWorldLike.1.3000');
             $Router->Call('ActivityWorldLikeList',      function() { ActivityWorldLikeList($this);      }, true, 'ActivityWorldLikeList.1.3000');

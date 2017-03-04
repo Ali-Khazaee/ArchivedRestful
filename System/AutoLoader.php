@@ -21,6 +21,8 @@
 
     include_once(ROOT . "System/Module/Account.php");
 
+    include_once(ROOT . "System/Module/ActivityWelcome.php");
+
     include_once(ROOT . "System/Module/Profile.php");
 
     include_once(ROOT . "System/Module/Misc.php");
