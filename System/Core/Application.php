@@ -14,7 +14,9 @@
             $this->RateLimit = new RateLimit();
 
             $Router = new Router();
-            $Router->Call('ActivityWelcomeSignIn', function() { ActivityWelcomeSignIn($this); }, true, 'ActivityWelcomeSignIn.1.3000');
+            $Router->Call('ActivityWelcomeUsernameFree', function() { ActivityWelcomeUsernameFree($this); }, true, 'ActivityWelcomeUsernameFree.1.1000');
+            $Router->Call('ActivityWelcomeEmailSign',    function() { ActivityWelcomeEmailSign($this);    }, true, 'ActivityWelcomeEmailSign.1.1000');
+            $Router->Call('ActivityWelcomeSignIn',       function() { ActivityWelcomeSignIn($this);       }, true, 'ActivityWelcomeSignIn.1.1000');
 
             $Router->Call('ActivityWorld',              function() { ActivityWorld($this);              }, true, 'ActivityWorld.1.3000');
             $Router->Call('ActivityWorldLike',          function() { ActivityWorldLike($this);          }, true, 'ActivityWorldLike.1.3000');
