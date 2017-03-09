@@ -60,7 +60,7 @@
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
             JSON(["Message" => 10]);
 
-        $App->RateLimit->Call('ActivityWelcomeEmailSignQuery.1.5000');
+        $App->RateLimit->Call('ActivityWelcomeEmailSignQuery.1.2000');
 
         if (!empty($App->DB->Find('account', ['Username' => $Username])->toArray()))
             JSON(["Message" => 11]);
@@ -111,7 +111,7 @@
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
             JSON(["Message" => 7]);
 
-        $App->RateLimit->Call('ActivityWelcomeSignInQuery.1.3000');
+        $App->RateLimit->Call('ActivityWelcomeSignInQuery.1.2000');
 
         $Account = $App->DB->Find('account', ['Username' => $Username])->toArray();
 
@@ -132,6 +132,56 @@
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
         JSON(["Message" => 1000, "Token" => $Token, "AccountID" => $ID]);
+    }
+
+    function ActivityWelcomeReset($App)
+    {
+        $EmailOrUsername = isset($_POST["EmailOrUsername"]) ? strtolower($_POST["EmailOrUsername"]) : NULL;
+
+        if (!isset($EmailOrUsername) || empty($EmailOrUsername))
+            JSON(["Message" => 1]);
+
+        if (strlen($EmailOrUsername) <= 2)
+            JSON(["Message" => 2]);
+
+        if (strlen($EmailOrUsername) >= 65)
+            JSON(["Message" => 3]);
+
+        if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
+            if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
+                JSON(["Message" => 4]);
+
+        $App->RateLimit->Call('ActivityWelcomeReset.1.2000');
+
+        $RandomString = '';
+        $Characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $CharactersLength = strlen($Characters);
+
+        for ($I = 0; $I < 15; $I++)
+            $RandomString .= $Characters[rand(0, $CharactersLength - 1)];
+
+        if (filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
+        {
+            $Account = $App->DB->Find('account', ['Email' => $EmailOrUsername])->toArray();
+
+            if (empty($Account))
+                JSON(["Message" => 8]);
+
+            $Email = $Account[0]->Email;
+            $Username = str_rot13(strrev($Account[0]->Username);
+        }
+        else
+        {
+            $Account = $App->DB->Find('account', ['Username' => $EmailOrUsername])->toArray();
+
+            if (empty($Account))
+                JSON(["Message" => 8]);
+
+            $Email = $Account[0]->Email;
+            $Username = str_rot13(strrev($Account[0]->Username);
+        }
+
+        JSON(["Message" => 1000]);
     }
 
     function ActivityWelcomeSignInGoogle($App)
@@ -162,7 +212,7 @@
             $Session .= " - " . $_SERVER['REMOTE_ADDR'];
 
         $GoogleID = $PayLoad['sub'];
-        $App->RateLimit->Call('ActivityWelcomeSignInGoogleQuery.1.3000');
+        $App->RateLimit->Call('ActivityWelcomeSignInGoogleQuery.1.2000');
         $Account = $App->DB->Find('account', ['GoogleID' => $GoogleID])->toArray();
 
         if (empty($Account))
