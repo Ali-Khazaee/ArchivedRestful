@@ -1,39 +1,20 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
-    function CategoryList($App)
+    function MiscGetProfileImage($App)
     {
-        $CategoryList = $App->DB->Find('category', [], ['sort' => [ '_id' => 1]])->toArray();
+        $ID = isset($_POST["ID"]) ? strtolower($_POST["ID"]) : NULL;
 
-        $Cate = array();
+        if (!isset($ID) || empty($ID))
+            JSON(["Message" => 1]);
 
-        foreach ($CategoryList as $Category)
-           array_push($Cate, array("ID" => $Category->_id, "Name" => $Category->Name, "Encode" => $Category->Encode));
+        $Profile = $App->DB->Find('account', ['ID' => $ID])->toArray();
 
-        JSON(["Status" => "Success", "Message" => Lang("SUCCESS"), "Data" => $Cate]);
+        JSON(["Message" => 1000, "URL" => $URL]);
     }
 
-    function CategorySave($App)
+    function MiscKeepClientOnline($App)
     {
-        $CatList = $_POST["CatList"];
-
-        if (!isset($CatList) || empty($CatList))
-            JSON(["Status" => "Failed", "Message" => Lang("CATEGORYSAVE_EMPTY")]);
-
-        $Cat = array_unique(explode(".", $CatList), SORT_REGULAR);
-        $Cat = array_values($Cat);
-
-        if (count($Cat) <= 4)
-            JSON(["Status" => "Failed", "Message" => Lang("CATEGORYSAVE_NOT_ENOUGH")]);
-
-        $CategoryList = $App->DB->Find('category_storage', ["_id" => new MongoDB\BSON\ObjectID($App->Auth->ID)])->toArray();
-
-        if (!empty($CategoryList))
-            JSON(["Status" => "Failed", "Message" => Lang("CATEGORYSAVE_ALREADY")]);
-
-        for ($I = 0; $I < count($Cat); ++$I)
-            $App->DB->Insert('category_storage', ['ID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'CategoryID' => $Cat[$I]]);
-
-        JSON(["Status" => "Success", "Message" => Lang("SUCCESS")]);
+        $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($App->Auth->ID)], ['$set' => ['LastOnline' => time()]]);
     }
 ?>

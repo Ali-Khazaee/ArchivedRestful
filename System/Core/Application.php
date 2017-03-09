@@ -14,13 +14,18 @@
             $this->RateLimit = new RateLimit();
 
             $Router = new Router();
-            $Router->Call('ActivityWelcomeUsernameFree', function() { ActivityWelcomeUsernameFree($this); }, true, 'ActivityWelcomeUsernameFree.1.1000');
-            $Router->Call('ActivityWelcomeEmailSign',    function() { ActivityWelcomeEmailSign($this);    }, true, 'ActivityWelcomeEmailSign.1.1000');
-            $Router->Call('ActivityWelcomeSignIn',       function() { ActivityWelcomeSignIn($this);       }, true, 'ActivityWelcomeSignIn.1.1000');
-            $Router->Call('ActivityWelcomeReset',        function() { ActivityWelcomeReset($this);        }, true, 'ActivityWelcomeReset.1.1000');
-            $Router->Call('ActivityWelcomeSignInGoogle', function() { ActivityWelcomeSignInGoogle($this); }, true, 'ActivityWelcomeSignInGoogle.1.1000');
+            $Router->Call('ActivityWelcomeUsernameFree', function() { ActivityWelcomeUsernameFree($this); }, false, 'ActivityWelcomeUsernameFree.1.1000');
+            $Router->Call('ActivityWelcomeEmailSign',    function() { ActivityWelcomeEmailSign($this);    }, false, 'ActivityWelcomeEmailSign.1.1000');
+            $Router->Call('ActivityWelcomeSignIn',       function() { ActivityWelcomeSignIn($this);       }, false, 'ActivityWelcomeSignIn.1.1000');
+            $Router->Call('ActivityWelcomeReset',        function() { ActivityWelcomeReset($this);        }, false, 'ActivityWelcomeReset.1.1000');
+            $Router->Call('ActivityWelcomeSignInGoogle', function() { ActivityWelcomeSignInGoogle($this); }, false, 'ActivityWelcomeSignInGoogle.1.1000');
 
             $Router->Call('GeneralAdapterPost', function() { GeneralAdapterPost($this); }, true, 'GeneralAdapterPost.1.1000');
+
+            $Router->Call('AdminGetTotalOnline', function() { AdminGetTotalOnline($this); }, true, 'AdminGetTotalOnline.1.1000');
+
+            $Router->Call('MiscGetProfileImage',  function() { MiscGetProfileImage($this);  }, true, 'MiscGetProfileImage.1.1000');
+            $Router->Call('MiscKeepClientOnline', function() { MiscKeepClientOnline($this); }, true, 'MiscKeepClientOnline.1.60000');
 
             $Router->Execute($this);
         }

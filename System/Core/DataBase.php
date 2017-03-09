@@ -20,15 +20,24 @@
             }
         }
 
-        public function Insert($Collection, $Data)
+        public function Command($Collection, $Query)
+        {
+            $Command = new MongoDB\Driver\Command($Query);
+
+            $Result = $this->Manager->executeCommand(DB_NAME . '.' . $Collection, $Command);
+
+            return $Result;
+        }
+
+        public function Insert($Collection, $Query)
         {
             $Bulk = new BulkWrite;
 
             $ID = new MongoDB\BSON\ObjectID;
 
-            $Data = array_merge(['_id' => $ID], $Data);
+            $Query = array_merge(['_id' => $ID], $Query);
 
-            $Bulk->insert($Data);
+            $Bulk->insert($Query);
 
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
 
@@ -44,11 +53,11 @@
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
 
-        public function Update($Collection, $Condition, $Data)
+        public function Update($Collection, $Condition, $Query)
         {
             $Bulk = new BulkWrite;
 
-            $Bulk->update($Condition, $Data);
+            $Bulk->update($Condition, $Query);
 
             $this->Manager->executeBulkWrite(DB_NAME . '.' . $Collection, $Bulk);
         }
