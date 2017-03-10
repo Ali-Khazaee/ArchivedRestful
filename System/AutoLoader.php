@@ -11,17 +11,17 @@
 
     include_once(ROOT . "System/Core/DataBase.php");
 
-    include_once(ROOT . "System/Core/Language.php");
-
     include_once(ROOT . "System/Core/Router.php");
 
     include_once(ROOT . "System/Core/Upload.php");
 
     include_once(ROOT . "System/Core/RateLimit.php");
 
-    include_once(ROOT . "System/Module/ActivityMainFragmentMoment.php");
-
     include_once(ROOT . "System/Module/ActivityWelcome.php");
+
+    include_once(ROOT . "System/Module/AdminPanel.php");
+
+    include_once(ROOT . "System/Module/GeneralAdapterPost.php");
 
     include_once(ROOT . "System/Module/Misc.php");
 ?>

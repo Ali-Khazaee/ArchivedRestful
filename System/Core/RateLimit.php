@@ -24,7 +24,7 @@
             }
 
             Tracer("Flood.log", $Key);
-            JSON(["Status" => "Failed", "Message" => "RATELIMIT_MAX_REQUEST_EXCEED"]);
+            JSON(["Message" => 2000]);
         }
     }
 ?>

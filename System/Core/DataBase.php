@@ -16,7 +16,7 @@
             catch (Exception $e)
             {
                 Tracer("DataBaseError.log", "Connection Error:" . $e->getMessage());
-                JSON(["Status" => "Failed", "Message" => Lang("DATABASE_CONNECTION")]);
+                JSON(["Message" => 2001]);
             }
         }
 

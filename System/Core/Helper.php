@@ -4,7 +4,7 @@
     function ErrorHandler($Type, $Message, $File, $Line)
     {
         Tracer("ApplicationError.log", "Line: $Line File: $File Type: $Type Message: $Message");
-        JSON(["Status" => "Failed", "Line" => $Line, "File" => $File, "Message" => 999, "Error" => $Message, "Type" => $Type]);
+        JSON(["Status" => "Failed", "Line" => $Line, "File" => $File, "Message" => 0, "Error" => $Message, "Type" => $Type]);
     }
 
     function Tracer($FileName, $Message)

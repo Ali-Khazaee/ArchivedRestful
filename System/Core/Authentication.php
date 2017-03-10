@@ -8,15 +8,15 @@
         public function CheckToken()
         {
             if (!isset($_SERVER['HTTP_TOKEN']) || empty($_SERVER['HTTP_TOKEN']))
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_TOKEN")]);
+                JSON(["Message" => 2002]);
 
             $Decode = $this->Decode($_SERVER['HTTP_TOKEN']);
 
             if (!isset($Decode->ID))
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_DATA")]);
+                JSON(["Message" => 2003]);
 
             if (!isset($Decode->EXP) || time() >= $Decode->EXP)
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EXPIRED_TOKEN")]);
+                JSON(["Message" => 2004]);
 
             $this->ID = $Decode->ID;
         }
@@ -62,7 +62,7 @@
             if ($Success)
                 return $Signature;
 
-            JSON(["Status" => "Failed", "Message" => Lang("AUTH_CANNOT_SIGN")]);
+            JSON(["Message" => 2005]);
         }
 
         public function Decode($Data)
@@ -70,15 +70,15 @@
             $Segments = explode('.', $Data);
 
             if (count($Segments) != 2)
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_WRONG_SEGMENT_COUNT")]);
+                JSON(["Message" => 2006]);
 
             if (($Content = json_decode($this->Base64Decode($Segments[0]))) === NULL)
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_EMPTY_CONTENT")]);
+                JSON(["Message" => 2007]);
 
             $Signature = $this->Base64Decode($Segments[1]);
 
             if ($this->Verify($Segments[0], $Signature))
-                JSON(["Status" => "Failed", "Message" => Lang("AUTH_VERIFY_FAILED")]);
+                JSON(["Message" => 2008]);
 
             return $Content;
         }

@@ -3,7 +3,7 @@
 
     function AdminGetTotalOnline($App)
     {
-        $Time = isset($_POST["Time"]) ? strtolower($_POST["Time"]) : 86400
+        $Time = isset($_POST["Time"]) ? strtolower($_POST["Time"]) : 86400;
         $Time = time() - $Time;
 
         $Online = $App->DB->Find('account', ['LastOnline' => ['$gt' => (int) $Time]])->toArray();
