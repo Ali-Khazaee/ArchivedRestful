@@ -17,6 +17,8 @@
 
     include_once(ROOT . "System/Core/RateLimit.php");
 
+    include_once(ROOT . "System/Module/ActivityProfileEdit.php");
+
     include_once(ROOT . "System/Module/ActivityWelcome.php");
 
     include_once(ROOT . "System/Module/AdminPanel.php");

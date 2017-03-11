@@ -20,6 +20,11 @@
             $Router->Call('ActivityWelcomeReset',        function() { ActivityWelcomeReset($this);        }, false, 'ActivityWelcomeReset.1.1000');
             $Router->Call('ActivityWelcomeSignInGoogle', function() { ActivityWelcomeSignInGoogle($this); }, false, 'ActivityWelcomeSignInGoogle.1.1000');
 
+            $Router->Call('ActivityProfileEdit',                 function() { ActivityProfileEdit($this);                 }, true, 'ActivityProfileEdit.1.1000');
+            $Router->Call('ActivityProfileEditSave',             function() { ActivityProfileEditSave($this);             }, true, 'ActivityProfileEditSave.1.1000');
+            $Router->Call('ActivityProfileEditDeleteProfile',    function() { ActivityProfileEditDeleteProfile($this);    }, true, 'ActivityProfileEditDeleteProfile.1.1000');
+            $Router->Call('ActivityProfileEditDeleteBackGround', function() { ActivityProfileEditDeleteBackGround($this); }, true, 'ActivityProfileEditDeleteBackGround.1.1000');
+
             $Router->Call('GeneralAdapterPost', function() { GeneralAdapterPost($this); }, true, 'GeneralAdapterPost.1.1000');
 
             $Router->Call('AdminGetTotalOnline', function() { AdminGetTotalOnline($this); }, true, 'AdminGetTotalOnline.1.1000');

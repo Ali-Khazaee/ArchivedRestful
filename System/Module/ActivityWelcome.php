@@ -90,20 +90,20 @@
 
     function ActivityWelcomeSignIn($App)
     {
-        $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : NULL;
+        $EmailOrUsername = isset($_POST["EmailOrUsername"]) ? strtolower($_POST["EmailOrUsername"]) : NULL;
         $Password = isset($_POST["Password"]) ? $_POST["Password"] : NULL;
         $Session = isset($_POST["Session"]) ? $_POST["Session"] : NULL;
 
-        if (!isset($Username) || empty($Username))
+        if (!isset($EmailOrUsername) || empty($EmailOrUsername))
             JSON(["Message" => 1]);
 
         if (!isset($Password) || empty($Password))
             JSON(["Message" => 2]);
 
-        if (strlen($Username) <= 2)
+        if (strlen($EmailOrUsername) <= 2)
             JSON(["Message" => 3]);
 
-        if (strlen($Username) >= 33)
+        if (strlen($EmailOrUsername) >= 65)
             JSON(["Message" => 4]);
 
         if (strlen($Password) <= 4)
@@ -112,12 +112,16 @@
         if (strlen($Password) >= 33)
             JSON(["Message" => 6]);
 
-        if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
-            JSON(["Message" => 7]);
+        if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
+            if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $EmailOrUsername))
+                JSON(["Message" => 7]);
 
         $App->RateLimit->Call('ActivityWelcomeSignInQuery.1.2000');
 
-        $Account = $App->DB->Find('account', ['Username' => $Username])->toArray();
+        if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
+            $Account = $App->DB->Find('account', ['Username' => $EmailOrUsername])->toArray();
+        else
+            $Account = $App->DB->Find('account', ['Email' => $EmailOrUsername])->toArray();
 
         if (empty($Account))
             JSON(["Message" => 8]);
