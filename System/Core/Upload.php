@@ -21,6 +21,20 @@
             return array_keys($Result, max($Result))[0];
         }
 
+        public static function DeleteFile($URL)
+        {
+            foreach (self::$ServerList as $Server)
+            {
+                $Channel = curl_init();
+                curl_setopt($Channel, CURLOPT_URL, $Server);
+                curl_setopt($Channel, CURLOPT_HEADER, false);
+                curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_REMOVE", "URL" => $URL, "TOKEN" => self::GetServerToken($Server)]);
+                curl_exec($Channel);
+                curl_close($Channel);
+            }
+        }
+
         public static function GetServerToken($ServerID)
         {
             switch ($ServerID)
