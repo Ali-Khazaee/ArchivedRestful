@@ -20,11 +20,11 @@
             }
         }
 
-        public function Command($Collection, $Query)
+        public function Command($Query)
         {
             $Command = new MongoDB\Driver\Command($Query);
 
-            $Result = $this->Manager->executeCommand(DB_NAME . '.' . $Collection, $Command);
+            $Result = $this->Manager->executeCommand(DB_NAME, $Command);
 
             return $Result;
         }

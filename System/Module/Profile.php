@@ -1,6 +1,35 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
+    function GetProfile($App)
+    {
+        $ID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+
+        $Account = $App->DB->Find('account', ['_id' => $ID])->toArray();
+
+        $Post = $App->DB->Command(["count" => "post", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
+        $Follower = $App->DB->Command(["count" => "follower", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
+        $Following = $App->DB->Command(["count" => "following", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
+
+        if (!$Post)
+            $Post = 0;
+
+        if (!$Follower)
+            $Follower = 0;
+
+        if (!$Following)
+            $Following = 0;
+
+        $Result = json_encode(array("Username"    => isset($Account[0]->Username) ? $Account[0]->Username : "",
+                        "Description" => isset($Account[0]->Description) ? $Account[0]->Description : "",
+                        "Link"        => isset($Account[0]->Link) ? $Account[0]->Link : "",
+                        "Name"        => isset($Account[0]->Name) ? $Account[0]->Name : "",
+                        "BackGround"  => isset($Account[0]->ImageBackGround) ? $Account[0]->ImageBackGround : "",
+                        "Profile"     => isset($Account[0]->ImageProfile) ? $Account[0]->ImageProfile : ""));
+
+        JSON(["Message" => 1000, "Result" => $Result]);
+    }
+
     function ActivityProfileEdit($App)
     {
         $ID = new MongoDB\BSON\ObjectID($App->Auth->ID);

@@ -25,6 +25,8 @@
             $Router->Call('ActivityProfileEditDeleteProfile',    function() { ActivityProfileEditDeleteProfile($this);    }, true, 'ActivityProfileEditDeleteProfile.1.1000');
             $Router->Call('ActivityProfileEditDeleteBackGround', function() { ActivityProfileEditDeleteBackGround($this); }, true, 'ActivityProfileEditDeleteBackGround.1.1000');
 
+            $Router->Call('GetProfile', function() { GetProfile($this); }, true, 'GetProfile.1.1000');
+
             $Router->Call('GeneralAdapterPost', function() { GeneralAdapterPost($this); }, true, 'GeneralAdapterPost.1.1000');
 
             $Router->Call('AdminGetTotalOnline', function() { AdminGetTotalOnline($this); }, true, 'AdminGetTotalOnline.1.1000');
