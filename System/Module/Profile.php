@@ -21,65 +21,78 @@
             $Following = 0;
 
         $Result = json_encode(array("Username"    => isset($Account[0]->Username) ? $Account[0]->Username : "",
-                        "Description" => isset($Account[0]->Description) ? $Account[0]->Description : "",
-                        "Link"        => isset($Account[0]->Link) ? $Account[0]->Link : "",
-                        "Name"        => isset($Account[0]->Name) ? $Account[0]->Name : "",
-                        "BackGround"  => isset($Account[0]->ImageBackGround) ? $Account[0]->ImageBackGround : "",
-                        "Profile"     => isset($Account[0]->ImageProfile) ? $Account[0]->ImageProfile : ""));
+                                    "Description" => isset($Account[0]->Description) ? $Account[0]->Description : "",
+                                    "Link"        => isset($Account[0]->Link) ? $Account[0]->Link : "",
+                                    "Name"        => isset($Account[0]->Name) ? $Account[0]->Name : "",
+                                    "BackGround"  => isset($Account[0]->ImageBackGround) ? $Account[0]->ImageBackGround : "",
+                                    "Profile"     => isset($Account[0]->ImageProfile) ? $Account[0]->ImageProfile : ""
+                                    "Post"        => isset($Account[0]->Post) ? $Account[0]->Post : ""
+                                    "Follower"    => isset($Account[0]->Follower) ? $Account[0]->Follower : ""
+                                    "Following"   => isset($Account[0]->Following) ? $Account[0]->Following : ""));
 
         JSON(["Message" => 1000, "Result" => $Result]);
     }
 
-    function ActivityProfileEdit($App)
+    function GetProfileEdit($App)
     {
-        $ID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $Account = $App->DB->Find('account', ['_id' => new MongoDB\BSON\ObjectID($App->Auth->ID)])->toArray();
 
-        $User = $App->DB->Find('account', ['_id' => $ID])->toArray();
-
-        $Result = array("Username"    => isset($User[0]->Username) ? $User[0]->Username : "",
-                        "Description" => isset($User[0]->Description) ? $User[0]->Description : "",
-                        "Link"        => isset($User[0]->Link) ? $User[0]->Link : "",
-                        "Email"       => isset($User[0]->Email) ? $User[0]->Email : "",
-                        "BackGround"  => isset($User[0]->ImageBackGround) ? $User[0]->ImageBackGround : "",
-                        "Profile"     => isset($User[0]->ImageProfile) ? $User[0]->ImageProfile : "");
+        $Result = array("Username"    => isset($Account[0]->Username) ? $Account[0]->Username : "",
+                        "Description" => isset($Account[0]->Description) ? $Account[0]->Description : "",
+                        "Link"        => isset($Account[0]->Link) ? $Account[0]->Link : "",
+                        "Name"        => isset($Account[0]->Name) ? $Account[0]->Name : "",
+                        "Position"    => isset($Account[0]->Position) ? $Account[0]->Position : "",
+                        "Location"    => isset($Account[0]->Location) ? $Account[0]->Location : "",
+                        "Email"       => isset($Account[0]->Email) ? $Account[0]->Email : "",
+                        "BackGround"  => isset($Account[0]->ImageBackGround) ? $Account[0]->ImageBackGround : "",
+                        "Profile"     => isset($Account[0]->ImageProfile) ? $Account[0]->ImageProfile : "");
 
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);
     }
 
-    function ActivityProfileEditSave($App)
+    function SetProfileEdit($App)
     {
-        $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : NULL;
-        $Description = isset($_POST["Description"]) ? $_POST["Description"] : NULL;
-        $Link = isset($_POST["Link"]) ? strtolower($_POST["Link"]) : NULL;
-        $Email = isset($_POST["Email"]) ? $_POST["Email"] : NULL;
-
-        $OldEmail = false;
-        $OldUsername = false;
+        $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : "";
+        $Description = isset($_POST["Description"]) ? $_POST["Description"] : "";
+        $Link = isset($_POST["Link"]) ? strtolower($_POST["Link"]) : "";
+        $Name = isset($_POST["Name"]) ? $_POST["Name"] : "";
+        $Position = isset($_POST["Position"]) ? $_POST["Position"] : "";
+        $Location = isset($_POST["Location"]) ? $_POST["Location"] : "";
 
         if (!isset($Username) || empty($Username))
-            $OldUsername = true;
+            JSON(["Message" => 1]);
 
         if (strlen($Username) <= 2)
-            $OldUsername = true;
+            JSON(["Message" => 2]);
 
         if (strlen($Username) >= 33)
-            $OldUsername = true;
+            JSON(["Message" => 3]);
 
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
-            $OldUsername = true;
+            JSON(["Message" => 4]);
 
         if (!isset($Email) || empty($Email))
-            $OldEmail = true;
+            JSON(["Message" => 5]);
 
         if (!filter_var($Email, FILTER_VALIDATE_EMAIL))
-            $OldEmail = true;
+            JSON(["Message" => 6]);
 
         if (strlen($Email) >= 65)
-            $OldEmail = true;
+            JSON(["Message" => 7]);
 
-        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        if (strlen($Name) <= 2)
+            JSON(["Message" => 8]);
+
+        if (strlen($Name) >= 33)
+            JSON(["Message" => 9]);
+
+        if (strlen($Description) > 150)
+            JSON(["Message" => 10]);
+
         $ImageProfile = NULL;
         $ImageBackGround = NULL;
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $Account = $App->DB->Find('account', ['_id' => $OwnerID])->toArray();
 
         if (isset($_FILES['ImageProfile']))
         {
@@ -97,6 +110,7 @@
             if ($FileSize > 2097152)
                 break;
 
+            Upload::DeleteFile($Account[0]->ImageProfile);
             $Server = Upload::GetBestServer();
 
             $Channel = curl_init();
@@ -126,6 +140,7 @@
             if ($FileSize > 2097152)
                 break;
 
+            Upload::DeleteFile($Account[0]->ImageBackGround);
             $Server = Upload::GetBestServer();
 
             $Channel = curl_init();
@@ -139,38 +154,48 @@
             $ImageBackGround = $Server . $URL;
         }
 
-        $Account = $App->DB->Find('account', ['_id' => $OwnerID])->toArray();
-
-        if ($OldUsername && isset($Account[0]->Username))
-            $Username = $Account[0]->Username;
-
-        if ($OldEmail)
-            $Email = $Account[0]->Email;
-
         if ($ImageProfile == NULL && isset($Account[0]->ImageProfile))
             $ImageProfile = $Account[0]->ImageProfile;
 
         if ($ImageBackGround == NULL && isset($Account[0]->ImageBackGround))
             $ImageBackGround = $Account[0]->ImageBackGround;
 
-        $App->DB->Update('account', ['_id' => $OwnerID], ['$set' =>
-                                                         ['Username' => $Username,
-                                                          'Email' => $Email,
-                                                          'ImageProfile' => $ImageProfile,
-                                                          'ImageBackGround' => $ImageBackGround,
-                                                          'Description' => $Description,
-                                                          'Link' => $Link]]);
+        $App->DB->Update('account', ['_id' => $OwnerID], ['$set' => ['Username'        => $Username,
+                                                                     'Description'     => $Description,
+                                                                     'Link'            => $Link,
+                                                                     'Name'            => $Name,
+                                                                     'Email'           => $Email,
+                                                                     'Position'        => $Position,
+                                                                     'Location'        => $Location,
+                                                                     'ImageProfile'    => $ImageProfile,
+                                                                     'ImageBackGround' => $ImageBackGround);
 
         JSON(["Message" => 1000]);
     }
 
-    function ActivityProfileEditDeleteProfile($App)
+    function RemoveProfileImage($App)
     {
-        
+        $ID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+
+        $Account = $App->DB->Find('account', ['_id' => $ID])->toArray();
+
+        Upload::DeleteFile($Account[0]->ImageProfile);
+
+        $App->DB->Update('account', ['_id' => $ID], ['$set' => ['ImageProfile' => ""]]);
+
+        JSON(["Message" => 1000]);
     }
 
-    function ActivityProfileEditDeleteBackGround($App)
+    function RemoveProfileBackGround($App)
     {
-        
+        $ID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+
+        $Account = $App->DB->Find('account', ['_id' => $ID])->toArray();
+
+        Upload::DeleteFile($Account[0]->ImageBackGround);
+
+        $App->DB->Update('account', ['_id' => $ID], ['$set' => ['ImageBackGround' => ""]]);
+
+        JSON(["Message" => 1000]);
     }
 ?>
