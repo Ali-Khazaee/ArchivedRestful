@@ -6,8 +6,8 @@
         $Time = isset($_POST["Time"]) ? strtolower($_POST["Time"]) : 86400;
         $Time = time() - $Time;
 
-        $Online2 = $App->DB->Command(["count" => "account", "query" => ['LastOnline' => ['$gt' => (int) $Time]]])->toArray()[0]->n;
+        $Online = $App->DB->Command(["count" => "account", "query" => ['LastOnline' => ['$gt' => (int) $Time]]])->toArray()[0]->n;
 
-        JSON(["Message" => 1000, "Count" => $Online2]);
+        JSON(["Message" => 1000, "Count" => $Online]);
     }
 ?>

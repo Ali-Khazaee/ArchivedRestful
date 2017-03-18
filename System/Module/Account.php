@@ -1,7 +1,7 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
-    function ActivityWelcomeUsernameFree($App)
+    function UsernameIsAvailable($App)
     {
         $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : NULL;
 
@@ -17,7 +17,7 @@
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
             JSON(["Message" => 4]);
 
-        $App->RateLimit->Call('ActivityWelcomeUsernameFreeQuery.1.2000');
+        $App->RateLimit->Call('UsernameIsAvailableQuery.1.2000');
 
         if (empty($App->DB->Find('account', ['Username' => $Username])->toArray()))
             JSON(["Message" => 1000]);
@@ -25,7 +25,7 @@
         JSON(["Message" => 5]);
     }
 
-    function ActivityWelcomeEmailSign($App)
+    function SignUp($App)
     {
         $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : NULL;
         $Password = isset($_POST["Password"]) ? $_POST["Password"] : NULL;
@@ -62,7 +62,7 @@
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
             JSON(["Message" => 10]);
 
-        $App->RateLimit->Call('ActivityWelcomeEmailSignQuery.1.2000');
+        $App->RateLimit->Call('SignUpQuery.1.2000');
 
         if (!empty($App->DB->Find('account', ['Username' => $Username])->toArray()))
             JSON(["Message" => 11]);
@@ -75,7 +75,7 @@
         else
             $Session .= " - " . $_SERVER['REMOTE_ADDR'];
 
-        $App->RateLimit->Call('ActivityWelcomeEmailSignQueryCreated.1.60000');
+        $App->RateLimit->Call('SignUpCreated.1.60000');
 
         $Time = time();
 
@@ -88,7 +88,7 @@
         JSON(["Message" => 1000, "Token" => $Token, "AccountID" => $ID]);
     }
 
-    function ActivityWelcomeSignIn($App)
+    function SignIn($App)
     {
         $EmailOrUsername = isset($_POST["EmailOrUsername"]) ? strtolower($_POST["EmailOrUsername"]) : NULL;
         $Password = isset($_POST["Password"]) ? $_POST["Password"] : NULL;
@@ -116,7 +116,7 @@
             if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $EmailOrUsername))
                 JSON(["Message" => 7]);
 
-        $App->RateLimit->Call('ActivityWelcomeSignInQuery.1.2000');
+        $App->RateLimit->Call('SignInQuery.1.2000');
 
         if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
             $Account = $App->DB->Find('account', ['Username' => $EmailOrUsername])->toArray();
@@ -142,7 +142,7 @@
         JSON(["Message" => 1000, "Token" => $Token, "AccountID" => $ID]);
     }
 
-    function ActivityWelcomeReset($App)
+    function ResetPassword($App)
     {
         $EmailOrUsername = isset($_POST["EmailOrUsername"]) ? strtolower($_POST["EmailOrUsername"]) : NULL;
 
@@ -159,7 +159,7 @@
             if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $EmailOrUsername))
                 JSON(["Message" => 4]);
 
-        $App->RateLimit->Call('ActivityWelcomeResetQuery.1.2000');
+        $App->RateLimit->Call('ResetPasswordQuery.1.2000');
 
         if (filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
             $Account = $App->DB->Find('account', ['Email' => $EmailOrUsername])->toArray();
@@ -172,7 +172,7 @@
         $RandomString = '';
         $Characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-        $App->RateLimit->Call('ActivityWelcomeResetDone.1.300000');
+        $App->RateLimit->Call('ResetPasswordDone.1.300000');
 
         for ($I = 0; $I < 15; $I++) { $RandomString .= $Characters[rand(0, 61)]; }
 
@@ -185,7 +185,7 @@
         JSON(["Message" => 1000]);
     }
 
-    function ActivityWelcomeSignInGoogle($App)
+    function SignInGoogle($App)
     {
         $Token = isset($_POST["Token"]) ? $_POST["Token"] : NULL;
         $Session = isset($_POST["Session"]) ? $_POST["Session"] : NULL;
@@ -213,12 +213,12 @@
             $Session .= " - " . $_SERVER['REMOTE_ADDR'];
 
         $GoogleID = $PayLoad['sub'];
-        $App->RateLimit->Call('ActivityWelcomeSignInGoogleQuery.1.2000');
+        $App->RateLimit->Call('SignInGoogleQuery.1.2000');
         $Account = $App->DB->Find('account', ['GoogleID' => $GoogleID])->toArray();
 
         if (empty($Account))
         {
-            $App->RateLimit->Call('ActivityWelcomeSignInGoogleCreated.1.60000');
+            $App->RateLimit->Call('SignInGoogleCreated.1.60000');
 
             $ID = $App->DB->Insert('account', ['GoogleID' => $GoogleID, 'Email' => $PayLoad['email'], 'CreatedTime' => time()])->__toString();
 
