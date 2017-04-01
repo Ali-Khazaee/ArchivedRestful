@@ -25,39 +25,53 @@
                                     "Link"        => isset($Account[0]->Link) ? $Account[0]->Link : "",
                                     "Name"        => isset($Account[0]->Name) ? $Account[0]->Name : "",
                                     "BackGround"  => isset($Account[0]->ImageBackGround) ? $Account[0]->ImageBackGround : "",
-                                    "Profile"     => isset($Account[0]->ImageProfile) ? $Account[0]->ImageProfile : ""
-                                    "Post"        => isset($Account[0]->Post) ? $Account[0]->Post : ""
-                                    "Follower"    => isset($Account[0]->Follower) ? $Account[0]->Follower : ""
-                                    "Following"   => isset($Account[0]->Following) ? $Account[0]->Following : ""));
+                                    "Profile"     => isset($Account[0]->ImageProfile) ? $Account[0]->ImageProfile : "",
+                                    "Post"        => $Post,
+                                    "Follower"    => $Follower,
+                                    "Following"   => $Following));
 
         JSON(["Message" => 1000, "Result" => $Result]);
     }
 
     function GetProfileEdit($App)
     {
+        $Position = "";
         $Account = $App->DB->Find('account', ['_id' => new MongoDB\BSON\ObjectID($App->Auth->ID)])->toArray();
 
-        $Result = array("Username"    => isset($Account[0]->Username) ? $Account[0]->Username : "",
-                        "Description" => isset($Account[0]->Description) ? $Account[0]->Description : "",
-                        "Link"        => isset($Account[0]->Link) ? $Account[0]->Link : "",
-                        "Name"        => isset($Account[0]->Name) ? $Account[0]->Name : "",
-                        "Position"    => isset($Account[0]->Position) ? $Account[0]->Position : "",
-                        "Location"    => isset($Account[0]->Location) ? $Account[0]->Location : "",
-                        "Email"       => isset($Account[0]->Email) ? $Account[0]->Email : "",
-                        "BackGround"  => isset($Account[0]->ImageBackGround) ? $Account[0]->ImageBackGround : "",
-                        "Profile"     => isset($Account[0]->ImageProfile) ? $Account[0]->ImageProfile : "");
+        if (isset($Account[0]->Lat) && isset($Account[0]->Lon))
+            $Position = $Account[0]->Lat . ":" . $Account[0]->Lon;
 
-        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
+        $Result = json_encode(array("Username"    => isset($Account[0]->Username) ? $Account[0]->Username : "",
+                                    "Description" => isset($Account[0]->Description) ? $Account[0]->Description : "",
+                                    "Link"        => isset($Account[0]->Link) ? $Account[0]->Link : "",
+                                    "Name"        => isset($Account[0]->Name) ? $Account[0]->Name : "",
+                                    "Position"    => $Position,
+                                    "Location"    => isset($Account[0]->Location) ? $Account[0]->Location : "",
+                                    "Email"       => isset($Account[0]->Email) ? $Account[0]->Email : "",
+                                    "BackGround"  => isset($Account[0]->ImageBackGround) ? $Account[0]->ImageBackGround : "",
+                                    "Profile"     => isset($Account[0]->ImageProfile) ? $Account[0]->ImageProfile : ""));
+
+        JSON(["Message" => 1000, "Result" => $Result]);
     }
 
     function SetProfileEdit($App)
     {
         $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : "";
+        $Name = isset($_POST["Name"]) ? $_POST["Name"] : "";
         $Description = isset($_POST["Description"]) ? $_POST["Description"] : "";
         $Link = isset($_POST["Link"]) ? strtolower($_POST["Link"]) : "";
-        $Name = isset($_POST["Name"]) ? $_POST["Name"] : "";
-        $Position = isset($_POST["Position"]) ? $_POST["Position"] : "";
         $Location = isset($_POST["Location"]) ? $_POST["Location"] : "";
+        $Email = isset($_POST["Email"]) ? $_POST["Email"] : "";
+
+        $Lat = "";
+        $Lon = "";
+
+        if (isset($_POST["Position"]))
+        {
+            $Pos = explode(":", $_POST["Position"]);
+            $Lat = $Pos[0];
+            $Lon = $Pos[1];
+        }
 
         if (!isset($Username) || empty($Username))
             JSON(["Message" => 1]);
@@ -89,8 +103,8 @@
         if (strlen($Description) > 150)
             JSON(["Message" => 10]);
 
-        $ImageProfile = NULL;
-        $ImageBackGround = NULL;
+        $ImageProfile = "";
+        $ImageBackGround = "";
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
         $Account = $App->DB->Find('account', ['_id' => $OwnerID])->toArray();
 
@@ -154,10 +168,10 @@
             $ImageBackGround = $Server . $URL;
         }
 
-        if ($ImageProfile == NULL && isset($Account[0]->ImageProfile))
+        if ($ImageProfile == "" && isset($Account[0]->ImageProfile))
             $ImageProfile = $Account[0]->ImageProfile;
 
-        if ($ImageBackGround == NULL && isset($Account[0]->ImageBackGround))
+        if ($ImageBackGround == "" && isset($Account[0]->ImageBackGround))
             $ImageBackGround = $Account[0]->ImageBackGround;
 
         $App->DB->Update('account', ['_id' => $OwnerID], ['$set' => ['Username'        => $Username,
@@ -165,10 +179,11 @@
                                                                      'Link'            => $Link,
                                                                      'Name'            => $Name,
                                                                      'Email'           => $Email,
-                                                                     'Position'        => $Position,
+                                                                     'Lat'             => $Lat,
+                                                                     'Lon'             => $Lon,
                                                                      'Location'        => $Location,
                                                                      'ImageProfile'    => $ImageProfile,
-                                                                     'ImageBackGround' => $ImageBackGround);
+                                                                     'ImageBackGround' => $ImageBackGround]]);
 
         JSON(["Message" => 1000]);
     }

@@ -178,7 +178,7 @@
 
         $RandomString .= str_rot13(strrev($Account[0]->Username));
 
-        $App->DB->Insert('recovery_password', ['Username' => $Account[0]->Username, 'Email' => $Account[0]->Email, "Key" => $RandomString, 'CreatedTime' => time()])->__toString();
+        $App->DB->Insert('recovery_password', ['ID' => $Account[0]->_id, 'Username' => $Account[0]->Username, 'Email' => $Account[0]->Email, "Key" => $RandomString, 'CreatedTime' => time()])->__toString();
 
         # SendMail
 
