@@ -1,48 +1,6 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
-    
-
-    function ActivityWorldLike($App)
-    {
-        $PostID = $_POST["PostID"];
-
-        if (!isset($PostID) || empty($PostID))
-            JSON(["Message" => 1]);
-
-        $Query = ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "PostID" => new MongoDB\BSON\ObjectID($PostID)]]];
-        $Post = $App->DB->Find('post_world_like', $Query)->toArray();
-
-        if (isset($Post[0]))
-            $App->DB->Remove('post_world_like', $Query, ['limit' => 1]);
-        else
-            $App->DB->Insert('post_world_like', ["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "PostID" => new MongoDB\BSON\ObjectID($PostID), "Time" => time()]);
-
-        JSON(["Message" => 1000]); 
-    }
-
-    function ActivityWorldLikeList($App)
-    {
-        $LikeArray = array();
-        $PostID = $_POST["PostID"];
-        $SkipCount = isset($_POST["Skip"]) ? $_POST["Skip"] : 0;
-
-        if (!isset($PostID) || empty($PostID))
-            JSON(["Message" => 1]);
-
-        $LikeList = $App->DB->Find('post_world_like', ['PostID' => new MongoDB\BSON\ObjectID($PostID)], ['skip' => $SkipCount, 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
-
-        foreach ($LikeList as $Like)
-        {
-            $Username = $App->DB->Find('account', ['_id' => new MongoDB\BSON\ObjectID($Like->OwnerID)])->toArray();
-
-            if (isset($Username[0]))
-                array_push($LikeArray, array("OwnerID" => $Like->OwnerID->__toString(), "Username" => $Username[0]->Username, "Time" => $Like->Time));
-        }
-
-        JSON(["Message" => 1000, "Result" => json_encode($LikeArray)]);
-    }
-
     function ActivityWorldCommentSend($App)
     {
         $PostID = $_POST["PostID"];

@@ -119,28 +119,28 @@
 
             if (isset($Username[0]))
             {
-                $Like = $App->DB->Find('moment_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Mom->_id]]])->toArray();
+                $Like = $App->DB->Find('like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Mom->_id]]])->toArray();
 
                 if (isset($Like[0]))
                     $Like = true;
                 else
                     $Like = false;
 
-                $BookMark = $App->DB->Find('moment_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Mom->_id]]])->toArray();
+                $BookMark = $App->DB->Find('bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Mom->_id]]])->toArray();
 
                 if (isset($BookMark[0]))
                     $BookMark = true;
                 else
                     $BookMark = false;
 
-                $LikeCount = $App->DB->Find('moment_like', ["PostID" => $Mom->_id])->toArray();
+                $LikeCount = $App->DB->Find('like', ["PostID" => $Mom->_id])->toArray();
 
                 if (isset($LikeCount[0]))
                     $LikeCount = count($LikeCount);
                 else
                     $LikeCount = 0;
 
-                $CommentCount = $App->DB->Find('moment_comment', ["PostID" => $Mom->_id])->toArray();
+                $CommentCount = $App->DB->Find('comment', ["PostID" => $Mom->_id])->toArray();
 
                 if (isset($CommentCount[0]))
                     $CommentCount = count($CommentCount);

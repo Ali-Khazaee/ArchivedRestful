@@ -23,6 +23,9 @@
             $Router->Call('MomentList',  function() { MomentList($this);  }, true, 'MomentList.2.3000');
             $Router->Call('MomentWrite', function() { MomentWrite($this); }, true, 'MomentWrite.2.3000');
 
+            $Router->Call('LikeList', function() { LikeList($this); }, true, 'LikeList.2.3000');
+            $Router->Call('LikePost', function() { LikePost($this); }, true, 'LikePost.2.3000');
+
             $Router->Call('GetProfile',     function() { GetProfile($this);     }, true, 'GetProfile.5.1000');
             $Router->Call('GetProfileEdit', function() { GetProfileEdit($this); }, true, 'GetProfileEdit.5.1000');
             $Router->Call('SetProfileEdit', function() { SetProfileEdit($this); }, true, 'SetProfileEdit.5.1000');
