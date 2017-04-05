@@ -144,12 +144,13 @@
                                           "Time"         => $Mom->Time,
                                           "Message"      => isset($Mom->Message) ? $Mom->Message : "",
                                           "Data"         => isset($Mom->Data) ? $Mom->Data : "",
-                                          "Type"         => isset($Mom->Type ? $Mom->Type : 0,
+                                          "Type"         => isset($Mom->Type) ? $Mom->Type : 0,
                                           "Comment"      => isset($Mom->Comment) ? $Mom->Comment : false,
                                           "CommentCount" => $CommentCount,
                                           "Like"         => $Like,
                                           "LikeCount"    => $LikeCount,
-                                          "BookMark"     => $BookMark));
+                                          "BookMark"     => $BookMark,
+                                          "Avatar"       => isset($Account[0]->Avatar) ? $Account[0]->Avatar : "");
             }
         }
 

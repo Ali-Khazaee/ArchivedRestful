@@ -139,7 +139,7 @@
 
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID]);
+        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Avatar" => $Account[0]->Avatar]);
     }
 
     function ResetPassword($App)
@@ -223,8 +223,9 @@
             $Token = $App->Auth->CreateToken(["ID" => $ID]);
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
+            $Account = $App->DB->Find('account', ['_id' => new MongoDB\BSON\ObjectID($ID)])->toArray();
 
-            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID]);
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username]);
         }
         else
         {
@@ -234,7 +235,7 @@
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID]);
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Avatar" => $Account[0]->Avatar]);
         }
     }
 ?>
