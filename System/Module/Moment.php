@@ -98,7 +98,7 @@
         if ($Category == NULL || $Category > 17 || $Category < 0)
             $Category = 0;
 
-        $App->DB->Insert('post', ['OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Type' => $Type, 'Data' => $Data, 'Message' => $Message, 'Category' => $Category, 'Time' => time()]);
+        $App->DB->Insert('moment', ['OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Type' => $Type, 'Data' => $Data, 'Message' => $Message, 'Category' => $Category, 'Time' => time()]);
     }
 
     function MomentList($App)
@@ -109,15 +109,15 @@
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
 
         if ($Time)
-            $MomentList = $App->DB->Find('post', ['Time' => ['$gt' => (int) $Time]], ['skip' => $Skip, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+            $MomentList = $App->DB->Find('moment', ['Time' => ['$gt' => (int) $Time]], ['skip' => $Skip, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
         else
-            $MomentList = $App->DB->Find('post', [], ['skip' => $Skip, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+            $MomentList = $App->DB->Find('moment', [], ['skip' => $Skip, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
 
         foreach ($MomentList as $Mom)
         {
-            $Username = $App->DB->Find('account', ['_id' => $OwnerID])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Mom->OwnerID])->toArray();
 
-            if (isset($Username[0]))
+            if (isset($Account[0]))
             {
                 $Like = $App->DB->Find('like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Mom->_id]]])->toArray();
 
@@ -149,7 +149,7 @@
 
                 array_push($Moment, array("PostID"       => $Mom->_id->__toString(),
                                           "OwnerID"      => $Mom->OwnerID->__toString(),
-                                          "Username"     => $Username[0]->Username,
+                                          "Username"     => $Account[0]->Username,
                                           "Time"         => $Mom->Time,
                                           "Message"      => isset($Mom->Message) ? $Mom->Message : "",
                                           "Data"         => isset($Mom->Data) ? $Mom->Data : "",
