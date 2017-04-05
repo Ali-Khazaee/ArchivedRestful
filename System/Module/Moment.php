@@ -3,15 +3,15 @@
 
     function MomentWrite($App)
     {
-        $Message  = isset($_POST["Message"])  ? $_POST["Message"]  : NULL;
-        $Category = isset($_POST["Category"]) ? $_POST["Category"] : NULL;
-        $Type     = isset($_POST["Type"])     ? $_POST["Type"]     : NULL;
-        $Link     = isset($_POST["Link"])     ? $_POST["Link"]     : NULL;
+        $Message  = isset($_POST["Message"])  ? $_POST["Message"]  : "";
+        $Category = isset($_POST["Category"]) ? $_POST["Category"] : "";
+        $Type     = isset($_POST["Type"])     ? $_POST["Type"]     : "";
+        $Link     = isset($_POST["Link"])     ? $_POST["Link"]     : "";
 
-        if ($Type == 0 && $Message <= 19)
+        if ($Type == 0 && $Message < 20)
             JSON(["Message" => 1]);
 
-        if (strlen($Message) >= 150)
+        if (strlen($Message) > 150)
             $Message = substr($Message, 0, 150);
 
         $Data = array();
@@ -95,8 +95,8 @@
             array_push($Data, $Link);
         }
 
-        if ($Category == NULL || $Category > 17 || $Category < 0)
-            $Category = 0;
+        if (empty($Category) || $Category > 17 || $Category < 0)
+            $Category = 17;
 
         $App->DB->Insert('moment', ['OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Type' => $Type, 'Data' => $Data, 'Message' => $Message, 'Category' => $Category, 'Time' => time()]);
     }
@@ -105,13 +105,12 @@
     {
         $Moment  = array();
         $Time    = isset($_POST["Time"]) ? $_POST["Time"] : 0;
-        $Skip    = isset($_POST["Skip"]) ? $_POST["Skip"] : 0;
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
 
         if ($Time)
-            $MomentList = $App->DB->Find('moment', ['Time' => ['$gt' => (int) $Time]], ['skip' => $Skip, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+            $MomentList = $App->DB->Find('moment', ['Time' => ['$gt' => (int) $Time]], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
         else
-            $MomentList = $App->DB->Find('moment', [], ['skip' => $Skip, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+            $MomentList = $App->DB->Find('moment', [], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
 
         foreach ($MomentList as $Mom)
         {
@@ -119,32 +118,24 @@
 
             if (isset($Account[0]))
             {
-                $Like = $App->DB->Find('like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Mom->_id]]])->toArray();
-
-                if (isset($Like[0]))
+                if (isset($App->DB->Find('like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Mom->_id]]])->toArray()[0]))
                     $Like = true;
                 else
                     $Like = false;
 
-                $BookMark = $App->DB->Find('bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Mom->_id]]])->toArray();
-
-                if (isset($BookMark[0]))
+                if (isset($App->DB->Find('bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Mom->_id]]])->toArray()[0]))
                     $BookMark = true;
                 else
                     $BookMark = false;
+                
+                $LikeCount = $App->DB->Command(["count" => "like", "query" => ['PostID' => $Mom->_id]])->toArray()[0]->n;
 
-                $LikeCount = $App->DB->Find('like', ["PostID" => $Mom->_id])->toArray();
-
-                if (isset($LikeCount[0]))
-                    $LikeCount = count($LikeCount);
-                else
+                if (!isset($LikeCount) || empty($LikeCount))
                     $LikeCount = 0;
 
-                $CommentCount = $App->DB->Find('comment', ["PostID" => $Mom->_id])->toArray();
+                $CommentCount = $App->DB->Command(["count" => "comment", "query" => ['PostID' => $Mom->_id]])->toArray()[0]->n;
 
-                if (isset($CommentCount[0]))
-                    $CommentCount = count($CommentCount);
-                else
+                if (!isset($CommentCount) || empty($CommentCount))
                     $CommentCount = 0;
 
                 array_push($Moment, array("PostID"       => $Mom->_id->__toString(),
@@ -153,7 +144,7 @@
                                           "Time"         => $Mom->Time,
                                           "Message"      => isset($Mom->Message) ? $Mom->Message : "",
                                           "Data"         => isset($Mom->Data) ? $Mom->Data : "",
-                                          "Type"         => isset($Mom->Type) ? $Mom->Type : 0,
+                                          "Type"         => isset($Mom->Type ? $Mom->Type : 0,
                                           "Comment"      => isset($Mom->Comment) ? $Mom->Comment : false,
                                           "CommentCount" => $CommentCount,
                                           "Like"         => $Like,

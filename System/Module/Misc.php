@@ -8,16 +8,14 @@
         
         $List = array();
         $Skip = isset($_POST["Skip"]) ? $_POST["Skip"] : 0;
-        $PostID = new MongoDB\BSON\ObjectID($_POST["PostID"]);
-
-        $Likes = $App->DB->Find('like', ['PostID' => $PostID], ['skip' => $Skip, 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
+        $Likes = $App->DB->Find('like', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"])], ['skip' => $Skip, 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
 
         foreach ($Likes as $Like)
         {
             $Username = $App->DB->Find('account', ['_id' => $Like->OwnerID])->toArray();
 
             if (isset($Username[0]))
-                array_push($List, array("OwnerID" => $Like->OwnerID->__toString(), "Username" => $Username[0]->Username, "URL" => (isset($Username[0]->Profile) ? $Username[0]->Profile : ""), "Time" => $Like->Time));
+                array_push($List, array("OwnerID" => $Like->OwnerID->__toString(), "Username" => $Username[0]->Username, "Avatar" => (isset($Username[0]->Avatar) ? $Username[0]->Avatar : ""), "Time" => $Like->Time));
         }
 
         JSON(["Message" => 1000, "Result" => json_encode($List)]);
@@ -32,9 +30,7 @@
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
         $Query = ['$and' => [["OwnerID" => $OwnerID, "PostID" => $PostID]]];
 
-        $Post = $App->DB->Find('like', $Query)->toArray();
-
-        if (isset($Post[0]))
+        if (isset($App->DB->Find('like', $Query)->toArray()[0]))
             $App->DB->Remove('like', $Query, ['limit' => 1]);
         else
             $App->DB->Insert('like', ["OwnerID" => $OwnerID, "PostID" => $PostID, "Time" => time()]);
@@ -57,18 +53,17 @@
 
     function CommentList($App)
     {
-        $Comment = array();
-        $PostID = $_POST["PostID"];
-        $Skip = isset($_POST["Skip"]) ? $_POST["Skip"] : 0;
-        $CommentTime = isset($_POST["CommentTime"]) ? $_POST["CommentTime"] : 0;
-
-        if (!isset($PostID) || empty($PostID))
+        if (!isset($_POST["PostID"]) || empty($_POST["PostID"]))
             JSON(["Message" => 1]);
 
+        $Comment     = array();
+        $Skip        = isset($_POST["Skip"]) ? $_POST["Skip"] : 0;
+        $CommentTime = isset($_POST["CommentTime"]) ? $_POST["CommentTime"] : 0;
+
         if ($CommentTime)
-            $CommentList = $App->DB->Find('comment', ['PostID' => new MongoDB\BSON\ObjectID($PostID), 'Time' => ['$gt' => (int) $CommentTime]], ['limit' => 8, 'sort' => ['Time' => 1]])->toArray();
+            $CommentList = $App->DB->Find('comment', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"]), 'Time' => ['$gt' => (int) $CommentTime]], ['limit' => 8, 'sort' => ['Time' => 1]])->toArray();
         else
-            $CommentList = $App->DB->Find('comment', ['PostID' => new MongoDB\BSON\ObjectID($PostID)], ['skip' => $Skip, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+            $CommentList = $App->DB->Find('comment', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"])], ['skip' => $Skip, 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
 
         foreach ($CommentList as $Com)
         {
@@ -83,14 +78,12 @@
                 else
                     $Like = false;
 
-                $LikeCount = $App->DB->Find('like', ["CommentID" => $Com->_id])->toArray();
+                $LikeCount = $App->DB->Command(["count" => "like", "query" => ['CommentID' => $Com->_id]])->toArray()[0]->n;
 
-                if (isset($LikeCount[0]))
-                    $LikeCount = count($LikeCount);
-                else
+                if (!isset($LikeCount) || empty($LikeCount))
                     $LikeCount = 0;
 
-                array_push($Comment, array("CommentID" => $Com->_id->__toString(), "OwnerID" => $Com->OwnerID->__toString(), "Username" => $Username[0]->Username, "Time" => $Com->Time, "Message" => $Com->Message, "LikeCount" => $LikeCount, "Like" => $Like, "Profile" => (isset($Username[0]->Profile) ? $Username[0]->Profile : "")));
+                array_push($Comment, array("CommentID" => $Com->_id->__toString(), "OwnerID" => $Com->OwnerID->__toString(), "Username" => $Username[0]->Username, "Time" => $Com->Time, "Message" => $Com->Message, "LikeCount" => $LikeCount, "Like" => $Like, "Avatar" => (isset($Username[0]->Avatar) ? $Username[0]->Avatar : "")));
             }
         }
 
@@ -129,14 +122,17 @@
             JSON(["Message" => 1000]); 
         }
 
-        $PostOnwer = $App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "PostID" => new MongoDB\BSON\ObjectID($_POST["PostID"])]]])->toArray();
-
-        if (isset($PostOnwer[0]))
+        if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "PostID" => new MongoDB\BSON\ObjectID($_POST["PostID"])]]])->toArray()[0]))
         {
             $App->DB->Remove('comment', $Query);
             JSON(["Message" => 1000]); 
         }
 
-        JSON(["Message" => 999]); 
+        JSON(["Message" => 3]); 
+    }
+
+    function LastOnline($App)
+    {
+        $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($App->Auth->ID)], ['$set' => ['LastOnline' => time()]]);
     }
 ?>

@@ -3,15 +3,15 @@
 
     function UsernameIsAvailable($App)
     {
-        $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : NULL;
+        $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : "";
 
         if (!isset($Username) || empty($Username))
             JSON(["Message" => 1]);
 
-        if (strlen($Username) <= 2)
+        if (strlen($Username) < 3)
             JSON(["Message" => 2]);
 
-        if (strlen($Username) >= 33)
+        if (strlen($Username) > 32)
             JSON(["Message" => 3]);
 
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
@@ -27,10 +27,10 @@
 
     function SignUp($App)
     {
-        $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : NULL;
-        $Password = isset($_POST["Password"]) ? $_POST["Password"] : NULL;
-        $Email    = isset($_POST["Email"]) ? strtolower($_POST["Email"]) : NULL;
-        $Session  = isset($_POST["Session"]) ? $_POST["Session"] : NULL;
+        $Username = isset($_POST["Username"]) ? strtolower($_POST["Username"]) : "";
+        $Password = isset($_POST["Password"]) ? $_POST["Password"] : "";
+        $Email    = isset($_POST["Email"])    ? strtolower($_POST["Email"]) : "";
+        $Session  = isset($_POST["Session"])  ? $_POST["Session"] : "";
 
         if (!isset($Username) || empty($Username))
             JSON(["Message" => 1]);
@@ -44,19 +44,19 @@
         if (!filter_var($Email, FILTER_VALIDATE_EMAIL))
             JSON(["Message" => 4]);
 
-        if (strlen($Username) <= 2)
+        if (strlen($Username) < 3)
             JSON(["Message" => 5]);
 
-        if (strlen($Username) >= 33)
+        if (strlen($Username) > 32)
             JSON(["Message" => 6]);
 
-        if (strlen($Password) <= 4)
+        if (strlen($Password) < 6)
             JSON(["Message" => 7]);
 
-        if (strlen($Password) >= 33)
+        if (strlen($Password) > 32)
             JSON(["Message" => 8]);
 
-        if (strlen($Email) >= 65)
+        if (strlen($Email) > 64)
             JSON(["Message" => 9]);
 
         if (!preg_match("/^(?![^A-Za-z])(?!.*\.\.)[A-Za-z0-9_.]+(?<![^A-Za-z])$/", $Username))
@@ -79,20 +79,20 @@
 
         $Time = time();
 
-        $ID = $App->DB->Insert('account', ['Username' => $Username, 'Password' => password_hash($Password, PASSWORD_BCRYPT), 'Email' => $Email, 'CreatedTime' => $Time, 'LastOnline' => $Time])->__toString();
+        $ID = $App->DB->Insert('account', ['Username' => $Username, 'Password' => password_hash($Password, PASSWORD_BCRYPT), 'Email' => $Email, 'CreatedTime' => $Time, 'LastOnline' => $Time]);
 
-        $Token = $App->Auth->CreateToken(["ID" => $ID]);
+        $Token = $App->Auth->CreateToken(["ID" => $ID->__toString]);
 
-        $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => $Time]]]);
+        $App->DB->Update('account', ['_id' => $ID], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => $Time]]]);
 
-        JSON(["Message" => 1000, "Token" => $Token, "AccountID" => $ID]);
+        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID]);
     }
 
     function SignIn($App)
     {
-        $EmailOrUsername = isset($_POST["EmailOrUsername"]) ? strtolower($_POST["EmailOrUsername"]) : NULL;
-        $Password = isset($_POST["Password"]) ? $_POST["Password"] : NULL;
-        $Session = isset($_POST["Session"]) ? $_POST["Session"] : NULL;
+        $EmailOrUsername = isset($_POST["EmailOrUsername"]) ? strtolower($_POST["EmailOrUsername"]) : "";
+        $Password        = isset($_POST["Password"])        ? $_POST["Password"] : "";
+        $Session         = isset($_POST["Session"])         ? $_POST["Session"] : "";
 
         if (!isset($EmailOrUsername) || empty($EmailOrUsername))
             JSON(["Message" => 1]);
@@ -100,16 +100,16 @@
         if (!isset($Password) || empty($Password))
             JSON(["Message" => 2]);
 
-        if (strlen($EmailOrUsername) <= 2)
+        if (strlen($EmailOrUsername) < 3)
             JSON(["Message" => 3]);
 
-        if (strlen($EmailOrUsername) >= 65)
+        if (strlen($EmailOrUsername) > 64)
             JSON(["Message" => 4]);
 
-        if (strlen($Password) <= 4)
+        if (strlen($Password) < 6)
             JSON(["Message" => 5]);
 
-        if (strlen($Password) >= 33)
+        if (strlen($Password) > 32)
             JSON(["Message" => 6]);
 
         if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
@@ -139,20 +139,20 @@
 
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        JSON(["Message" => 1000, "Token" => $Token, "AccountID" => $ID]);
+        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID]);
     }
 
     function ResetPassword($App)
     {
-        $EmailOrUsername = isset($_POST["EmailOrUsername"]) ? strtolower($_POST["EmailOrUsername"]) : NULL;
+        $EmailOrUsername = isset($_POST["EmailOrUsername"]) ? strtolower($_POST["EmailOrUsername"]) : "";
 
         if (!isset($EmailOrUsername) || empty($EmailOrUsername))
             JSON(["Message" => 1]);
 
-        if (strlen($EmailOrUsername) <= 2)
+        if (strlen($EmailOrUsername) < 3)
             JSON(["Message" => 2]);
 
-        if (strlen($EmailOrUsername) >= 65)
+        if (strlen($EmailOrUsername) > 64)
             JSON(["Message" => 3]);
 
         if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
@@ -170,15 +170,14 @@
             JSON(["Message" => 5]);
 
         $RandomString = '';
-        $Characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
         $App->RateLimit->Call('ResetPasswordDone.1.300000');
+        $Characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         for ($I = 0; $I < 15; $I++) { $RandomString .= $Characters[rand(0, 61)]; }
 
         $RandomString .= str_rot13(strrev($Account[0]->Username));
 
-        $App->DB->Insert('recovery_password', ['ID' => $Account[0]->_id, 'Username' => $Account[0]->Username, 'Email' => $Account[0]->Email, "Key" => $RandomString, 'CreatedTime' => time()])->__toString();
+        $App->DB->Insert('recovery_password', ['ID' => $Account[0]->_id, 'Username' => $Account[0]->Username, 'Email' => $Account[0]->Email, "Key" => $RandomString, 'CreatedTime' => time()]);
 
         # SendMail
 
@@ -187,8 +186,8 @@
 
     function SignInGoogle($App)
     {
-        $Token = isset($_POST["Token"]) ? $_POST["Token"] : NULL;
-        $Session = isset($_POST["Session"]) ? $_POST["Session"] : NULL;
+        $Token   = isset($_POST["Token"])   ? $_POST["Token"] : "";
+        $Session = isset($_POST["Session"]) ? $_POST["Session"] : "";
 
         if (!isset($Token) || empty($Token))
             JSON(["Message" => 1]);
@@ -198,7 +197,7 @@
         $Client = new Google_Client();
         $PayLoad = $Client->verifyIdToken($Token);
 
-        if (!$PayLoad)
+        if (isset($PayLoad)
             JSON(["Message" => 2]);
 
         if ($PayLoad['iss'] != "accounts.google.com" && $PayLoad['iss'] != "https://accounts.google.com");
@@ -212,21 +211,20 @@
         else
             $Session .= " - " . $_SERVER['REMOTE_ADDR'];
 
-        $GoogleID = $PayLoad['sub'];
         $App->RateLimit->Call('SignInGoogleQuery.1.2000');
-        $Account = $App->DB->Find('account', ['GoogleID' => $GoogleID])->toArray();
+        $Account = $App->DB->Find('account', ['GoogleID' => $PayLoad['sub']])->toArray();
 
         if (empty($Account))
         {
             $App->RateLimit->Call('SignInGoogleCreated.1.60000');
 
-            $ID = $App->DB->Insert('account', ['GoogleID' => $GoogleID, 'Email' => $PayLoad['email'], 'CreatedTime' => time()])->__toString();
+            $ID = $App->DB->Insert('account', ['GoogleID' => $PayLoad['sub'], 'Username' => ("unknown" . time()), 'Email' => $PayLoad['email'], 'CreatedTime' => time()])->__toString();
 
             $Token = $App->Auth->CreateToken(["ID" => $ID]);
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-            JSON(["Message" => 1000, "Token" => $Token, "AccountID" => $ID]);
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID]);
         }
         else
         {
@@ -236,7 +234,7 @@
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-            JSON(["Message" => 1000, "Token" => $Token, "AccountID" => $ID]);
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID]);
         }
     }
 ?>
