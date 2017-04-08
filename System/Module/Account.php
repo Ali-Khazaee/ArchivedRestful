@@ -139,7 +139,7 @@
 
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Avatar" => $Account[0]->Avatar]);
+        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
     }
 
     function ResetPassword($App)
@@ -235,7 +235,7 @@
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Avatar" => $Account[0]->Avatar]);
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
         }
     }
 ?>
