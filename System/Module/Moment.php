@@ -150,7 +150,7 @@
                                           "Like"         => $Like,
                                           "LikeCount"    => $LikeCount,
                                           "BookMark"     => $BookMark,
-                                          "Avatar"       => isset($Account[0]->Avatar) ? $Account[0]->Avatar : "");
+                                          "Avatar"       => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")));
             }
         }
 

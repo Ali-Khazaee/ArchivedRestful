@@ -20,7 +20,7 @@
             $Router->Call('ResetPassword',       function() { ResetPassword($this);       }, false, 'ResetPassword.5.1000');
             $Router->Call('SignInGoogle',        function() { SignInGoogle($this);        }, false, 'SignInGoogle.5.1000');
 
-            $Router->Call('MomentList',   function() { MomentList($this);   }, true, 'MomentList.2.3000');
+            $Router->Call('MomentList',   function() { MomentList($this);   }, true, 'MomentList.5.2000');
             $Router->Call('MomentWrite',  function() { MomentWrite($this);  }, true, 'MomentWrite.2.3000');
             $Router->Call('MomentDelete', function() { MomentDelete($this); }, true, 'MomentDelete.2.3000');
 
