@@ -5,14 +5,14 @@
     {
         $Message  = isset($_POST["Message"])  ? $_POST["Message"]  : "";
         $Category = isset($_POST["Category"]) ? $_POST["Category"] : "";
-        $Type     = isset($_POST["Type"])     ? $_POST["Type"]     : "";
+        $Type     = isset($_POST["Type"])     ? $_POST["Type"]     : 0;
         $Link     = isset($_POST["Link"])     ? $_POST["Link"]     : "";
 
-        if ($Type == 0 && $Message < 20)
+        if ($Type == 0 && strlen($Message) < 20)
             JSON(["Message" => 1]);
 
         if (strlen($Message) > 150)
-            $Message = substr($Message, 0, 150);
+            $Message = mb_substr($Message, 0, 150);
 
         $Data = array();
 
@@ -95,7 +95,7 @@
             array_push($Data, $Link);
         }
 
-        if (empty($Category) || $Category > 17 || $Category < 0)
+        if (empty($Category) || $Category > 17 || $Category < 1)
             $Category = 17;
 
         $App->DB->Insert('moment', ['OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Type' => $Type, 'Data' => $Data, 'Message' => $Message, 'Category' => $Category, 'Time' => time()]);

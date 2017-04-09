@@ -84,7 +84,7 @@
 
         $Account = $App->DB->Find('account', ["_id" => $ID])->toArray();
 
-        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
+        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID->__toString(), "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
     }
 
     function SignIn($App)
@@ -136,7 +136,7 @@
         $ID = $Account[0]->_id->__toString();
         $Token = $App->Auth->CreateToken(["ID" => $ID]);
 
-        $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
+        $App->DB->Update('account', ['_id' => $Account[0]->_id], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
         JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
     }
@@ -217,14 +217,14 @@
         {
             $App->RateLimit->Call('SignInGoogleCreated.1.60000');
 
-            $ID = $App->DB->Insert('account', ['GoogleID' => $PayLoad['sub'], 'Username' => ("unknown" . time()), 'Email' => $PayLoad['email'], 'CreatedTime' => time()])->__toString();
+            $ID = $App->DB->Insert('account', ['GoogleID' => $PayLoad['sub'], 'Username' => ("unknown" . time()), 'Email' => $PayLoad['email'], 'CreatedTime' => time()]);
 
-            $Token = $App->Auth->CreateToken(["ID" => $ID]);
+            $Token = $App->Auth->CreateToken(["ID" => $ID->__toString()]);
 
-            $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
-            $Account = $App->DB->Find('account', ['_id' => new MongoDB\BSON\ObjectID($ID)])->toArray();
+            $App->DB->Update('account', ['_id' => $ID], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
+            $Account = $App->DB->Find('account', ['_id' => $ID])->toArray();
 
-            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username]);
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID->__toString(), "Username" => $Account[0]->Username]);
         }
         else
         {
