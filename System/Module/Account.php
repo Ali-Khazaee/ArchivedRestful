@@ -64,11 +64,8 @@
 
         $App->RateLimit->Call('SignUpQuery.1.2000');
 
-        if (!empty($App->DB->Find('account', ['Username' => $Username])->toArray()))
+        if (!empty($App->DB->Find('account', ['$or' => [["Username" => $Username, "Email" => $Email]]])->toArray()))
             JSON(["Message" => 11]);
-
-        if (!empty($App->DB->Find('account', ['Email' => $Email])->toArray()))
-            JSON(["Message" => 12]);
 
         if (!isset($Session) || empty($Session))
             $Session = "Unknown - " . $_SERVER['REMOTE_ADDR'];
@@ -81,11 +78,13 @@
 
         $ID = $App->DB->Insert('account', ['Username' => $Username, 'Password' => password_hash($Password, PASSWORD_BCRYPT), 'Email' => $Email, 'CreatedTime' => $Time, 'LastOnline' => $Time]);
 
-        $Token = $App->Auth->CreateToken(["ID" => $ID->__toString]);
+        $Token = $App->Auth->CreateToken(["ID" => $ID->__toString()]);
 
         $App->DB->Update('account', ['_id' => $ID], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => $Time]]]);
 
-        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID]);
+        $Account = $App->DB->Find('account', ["_id" => $ID])->toArray();
+
+        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
     }
 
     function SignIn($App)
@@ -139,7 +138,7 @@
 
         $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
+        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
     }
 
     function ResetPassword($App)
@@ -197,7 +196,7 @@
         $Client = new Google_Client();
         $PayLoad = $Client->verifyIdToken($Token);
 
-        if (isset($PayLoad)
+        if (isset($PayLoad))
             JSON(["Message" => 2]);
 
         if ($PayLoad['iss'] != "accounts.google.com" && $PayLoad['iss'] != "https://accounts.google.com");
