@@ -127,12 +127,12 @@
         {
             $Account = $App->DB->Find('account', ['_id' => $Post->OwnerID])->toArray();
 
-            if (isset($App->DB->Find('like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]])->toArray()[0]))
+            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]])->toArray()[0]))
                 $Like = true;
             else
                 $Like = false;
 
-            if (isset($App->DB->Find('bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]])->toArray()[0]))
+            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]])->toArray()[0]))
                 $BookMark = true;
             else
                 $BookMark = false;
@@ -175,6 +175,9 @@
 
         if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "_id" => $PostID]]])->toArray()[0]))
         {
+            foreach ($App->DB->Find('post_comment', ["PostID" => $PostID])->toArray() as $Comment)
+                $App->DB->Remove('post_comment_like', ["CommentID" => new MongoDB\BSON\ObjectID($Comment->CommentID)]);
+
             $App->DB->Remove('post', ["PostID" => $PostID]);
             $App->DB->Remove('post_like', ["PostID" => $PostID]);
             $App->DB->Remove('post_comment', ["PostID" => $PostID]);
@@ -331,5 +334,24 @@
         }
 
         JSON(["Message" => 3]); 
+    }
+
+    function PostBookMark($App)
+    {
+        if (!isset($_POST["PostID"]) || empty($_POST["PostID"]))
+            JSON(["Message" => 1]);
+
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $PostID = new MongoDB\BSON\ObjectID($_POST["PostID"]);
+
+        $Query = ['$and' => [["OwnerID" => $OwnerID, "PostID" => $PostID]]];
+        $BookMark = $App->DB->Find('post_bookmark', $Query)->toArray();
+
+        if (isset($BookMark[0]))
+            $App->DB->Remove('post_bookmark', $Query);
+        else
+            $App->DB->Insert('post_bookmark', ["OwnerID" => $OwnerID, "PostID" => $PostID]);
+
+        JSON(["Message" => 1000]); 
     }
 ?>

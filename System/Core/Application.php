@@ -20,17 +20,17 @@
             $Router->Call('ResetPassword',       function() { ResetPassword($this);       }, false, 'ResetPassword.5.1000');
             $Router->Call('SignInGoogle',        function() { SignInGoogle($this);        }, false, 'SignInGoogle.5.1000');
 
-            $Router->Call('MomentList',   function() { MomentList($this);   }, true, 'MomentList.5.2000');
-            $Router->Call('MomentWrite',  function() { MomentWrite($this);  }, true, 'MomentWrite.2.3000');
-            $Router->Call('MomentDelete', function() { MomentDelete($this); }, true, 'MomentDelete.2.3000');
-
-            $Router->Call('LikeList', function() { LikeList($this); }, true, 'LikeList.2.3000');
-            $Router->Call('LikePost', function() { LikePost($this); }, true, 'LikePost.2.3000');
-
-            $Router->Call('CommentList',   function() { CommentList($this);   }, true, 'CommentList.2.3000');
-            $Router->Call('CommentPost',   function() { CommentPost($this);   }, true, 'CommentPost.2.3000');
-            $Router->Call('CommentLike',   function() { CommentLike($this);   }, true, 'CommentLike.2.3000');
-            $Router->Call('CommentDelete', function() { CommentDelete($this); }, true, 'CommentDelete.2.3000');
+            $Router->Call('PostWrite',         function() { PostWrite($this);         }, true, 'PostWrite.3.2000');
+            $Router->Call('PostList',          function() { PostList($this);          }, true, 'PostList.5.3000');
+            $Router->Call('PostDelete',        function() { PostDelete($this);        }, true, 'PostDelete.2.2000');
+            $Router->Call('PostTurnComment',   function() { PostTurnComment($this);   }, true, 'PostTurnComment.2.2000');
+            $Router->Call('PostLike',          function() { PostLike($this);          }, true, 'PostLike.5.2000');
+            $Router->Call('PostLikeList',      function() { PostLikeList($this);      }, true, 'PostLikeList.5.2000');
+            $Router->Call('PostComment',       function() { PostComment($this);       }, true, 'PostComment.3.2000');
+            $Router->Call('PostCommentList',   function() { PostCommentList($this);   }, true, 'PostCommentList.3.2000');
+            $Router->Call('PostCommentLike',   function() { PostCommentLike($this);   }, true, 'PostCommentLike.5.2000');
+            $Router->Call('PostCommentDelete', function() { PostCommentDelete($this); }, true, 'PostCommentDelete.3.2000');
+            $Router->Call('PostBookMark',      function() { PostBookMark($this);      }, true, 'PostBookMark.3.2000');
 
             $Router->Call('ProfileGet',          function() { ProfileGet($this);          }, true, 'ProfileGet.2.3000');
             $Router->Call('ProfileSet',          function() { ProfileSet($this);          }, true, 'ProfileSet.2.3000');
