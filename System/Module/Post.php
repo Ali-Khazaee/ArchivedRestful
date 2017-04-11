@@ -176,9 +176,9 @@
         if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "_id" => $PostID]]])->toArray()[0]))
         {
             foreach ($App->DB->Find('post_comment', ["PostID" => $PostID])->toArray() as $Comment)
-                $App->DB->Remove('post_comment_like', ["CommentID" => new MongoDB\BSON\ObjectID($Comment->CommentID)]);
+                $App->DB->Remove('post_comment_like', ["CommentID" => $Comment->_id]);
 
-            $App->DB->Remove('post', ["PostID" => $PostID]);
+            $App->DB->Remove('post', ["_id" => $PostID]);
             $App->DB->Remove('post_like', ["PostID" => $PostID]);
             $App->DB->Remove('post_comment', ["PostID" => $PostID]);
             $App->DB->Remove('post_bookmark', ["PostID" => $PostID]);
@@ -197,12 +197,12 @@
 
         if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "_id" => $PostID]]])->toArray()[0]))
         {
-            $Result = $App->DB->Find('post', ["PostID" => $PostID])->toArray();
+            $Result = $App->DB->Find('post', ["_id" => $PostID])->toArray();
 
-            if (isset($Result) && $Result[0]->Comment)
-                $App->DB->Update('post', ["PostID" => $PostID], ['$set' => ['Comment' => false]]);
+            if (!empty($Result) && $Result[0]->Comment)
+                $App->DB->Update('post', ["_id" => $PostID], ['$set' => ['Comment' => false]]);
             else
-                $App->DB->Update('post', ["PostID" => $PostID], ['$set' => ['Comment' => true]]);
+                $App->DB->Update('post', ["_id" => $PostID], ['$set' => ['Comment' => true]]);
 
             JSON(["Message" => 1000]);
         }
@@ -318,7 +318,7 @@
             JSON(["Message" => 2]);
 
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
-        $CommentID = new MongoDB\BSON\ObjectID($_POST["CommentID"])
+        $CommentID = new MongoDB\BSON\ObjectID($_POST["CommentID"]);
         $Query = ['$and' => [["OwnerID" => $OwnerID, "_id" => $CommentID]]];
 
         if (isset($App->DB->Find('post_comment', $Query)->toArray()[0]))
