@@ -26,6 +26,7 @@
             $Router->Call('PostTurnComment',   function() { PostTurnComment($this);   }, true, 'PostTurnComment.2.2000');
             $Router->Call('PostLike',          function() { PostLike($this);          }, true, 'PostLike.5.2000');
             $Router->Call('PostLikeList',      function() { PostLikeList($this);      }, true, 'PostLikeList.5.2000');
+            $Router->Call('PostDetails',       function() { PostDetails($this);       }, true, 'PostDetails.5.2000');
             $Router->Call('PostComment',       function() { PostComment($this);       }, true, 'PostComment.3.2000');
             $Router->Call('PostCommentList',   function() { PostCommentList($this);   }, true, 'PostCommentList.3.2000');
             $Router->Call('PostCommentLike',   function() { PostCommentLike($this);   }, true, 'PostCommentLike.5.2000');
