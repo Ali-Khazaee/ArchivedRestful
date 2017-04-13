@@ -19,7 +19,7 @@
 
         $App->RateLimit->Call('UsernameIsAvailableQuery.1.2000');
 
-        if (empty($App->DB->Find('account', ['Username' => $Username])->toArray()))
+        if (empty($App->DB->Find('account', ['Username' => $Username], ["projection" => ["_id" => 1]])->toArray()))
             JSON(["Message" => 1000]);
 
         JSON(["Message" => 5]);
@@ -64,7 +64,7 @@
 
         $App->RateLimit->Call('SignUpQuery.1.2000');
 
-        if (!empty($App->DB->Find('account', ['$or' => [["Username" => $Username, "Email" => $Email]]])->toArray()))
+        if (!empty($App->DB->Find('account', ['$or' => [["Username" => $Username, "Email" => $Email]]], ["projection" => ["_id" => 1]])->toArray()))
             JSON(["Message" => 11]);
 
         if (!isset($Session) || empty($Session))
@@ -82,7 +82,7 @@
 
         $App->DB->Update('account', ['_id' => $ID], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => $Time]]]);
 
-        $Account = $App->DB->Find('account', ["_id" => $ID])->toArray();
+        $Account = $App->DB->Find('account', ["_id" => $ID], ["projection" => ["_id" => 0, "Username" => 1, "Avatar" => 1]])->toArray();
 
         JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID->__toString(), "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
     }
@@ -118,9 +118,9 @@
         $App->RateLimit->Call('SignInQuery.1.2000');
 
         if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
-            $Account = $App->DB->Find('account', ['Username' => $EmailOrUsername])->toArray();
+            $Account = $App->DB->Find('account', ['Username' => $EmailOrUsername], ["projection" => ["Username" => 1, "Password" => 1, "Avatar" => 1]])->toArray();
         else
-            $Account = $App->DB->Find('account', ['Email' => $EmailOrUsername])->toArray();
+            $Account = $App->DB->Find('account', ['Email' => $EmailOrUsername], ["projection" => ["Username" => 1, "Password" => 1, "Avatar" => 1]])->toArray();
 
         if (empty($Account))
             JSON(["Message" => 8]);
@@ -161,9 +161,9 @@
         $App->RateLimit->Call('ResetPasswordQuery.1.2000');
 
         if (filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
-            $Account = $App->DB->Find('account', ['Email' => $EmailOrUsername])->toArray();
+            $Account = $App->DB->Find('account', ['Email' => $EmailOrUsername], ["projection" => ["_id" => 0, "Username" => 1, "Email" => 1]])->toArray();
         else
-            $Account = $App->DB->Find('account', ['Username' => $EmailOrUsername])->toArray();
+            $Account = $App->DB->Find('account', ['Username' => $EmailOrUsername], ["projection" => ["_id" => 0, "Username" => 1, "Email" => 1]])->toArray();
 
         if (empty($Account))
             JSON(["Message" => 5]);
@@ -211,7 +211,7 @@
             $Session .= " - " . $_SERVER['REMOTE_ADDR'];
 
         $App->RateLimit->Call('SignInGoogleQuery.1.2000');
-        $Account = $App->DB->Find('account', ['GoogleID' => $PayLoad['sub']])->toArray();
+        $Account = $App->DB->Find('account', ['GoogleID' => $PayLoad['sub']], ["projection" => ["Username" => 1, "Avatar" => 1]])->toArray();
 
         if (empty($Account))
         {
@@ -222,9 +222,9 @@
             $Token = $App->Auth->CreateToken(["ID" => $ID->__toString()]);
 
             $App->DB->Update('account', ['_id' => $ID], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
-            $Account = $App->DB->Find('account', ['_id' => $ID])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Username" => 1]])->toArray();
 
-            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID->__toString(), "Username" => $Account[0]->Username]);
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID->__toString(), "Username" => $Account[0]->Username, "Avatar" => ""]);
         }
         else
         {
@@ -234,7 +234,7 @@
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
         }
     }
 ?>

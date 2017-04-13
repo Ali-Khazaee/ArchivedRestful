@@ -125,14 +125,14 @@
 
         foreach ($PostList as $Post)
         {
-            $Account = $App->DB->Find('account', ['_id' => $Post->OwnerID])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Post->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "Avatar" => 1]])->toArray();
 
-            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]])->toArray()[0]))
+            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
                 $Like = true;
             else
                 $Like = false;
 
-            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]])->toArray()[0]))
+            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
                 $BookMark = true;
             else
                 $BookMark = false;
@@ -173,9 +173,9 @@
 
         $PostID = new MongoDB\BSON\ObjectID($_POST["PostID"]);
 
-        if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "_id" => $PostID]]])->toArray()[0]))
+        if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "_id" => $PostID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
         {
-            foreach ($App->DB->Find('post_comment', ["PostID" => $PostID])->toArray() as $Comment)
+            foreach ($App->DB->Find('post_comment', ["PostID" => $PostID], ["projection" => ["_id" => 1]])->toArray() as $Comment)
                 $App->DB->Remove('post_comment_like', ["CommentID" => $Comment->_id]);
 
             $App->DB->Remove('post', ["_id" => $PostID]);
@@ -195,9 +195,9 @@
 
         $PostID = new MongoDB\BSON\ObjectID($_POST["PostID"]);
 
-        if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "_id" => $PostID]]])->toArray()[0]))
+        if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "_id" => $PostID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
         {
-            $Result = $App->DB->Find('post', ["_id" => $PostID])->toArray();
+            $Result = $App->DB->Find('post', ["_id" => $PostID], ["projection" => ["_id" => 0, "Comment" => 1]])->toArray();
 
             if (!empty($Result) && $Result[0]->Comment)
                 $App->DB->Update('post', ["_id" => $PostID], ['$set' => ['Comment' => false]]);
@@ -219,7 +219,7 @@
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
         $Query = ['$and' => [["OwnerID" => $OwnerID, "PostID" => $PostID]]];
 
-        if (isset($App->DB->Find('post_like', $Query)->toArray()[0]))
+        if (isset($App->DB->Find('post_like', $Query, ["projection" => ["_id" => 1]])->toArray()[0]))
             $App->DB->Remove('post_like', $Query);
         else
             $App->DB->Insert('post_like', ["OwnerID" => $OwnerID, "PostID" => $PostID, "Time" => time()]);
@@ -233,11 +233,11 @@
             JSON(["Message" => 1]);
         
         $Result = array();
-        $LikeList = $App->DB->Find('post_like', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"])], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
+        $LikeList = $App->DB->Find('post_like', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"])], ["projection" => ["_id" => 0, "OwnerID" => 1, "Time" => 1], 'skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
 
         foreach ($LikeList as $Like)
         {
-            $Account = $App->DB->Find('account', ['_id' => $Like->OwnerID])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Like->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "Avatar" => 1]])->toArray();
 
             array_push($Result, array("OwnerID" => $Like->OwnerID->__toString(), "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : ""), "Time" => $Like->Time));
         }
@@ -272,9 +272,9 @@
 
         foreach ($CommentList as $Comment)
         {
-            $Account = $App->DB->Find('account', ['_id' => $Comment->OwnerID])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Comment->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "Avatar" => 1]])->toArray();
 
-            if (isset($App->DB->Find('post_comment_like', ['$and' => [["OwnerID" => $Comment->OwnerID, "CommentID" => $Comment->_id]]])->toArray()[0]))
+            if (isset($App->DB->Find('post_comment_like', ['$and' => [["OwnerID" => $Comment->OwnerID, "CommentID" => $Comment->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
                 $Like = true;
             else
                 $Like = false;
@@ -299,7 +299,7 @@
         $CommentID = new MongoDB\BSON\ObjectID($_POST["CommentID"]);
 
         $Query = ['$and' => [["OwnerID" => $OwnerID, "CommentID" => $CommentID]]];
-        $Comment = $App->DB->Find('post_comment_like', $Query)->toArray();
+        $Comment = $App->DB->Find('post_comment_like', $Query, ["projection" => ["_id" => 1]])->toArray();
 
         if (isset($Comment[0]))
             $App->DB->Remove('post_comment_like', $Query);
@@ -321,13 +321,13 @@
         $CommentID = new MongoDB\BSON\ObjectID($_POST["CommentID"]);
         $Query = ['$and' => [["OwnerID" => $OwnerID, "_id" => $CommentID]]];
 
-        if (isset($App->DB->Find('post_comment', $Query)->toArray()[0]))
+        if (isset($App->DB->Find('post_comment', $Query, ["projection" => ["_id" => 1]])->toArray()[0]))
         {
             $App->DB->Remove('post_comment', $Query);
             JSON(["Message" => 1000]); 
         }
 
-        if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => $OwnerID, "PostID" => new MongoDB\BSON\ObjectID($_POST["PostID"])]]])->toArray()[0]))
+        if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => $OwnerID, "PostID" => new MongoDB\BSON\ObjectID($_POST["PostID"])]]], ["projection" => ["_id" => 1]])->toArray()[0]))
         {
             $App->DB->Remove('post_comment', ["CommentID" => $CommentID]);
             JSON(["Message" => 1000]); 
@@ -345,7 +345,7 @@
         $PostID = new MongoDB\BSON\ObjectID($_POST["PostID"]);
 
         $Query = ['$and' => [["OwnerID" => $OwnerID, "PostID" => $PostID]]];
-        $BookMark = $App->DB->Find('post_bookmark', $Query)->toArray();
+        $BookMark = $App->DB->Find('post_bookmark', $Query, ["projection" => ["_id" => 1]])->toArray();
 
         if (isset($BookMark[0]))
             $App->DB->Remove('post_bookmark', $Query);
