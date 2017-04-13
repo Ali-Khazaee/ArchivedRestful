@@ -304,7 +304,7 @@
         if (!isset($_POST["Message"]) || empty($_POST["Message"]))
             JSON(["Message" => 2]);
 
-        $Post = $App->DB->Find('post', ["_id" => new MongoDB\BSON\ObjectID($_POST["PostID"])])->toArray();
+        $Post = $App->DB->Find('post', ["_id" => new MongoDB\BSON\ObjectID($_POST["PostID"])], ["projection" => ["_id" => 0, "Comment" => 1]])->toArray();
 
         if (!isset($Post) || empty($Post))
             JSON(["Message" => 3]);
