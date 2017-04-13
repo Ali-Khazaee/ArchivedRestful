@@ -245,6 +245,57 @@
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);
     }
 
+    function PostDetails($App)
+    {
+        if (!isset($_POST["PostID"]) || empty($_POST["PostID"]))
+            JSON(["Message" => 1]);
+
+        $Post = $App->DB->Find('post', ["_id" => new MongoDB\BSON\ObjectID($_POST["PostID"])])->toArray();
+
+        if (!isset($Post) || empty($Post))
+            JSON(["Message" => 2]);
+
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $Account = $App->DB->Find('account', ['_id' => $Post[0]->OwnerID], ['projection' => ["_id" => 0, "Username" => 1, "Avatar" => 1]])->toArray();
+
+        if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]])->toArray()[0]))
+            $Like = true;
+        else
+            $Like = false;
+
+        if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]])->toArray()[0]))
+            $BookMark = true;
+        else
+            $BookMark = false;
+        
+        $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+        if (!isset($LikeCount) || empty($LikeCount))
+            $LikeCount = 0;
+
+        $CommentCount = $App->DB->Command(["count" => "post_comment", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+        if (!isset($CommentCount) || empty($CommentCount))
+            $CommentCount = 0;
+
+        $Result = array("PostID"       => $Post[0]->_id->__toString(),
+                        "OwnerID"      => $Post[0]->OwnerID->__toString(),
+                        "Type"         => $Post[0]->Type,
+                        "Category"     => $Post[0]->Category,
+                        "Time"         => $Post[0]->Time,
+                        "Comment"      => $Post[0]->Comment,
+                        "Message"      => isset($Post[0]->Message) ? $Post[0]->Message : "",
+                        "Data"         => isset($Post[0]->Data) ? $Post[0]->Data : "",
+                        "Username"     => $Account[0]->Username,
+                        "Avatar"       => isset($Account[0]->Avatar) ? $Account[0]->Avatar : "",
+                        "Like"         => $Like,
+                        "LikeCount"    => $LikeCount,
+                        "CommentCount" => $CommentCount,
+                        "BookMark"     => $BookMark);
+
+        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
+    }
+
     function PostComment($App)
     {
         if (!isset($_POST["PostID"]) || empty($_POST["PostID"]))
@@ -252,6 +303,14 @@
 
         if (!isset($_POST["Message"]) || empty($_POST["Message"]))
             JSON(["Message" => 2]);
+
+        $Post = $App->DB->Find('post', ["_id" => new MongoDB\BSON\ObjectID($_POST["PostID"])])->toArray();
+
+        if (!isset($Post) || empty($Post))
+            JSON(["Message" => 3]);
+
+        if ($Post->Comment == false)
+            JSON(["Message" => 4]);
 
         $CommentID = $App->DB->Insert('post_comment', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"]), 'OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Time' => time(), 'Message' => $_POST["Message"]])->__toString();
 
