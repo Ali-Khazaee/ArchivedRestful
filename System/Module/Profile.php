@@ -5,7 +5,7 @@
     {
         $ID = isset($_POST["ID"]) ? new MongoDB\BSON\ObjectID($_POST["ID"]) : new MongoDB\BSON\ObjectID($App->Auth->ID);
 
-        $Account = $App->DB->Find('account', ['_id' => $ID])->toArray();
+        $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Username" => 1, "Description" => 1, "WebSite" => 1, "Name" => 1, "Cover" => 1, "Avatar" => 1]])->toArray();
 
         $Post = $App->DB->Command(["count" => "post", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
         $Follower = $App->DB->Command(["count" => "follower", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
@@ -188,7 +188,7 @@
     {
         $ID = new MongoDB\BSON\ObjectID($App->Auth->ID);
 
-        $Account = $App->DB->Find('account', ['_id' => $ID])->toArray();
+        $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Cover" => 1]])->toArray();
 
         Upload::DeleteFile($Account[0]->Cover);
 
@@ -201,7 +201,7 @@
     {
         $ID = new MongoDB\BSON\ObjectID($App->Auth->ID);
 
-        $Account = $App->DB->Find('account', ['_id' => $ID])->toArray();
+        $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Avatar" => 1]])->toArray();
 
         Upload::DeleteFile($Account[0]->Avatar);
 
