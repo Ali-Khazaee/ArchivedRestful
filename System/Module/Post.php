@@ -309,10 +309,15 @@
         if (!isset($Post) || empty($Post))
             JSON(["Message" => 3]);
 
-        if ($Post->Comment == false)
+        if ($Post[0]->Comment == false)
             JSON(["Message" => 4]);
+        
+        $Message = $_POST["Message"];
 
-        $CommentID = $App->DB->Insert('post_comment', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"]), 'OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Time' => time(), 'Message' => $_POST["Message"]])->__toString();
+        if (strlen($Message) > 150)
+            $Message = mb_substr($Message, 0, 150);
+
+        $CommentID = $App->DB->Insert('post_comment', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"]), 'OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Time' => time(), 'Message' => $Message])->__toString();
 
         JSON(["Message" => 1000, "CommentID" => $CommentID]);
     }
