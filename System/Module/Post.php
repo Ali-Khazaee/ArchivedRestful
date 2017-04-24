@@ -73,7 +73,7 @@
                 if ($FileType != "video/mp4")
                     continue;
 
-                if ($FileSize > 5242880)
+                if ($FileSize > 15728640)
                     continue;
 
                 $VideoCount++;
