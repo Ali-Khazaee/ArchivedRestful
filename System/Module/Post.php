@@ -14,6 +14,22 @@
         if (strlen($Message) > 150)
             $Message = mb_substr($Message, 0, 150);
 
+        $NewLine = 0;
+        $Result = "";
+
+        for ($I = 0; $I < strlen($Message); $I++)
+        {
+            if (ord($Message[$I]) == 10)
+                $NewLine++;
+
+            if ($NewLine > 2 && ord($Message[$I]) == 10)
+                continue;
+
+            $Result .= $Message[$I];
+        }
+
+        $Message = $Result;
+
         $Data = array();
 
         if ($Type == 1)

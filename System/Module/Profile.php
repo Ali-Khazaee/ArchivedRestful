@@ -23,7 +23,6 @@
         $Result = json_encode(array("Username"    => isset($Account[0]->Username)    ? $Account[0]->Username : "",
                                     "Description" => isset($Account[0]->Description) ? $Account[0]->Description : "",
                                     "WebSite"     => isset($Account[0]->WebSite)     ? $Account[0]->WebSite : "",
-                                    "Name"        => isset($Account[0]->Name)        ? $Account[0]->Name : "",
                                     "Cover"       => isset($Account[0]->Cover)       ? $Account[0]->Cover : "",
                                     "Avatar"      => isset($Account[0]->Avatar)      ? $Account[0]->Avatar : "",
                                     "Post"        => $Post,
@@ -31,6 +30,169 @@
                                     "Following"   => $Following));
 
         JSON(["Message" => 1000, "Result" => $Result]);
+    }
+
+    function ProfileGetPost($App)
+    {
+        $Result = array();
+        $ID = new MongoDB\BSON\ObjectID($_POST["ID"]);
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+
+        $PostList = $App->DB->Find('post', ["OwnerID" => $ID], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+
+        foreach ($PostList as $Post)
+        {
+            $Account = $App->DB->Find('account', ['_id' => $Post->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "Avatar" => 1]])->toArray();
+
+            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Like = true;
+            else
+                $Like = false;
+
+            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $BookMark = true;
+            else
+                $BookMark = false;
+            
+            $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post->_id]])->toArray()[0]->n;
+
+            if (!isset($LikeCount) || empty($LikeCount))
+                $LikeCount = 0;
+
+            $CommentCount = $App->DB->Command(["count" => "post_comment", "query" => ['PostID' => $Post->_id]])->toArray()[0]->n;
+
+            if (!isset($CommentCount) || empty($CommentCount))
+                $CommentCount = 0;
+
+            array_push($Result, array("PostID"       => $Post->_id->__toString(),
+                                      "OwnerID"      => $Post->OwnerID->__toString(),
+                                      "Type"         => $Post->Type,
+                                      "Category"     => $Post->Category,
+                                      "Time"         => $Post->Time,
+                                      "Comment"      => $Post->Comment,
+                                      "Message"      => isset($Post->Message) ? $Post->Message : "",
+                                      "Data"         => isset($Post->Data) ? $Post->Data : "",
+                                      "Username"     => $Account[0]->Username,
+                                      "Avatar"       => isset($Account[0]->Avatar) ? $Account[0]->Avatar : "",
+                                      "Like"         => $Like,
+                                      "LikeCount"    => $LikeCount,
+                                      "CommentCount" => $CommentCount,
+                                      "BookMark"     => $BookMark));
+        }
+
+        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
+    }
+
+    function ProfileGetComment($App)
+    {
+        $Result = array();
+        $ID = new MongoDB\BSON\ObjectID($_POST["ID"]);
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+
+        $PostList = $App->DB->Find('post_comment', ["OwnerID" => $ID], ["projection" => ["_id" => 0, "PostID" => 1], 'skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+
+        foreach ($PostList as $PostID)
+        {
+            $Post = $App->DB->Find('post', ["_id" => $PostID->PostID])->toArray();
+
+            if (!isset($Post))
+                continue;
+
+            $Account = $App->DB->Find('account', ['_id' => $Post[0]->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "Avatar" => 1]])->toArray();
+
+            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Like = true;
+            else
+                $Like = false;
+
+            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $BookMark = true;
+            else
+                $BookMark = false;
+            
+            $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+            if (!isset($LikeCount) || empty($LikeCount))
+                $LikeCount = 0;
+
+            $CommentCount = $App->DB->Command(["count" => "post_comment", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+            if (!isset($CommentCount) || empty($CommentCount))
+                $CommentCount = 0;
+
+            array_push($Result, array("PostID"       => $Post[0]->_id->__toString(),
+                                      "OwnerID"      => $Post[0]->OwnerID->__toString(),
+                                      "Type"         => $Post[0]->Type,
+                                      "Category"     => $Post[0]->Category,
+                                      "Time"         => $Post[0]->Time,
+                                      "Comment"      => $Post[0]->Comment,
+                                      "Message"      => isset($Post[0]->Message) ? $Post[0]->Message : "",
+                                      "Data"         => isset($Post[0]->Data) ? $Post[0]->Data : "",
+                                      "Username"     => $Account[0]->Username,
+                                      "Avatar"       => isset($Account[0]->Avatar) ? $Account[0]->Avatar : "",
+                                      "Like"         => $Like,
+                                      "LikeCount"    => $LikeCount,
+                                      "CommentCount" => $CommentCount,
+                                      "BookMark"     => $BookMark));
+        }
+
+        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
+    }
+
+    function ProfileGetLike($App)
+    {
+        $Result = array();
+        $ID = new MongoDB\BSON\ObjectID($_POST["ID"]);
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+
+        $PostList = $App->DB->Find('post_like', ["OwnerID" => $ID], ["projection" => ["_id" => 0, "PostID" => 1], 'skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+
+        foreach ($PostList as $PostID)
+        {
+            $Post = $App->DB->Find('post', ["_id" => $PostID->PostID])->toArray();
+
+            if (!isset($Post))
+                continue;
+
+            $Account = $App->DB->Find('account', ['_id' => $Post[0]->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "Avatar" => 1]])->toArray();
+
+            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Like = true;
+            else
+                $Like = false;
+
+            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $BookMark = true;
+            else
+                $BookMark = false;
+            
+            $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+            if (!isset($LikeCount) || empty($LikeCount))
+                $LikeCount = 0;
+
+            $CommentCount = $App->DB->Command(["count" => "post_comment", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+            if (!isset($CommentCount) || empty($CommentCount))
+                $CommentCount = 0;
+
+            array_push($Result, array("PostID"       => $Post[0]->_id->__toString(),
+                                      "OwnerID"      => $Post[0]->OwnerID->__toString(),
+                                      "Type"         => $Post[0]->Type,
+                                      "Category"     => $Post[0]->Category,
+                                      "Time"         => $Post[0]->Time,
+                                      "Comment"      => $Post[0]->Comment,
+                                      "Message"      => isset($Post[0]->Message) ? $Post[0]->Message : "",
+                                      "Data"         => isset($Post[0]->Data) ? $Post[0]->Data : "",
+                                      "Username"     => $Account[0]->Username,
+                                      "Avatar"       => isset($Account[0]->Avatar) ? $Account[0]->Avatar : "",
+                                      "Like"         => $Like,
+                                      "LikeCount"    => $LikeCount,
+                                      "CommentCount" => $CommentCount,
+                                      "BookMark"     => $BookMark));
+        }
+
+        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
     }
 
     function ProfileGetEdit($App)
