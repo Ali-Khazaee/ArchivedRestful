@@ -37,7 +37,7 @@
             $Router->Call('ProfileGetPost',      function() { ProfileGetPost($this);      }, true, 'ProfileGetPost.2.3000');
             $Router->Call('ProfileGetComment',   function() { ProfileGetComment($this);   }, true, 'ProfileGetComment.2.3000');
             $Router->Call('ProfileGetLike',      function() { ProfileGetLike($this);      }, true, 'ProfileGetLike.2.3000');
-            $Router->Call('ProfileSet',          function() { ProfileSet($this);          }, true, 'ProfileSet.2.3000');
+            $Router->Call('ProfileSetEdit',      function() { ProfileSetEdit($this);      }, true, 'ProfileSetEdit.2.3000');
             $Router->Call('ProfileGetEdit',      function() { ProfileGetEdit($this);      }, true, 'ProfileGetEdit.2.3000');
             $Router->Call('ProfileCoverDelete',  function() { ProfileCoverDelete($this);  }, true, 'ProfileCoverDelete.2.3000');
             $Router->Call('ProfileAvatarDelete', function() { ProfileAvatarDelete($this); }, true, 'ProfileAvatarDelete.2.3000');

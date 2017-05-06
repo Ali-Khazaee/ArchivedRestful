@@ -5,7 +5,7 @@
     {
         $ID = isset($_POST["ID"]) ? new MongoDB\BSON\ObjectID($_POST["ID"]) : new MongoDB\BSON\ObjectID($App->Auth->ID);
 
-        $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Username" => 1, "Description" => 1, "WebSite" => 1, "Name" => 1, "Cover" => 1, "Avatar" => 1]])->toArray();
+        $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Username" => 1, "Description" => 1, "Link" => 1, "Name" => 1, "Cover" => 1, "Avatar" => 1]])->toArray();
 
         $Post = $App->DB->Command(["count" => "post", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
         $Follower = $App->DB->Command(["count" => "follower", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
@@ -22,7 +22,7 @@
 
         $Result = json_encode(array("Username"    => isset($Account[0]->Username)    ? $Account[0]->Username : "",
                                     "Description" => isset($Account[0]->Description) ? $Account[0]->Description : "",
-                                    "WebSite"     => isset($Account[0]->WebSite)     ? $Account[0]->WebSite : "",
+                                    "Link"        => isset($Account[0]->Link)        ? $Account[0]->Link : "",
                                     "Cover"       => isset($Account[0]->Cover)       ? $Account[0]->Cover : "",
                                     "Avatar"      => isset($Account[0]->Avatar)      ? $Account[0]->Avatar : "",
                                     "Post"        => $Post,
@@ -206,7 +206,7 @@
 
         $Result = json_encode(array("Username"    => isset($Account[0]->Username)    ? $Account[0]->Username : "",
                                     "Description" => isset($Account[0]->Description) ? $Account[0]->Description : "",
-                                    "WebSite"     => isset($Account[0]->WebSite)     ? $Account[0]->WebSite : "",
+                                    "Link"        => isset($Account[0]->Link)        ? $Account[0]->Link : "",
                                     "Position"    => $Position,
                                     "Location"    => isset($Account[0]->Location)    ? $Account[0]->Location : "",
                                     "Email"       => isset($Account[0]->Email)       ? $Account[0]->Email : "",
@@ -219,11 +219,11 @@
     function ProfileSetEdit($App)
     {
         $Username        = isset($_POST["Username"])    ? strtolower($_POST["Username"]) : "";
-        $Description     = isset($_POST["Description"]) ? $_POST["Description"] : "";
-        $WebSite         = isset($_POST["WebSite"])     ? strtolower($_POST["WebSite"]) : "";
-        $Location        = isset($_POST["Location"])    ? $_POST["Location"] : "";
+        $Description     = isset($_POST["Description"]) ? urldecode($_POST["Description"]) : "";
+        $Link            = isset($_POST["Link"])        ? strtolower($_POST["Link"]) : "";
+        $Location        = isset($_POST["Location"])    ? urldecode($_POST["Location"]) : "";
         $Position        = isset($_POST["Position"])    ? $_POST["Position"] : "";
-        $Email           = isset($_POST["Email"])       ? $_POST["Email"] : "";
+        $Email           = isset($_POST["Email"])       ? urldecode($_POST["Email"]) : "";
         $Latitude        = "";
         $Longitude       = "";
 
@@ -243,7 +243,7 @@
             JSON(["Message" => 5]);
 
         if (!filter_var($Email, FILTER_VALIDATE_EMAIL))
-            JSON(["Message" => 6]);
+            JSON(["Message" => 6,]);
 
         if (strlen($Email) > 64)
             JSON(["Message" => 7]);
@@ -272,29 +272,22 @@
             $FileName = $_FILES['Avatar']['name'];
             $FileSize = $_FILES['Avatar']['size'];
             $FileTemp = $_FILES['Avatar']['tmp_name'];
-            $FileType = $_FILES['Avatar']['type'];
 
-            if (!in_array(strtolower(pathinfo($FileName, PATHINFO_EXTENSION)), array("jpeg", "jpg")))
-                break;
+            if ($FileSize < 2097152 && in_array(strtolower(pathinfo($FileName, PATHINFO_EXTENSION)), array("jpeg", "jpg", "png")))
+            {
+                Upload::DeleteFile($Account[0]->Avatar);
+                $Server = Upload::GetBestServer();
 
-            if ($FileType != "image/jpeg")
-                break;
+                $Channel = curl_init();
+                curl_setopt($Channel, CURLOPT_URL, $Server);
+                curl_setopt($Channel, CURLOPT_HEADER, false);
+                curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($Server), "FOLDER" => $OwnerID, "FILE" => new CurlFile($FileTemp, "image/jpeg")]);
+                $URL = curl_exec($Channel);
+                curl_close($Channel);
 
-            if ($FileSize > 2097152)
-                break;
-
-            Upload::DeleteFile($Account[0]->Avatar);
-            $Server = Upload::GetBestServer();
-
-            $Channel = curl_init();
-            curl_setopt($Channel, CURLOPT_URL, $Server);
-            curl_setopt($Channel, CURLOPT_HEADER, false);
-            curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($Server), "FOLDER" => $OwnerID, "FILE" => new CurlFile($FileTemp, $FileType)]);
-            $URL = curl_exec($Channel);
-            curl_close($Channel);
-
-            $Avatar = $Server . $URL;
+                $Avatar = $Server . $URL;
+            }
         }
         
         if (isset($_FILES['Cover']))
@@ -304,27 +297,21 @@
             $FileTemp = $_FILES['Cover']['tmp_name'];
             $FileType = $_FILES['Cover']['type'];
 
-            if (!in_array(strtolower(pathinfo($FileName, PATHINFO_EXTENSION)), array("jpeg", "jpg")))
-                break;
+            if ($FileSize < 2097152 && in_array(strtolower(pathinfo($FileName, PATHINFO_EXTENSION)), array("jpeg", "jpg")))
+            {
+                Upload::DeleteFile($Account[0]->Cover);
+                $Server = Upload::GetBestServer();
 
-            if ($FileType != "image/jpeg")
-                break;
+                $Channel = curl_init();
+                curl_setopt($Channel, CURLOPT_URL, $Server);
+                curl_setopt($Channel, CURLOPT_HEADER, false);
+                curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($Server), "FOLDER" => $OwnerID, "FILE" => new CurlFile($FileTemp, "image/jpeg")]);
+                $URL = curl_exec($Channel);
+                curl_close($Channel);
 
-            if ($FileSize > 2097152)
-                break;
-
-            Upload::DeleteFile($Account[0]->Cover);
-            $Server = Upload::GetBestServer();
-
-            $Channel = curl_init();
-            curl_setopt($Channel, CURLOPT_URL, $Server);
-            curl_setopt($Channel, CURLOPT_HEADER, false);
-            curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($Server), "FOLDER" => $OwnerID, "FILE" => new CurlFile($FileTemp, $FileType)]);
-            $URL = curl_exec($Channel);
-            curl_close($Channel);
-
-            $Cover = $Server . $URL;
+                $Cover = $Server . $URL;
+            }
         }
 
         if ($Avatar == "" && isset($Account[0]->Avatar))
@@ -335,7 +322,7 @@
 
         $App->DB->Update('account', ['_id' => $OwnerID], ['$set' => ['Username'    => $Username,
                                                                      'Description' => $Description,
-                                                                     'WebSite'     => $WebSite,
+                                                                     'Link'        => $Link,
                                                                      'Email'       => $Email,
                                                                      'Latitude'    => $Latitude,
                                                                      'Longitude'   => $Longitude,
