@@ -39,15 +39,15 @@
         {
             switch ($ServerID)
             {
-                case 'http://10.48.9.81:8080/': return 'Access1'; break;
-                case 'http://10.48.9.81:8081/': return 'Access2'; break;
+                case 'http://10.48.9.85:8080/': return 'Access1'; break;
+                case 'http://10.48.9.85:8081/': return 'Access2'; break;
             }
         }
 
         private static $ServerList =
         [
-            'http://10.48.9.81:8080/',
-            'http://10.48.9.81:8081/'
+            'http://10.48.9.85:8080/',
+            'http://10.48.9.85:8081/'
         ];
     }
 ?>

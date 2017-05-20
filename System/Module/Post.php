@@ -3,7 +3,7 @@
 
     function PostWrite($App)
     {
-        $Message  = isset($_POST["Message"])  ? $_POST["Message"]  : "";
+        $Message  = isset($_POST["Message"])  ? urldecode($_POST["Message"]) : "";
         $Category = isset($_POST["Category"]) ? $_POST["Category"] : 100;
         $Type     = isset($_POST["Type"])     ? $_POST["Type"]     : 0;
         $Link     = isset($_POST["Link"])     ? $_POST["Link"]     : "";
@@ -15,7 +15,7 @@
             $Message = mb_substr($Message, 0, 150);
 
         $NewLine = 0;
-        $Result = "";
+        $ResultMessage = "";
 
         for ($I = 0; $I < strlen($Message); $I++)
         {
@@ -25,11 +25,10 @@
             if ($NewLine > 2 && ord($Message[$I]) == 10)
                 continue;
 
-            $Result .= $Message[$I];
+            $ResultMessage .= $Message[$I];
         }
 
-        $Message = $Result;
-
+        $Message = $ResultMessage;
         $Data = array();
 
         if ($Type == 1)
@@ -41,18 +40,7 @@
                 if ($ImageCount > 2)
                     continue;
 
-                $FileName = $File['name'];
-                $FileSize = $File['size'];
-                $FileTemp = $File['tmp_name'];
-                $FileType = $File['type'];
-
-                if (!in_array(strtolower(pathinfo($FileName, PATHINFO_EXTENSION)), array("jpeg", "jpg")))
-                    continue;
-
-                if ($FileType != "image/jpeg")
-                    continue;
-
-                if ($FileSize > 2097152)
+                if ($File['size'] > 2097152)
                     continue;
 
                 $ImageCount++;
@@ -62,7 +50,7 @@
                 curl_setopt($Channel, CURLOPT_URL, $Server);
                 curl_setopt($Channel, CURLOPT_HEADER, false);
                 curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($Server), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($FileTemp, $FileType)]);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($Server), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($File['tmp_name'], "image/jpeg")]);
                 $URL = curl_exec($Channel);
                 curl_close($Channel);
 
@@ -78,18 +66,7 @@
                 if ($VideoCount > 0)
                     continue;
 
-                $FileName = $File['name'];
-                $FileSize = $File['size'];
-                $FileTemp = $File['tmp_name'];
-                $FileType = $File['type'];
-
-                if (!in_array(strtolower(pathinfo($FileName, PATHINFO_EXTENSION)), array("mp4")))
-                    continue;
-
-                if ($FileType != "video/mp4")
-                    continue;
-
-                if ($FileSize > 15728640)
+                if ($File['size'] > 15728640)
                     continue;
 
                 $VideoCount++;
@@ -99,7 +76,7 @@
                 curl_setopt($Channel, CURLOPT_URL, $Server);
                 curl_setopt($Channel, CURLOPT_HEADER, false);
                 curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_VIDEO", "TOKEN" => Upload::GetServerToken($Server), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($FileTemp, $FileType)]);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_VIDEO", "TOKEN" => Upload::GetServerToken($Server), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($File['tmp_name'], "video/mp4")]);
                 $URL = curl_exec($Channel);
                 curl_close($Channel);
 
