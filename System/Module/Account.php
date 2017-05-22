@@ -82,9 +82,9 @@
 
         $App->DB->Update('account', ['_id' => $ID], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => $Time]]]);
 
-        $Account = $App->DB->Find('account', ["_id" => $ID], ["projection" => ["_id" => 0, "Username" => 1, "Avatar" => 1]])->toArray();
+        $Account = $App->DB->Find('account', ["_id" => $ID], ["projection" => ["_id" => 0, "Username" => 1]])->toArray();
 
-        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID->__toString(), "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
+        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID->__toString(), "Username" => $Account[0]->Username, "Avatar" => ""]);
     }
 
     function SignIn($App)
@@ -118,9 +118,9 @@
         $App->RateLimit->Call('SignInQuery.1.2000');
 
         if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
-            $Account = $App->DB->Find('account', ['Username' => $EmailOrUsername], ["projection" => ["Username" => 1, "Password" => 1, "Avatar" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['Username' => $EmailOrUsername], ["projection" => ["Username" => 1, "ServerID" => 1, "Password" => 1, "Avatar" => 1]])->toArray();
         else
-            $Account = $App->DB->Find('account', ['Email' => $EmailOrUsername], ["projection" => ["Username" => 1, "Password" => 1, "Avatar" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['Email' => $EmailOrUsername], ["projection" => ["Username" => 1, "ServerID" => 1, "Password" => 1, "Avatar" => 1]])->toArray();
 
         if (empty($Account))
             JSON(["Message" => 8]);
@@ -138,7 +138,12 @@
 
         $App->DB->Update('account', ['_id' => $Account[0]->_id], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
+        if (isset($Account[0]->ServerID))
+            $ServerURL = Upload::GetServerURL($Account[0]->ServerID);
+        else
+            $ServerURL = "";
+
+        JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $ServerURL . $Account[0]->Avatar : "")]);
     }
 
     function ResetPassword($App)
@@ -211,7 +216,7 @@
             $Session .= " - " . $_SERVER['REMOTE_ADDR'];
 
         $App->RateLimit->Call('SignInGoogleQuery.1.2000');
-        $Account = $App->DB->Find('account', ['GoogleID' => $PayLoad['sub']], ["projection" => ["Username" => 1, "Avatar" => 1]])->toArray();
+        $Account = $App->DB->Find('account', ['GoogleID' => $PayLoad['sub']], ["projection" => ["Username" => 1, "ServerID" => 1, "Avatar" => 1]])->toArray();
 
         if (empty($Account))
         {
@@ -234,7 +239,12 @@
 
             $App->DB->Update('account', ['_id' => new MongoDB\BSON\ObjectID($ID)], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")]);
+            if (isset($Account[0]->ServerID))
+                $ServerURL = Upload::GetServerURL($Account[0]->ServerID);
+            else
+                $ServerURL = "";
+
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $ServerURL . $Account[0]->Avatar : "")]);
         }
     }
 ?>
