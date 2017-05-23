@@ -29,7 +29,10 @@
 
         public static function GetServerURL($ID)
         {
-           return $ServerList[$ID];
+            if (array_key_exists($ID, self::$ServerList))
+                return self::$ServerList[$ID];
+
+            return 0;
         }
 
         public static function DeleteFile($ID, $URL)

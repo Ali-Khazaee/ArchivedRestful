@@ -3,10 +3,10 @@
 
     function PostWrite($App)
     {
-        $Message  = isset($_POST["Message"])  ? urldecode($_POST["Message"]) : "";
+        $Message = isset($_POST["Message"]) ? urldecode($_POST["Message"]) : "";
         $Category = isset($_POST["Category"]) ? $_POST["Category"] : 100;
-        $Type     = isset($_POST["Type"])     ? $_POST["Type"]     : 0;
-        $Link     = isset($_POST["Link"])     ? $_POST["Link"]     : "";
+        $Type = isset($_POST["Type"]) ? $_POST["Type"] : 0;
+        $Link = isset($_POST["Link"]) ? $_POST["Link"] : "";
 
         if ($Type == 0 && strlen($Message) < 20)
             JSON(["Message" => 1]);
@@ -22,7 +22,7 @@
             if (ord($Message[$I]) == 10)
                 $NewLine++;
 
-            if ($NewLine > 2 && ord($Message[$I]) == 10)
+            if ($NewLine > 4 && ord($Message[$I]) == 10)
                 continue;
 
             $ResultMessage .= $Message[$I];
@@ -30,8 +30,8 @@
 
         $Data = array();
         $Message = $ResultMessage;
-        $ServerID = Upload::GetBestServerID();
-        $ServerURL = Upload::GetServerURL($ServerID);
+        $DataServerID = Upload::GetBestServerID();
+        $DataServerURL = Upload::GetServerURL($DataServerID);
 
         if ($Type == 1)
         {
@@ -48,10 +48,10 @@
                 $ImageCount++;
 
                 $Channel = curl_init();
-                curl_setopt($Channel, CURLOPT_URL, $ServerURL);
+                curl_setopt($Channel, CURLOPT_URL, $DataServerURL);
                 curl_setopt($Channel, CURLOPT_HEADER, false);
                 curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($ServerID), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($File['tmp_name'], "image/jpeg")]);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($DataServerID), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($File['tmp_name'], "image/jpeg")]);
                 $URL = curl_exec($Channel);
                 curl_close($Channel);
 
@@ -73,10 +73,10 @@
                 $VideoCount++;
 
                 $Channel = curl_init();
-                curl_setopt($Channel, CURLOPT_URL, $ServerURL);
+                curl_setopt($Channel, CURLOPT_URL, $DataServerURL);
                 curl_setopt($Channel, CURLOPT_HEADER, false);
                 curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_VIDEO", "TOKEN" => Upload::GetServerToken($ServerID), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($File['tmp_name'], "video/mp4")]);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_VIDEO", "TOKEN" => Upload::GetServerToken($DataServerID), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($File['tmp_name'], "video/mp4")]);
                 $URL = curl_exec($Channel);
                 curl_close($Channel);
 
@@ -93,11 +93,11 @@
 
         $Result = array("OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "Type" => $Type, "Category" => $Category, "Time" => time(), "Comment" => true);
 
-        if ($Type == 1 || $Type == 2)
-            $Result["ServerID"] = $ServerID;
-
         if (!empty($Message))
             $Result["Message"] = $Message;
+
+        if ($Type == 1 || $Type == 2)
+            $Result["DataServer"] = $DataServerID;
 
         if (!empty($Data))
             $Result["Data"] = $Data;
@@ -119,7 +119,7 @@
 
         foreach ($PostList as $Post)
         {
-            $Account = $App->DB->Find('account', ['_id' => $Post->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "ServerID" => 1, "Avatar" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Post->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
 
             if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
                 $Like = true;
@@ -141,10 +141,23 @@
             if (!isset($CommentCount) || empty($CommentCount))
                 $CommentCount = 0;
 
-            if (isset($Account[0]->ServerID))
-                $ServerURL = Upload::GetServerURL($Account[0]->ServerID);
+            if (isset($Account[0]->AvatarServer))
+                $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer);
             else
-                $ServerURL = "";
+                $AvatarServerURL = "";
+
+            $PostData = array();
+
+            if ($Post->Type == 1 || $Post->Type == 2)
+            {
+                if (isset($Post->DataServer))
+                    $DataServerURL = Upload::GetServerURL($Post->DataServer);
+                else
+                    $DataServerURL = "";
+
+                foreach ($Post->Data As $Data)
+                    array_push($PostData, $DataServerURL . $Data);
+            }
 
             array_push($Result, array("PostID"       => $Post->_id->__toString(),
                                       "OwnerID"      => $Post->OwnerID->__toString(),
@@ -153,9 +166,9 @@
                                       "Time"         => $Post->Time,
                                       "Comment"      => $Post->Comment,
                                       "Message"      => isset($Post->Message) ? $Post->Message : "",
-                                      "Data"         => isset($Post->Data) ? $Post->Data : "",
+                                      "Data"         => $PostData,
                                       "Username"     => $Account[0]->Username,
-                                      "Avatar"       => isset($Account[0]->Avatar) ? $ServerURL . $Account[0]->Avatar : "",
+                                      "Avatar"       => isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "",
                                       "Like"         => $Like,
                                       "LikeCount"    => $LikeCount,
                                       "CommentCount" => $CommentCount,
@@ -236,14 +249,14 @@
 
         foreach ($LikeList as $Like)
         {
-            $Account = $App->DB->Find('account', ['_id' => $Like->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "ServerID" => 1, "Avatar" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Like->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
 
-            if (isset($Account[0]->ServerID))
-                $ServerURL = Upload::GetServerURL($Account[0]->ServerID);
+            if (isset($Account[0]->AvatarServer))
+                $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer);
             else
-                $ServerURL = "";
+                $AvatarServerURL = "";
 
-            array_push($Result, array("OwnerID" => $Like->OwnerID->__toString(), "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $ServerURL . $Account[0]->Avatar : ""), "Time" => $Like->Time));
+            array_push($Result, array("OwnerID" => $Like->OwnerID->__toString(), "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : ""), "Time" => $Like->Time));
         }
 
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);
@@ -260,7 +273,7 @@
             JSON(["Message" => 2]);
 
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
-        $Account = $App->DB->Find('account', ['_id' => $Post[0]->OwnerID], ['projection' => ["_id" => 0, "Username" => 1, "ServerID" => 1, "Avatar" => 1]])->toArray();
+        $Account = $App->DB->Find('account', ['_id' => $Post[0]->OwnerID], ['projection' => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
 
         if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]])->toArray()[0]))
             $Like = true;
@@ -282,10 +295,23 @@
         if (!isset($CommentCount) || empty($CommentCount))
             $CommentCount = 0;
 
-        if (isset($Account[0]->ServerID))
-            $ServerURL = Upload::GetServerURL($Account[0]->ServerID);
+        if (isset($Account[0]->AvatarServer))
+            $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer);
         else
-            $ServerURL = "";
+            $AvatarServerURL = "";
+
+        $PostData = array();
+
+        if ($Post->Type == 1 || $Post->Type == 2)
+        {
+            if (isset($Post[0]->DataServer))
+                $DataServerURL = Upload::GetServerURL($Post[0]->DataServer);
+            else
+                $DataServerURL = "";
+
+            foreach ($Post->Data As $Data)
+                array_push($PostData, $DataServerURL . $Data);
+        }
 
         $Result = array("PostID"       => $Post[0]->_id->__toString(),
                         "OwnerID"      => $Post[0]->OwnerID->__toString(),
@@ -294,9 +320,9 @@
                         "Time"         => $Post[0]->Time,
                         "Comment"      => $Post[0]->Comment,
                         "Message"      => isset($Post[0]->Message) ? $Post[0]->Message : "",
-                        "Data"         => isset($Post[0]->Data) ? $Post[0]->Data : "",
+                        "Data"         => $PostData,
                         "Username"     => $Account[0]->Username,
-                        "Avatar"       => isset($Account[0]->Avatar) ? $ServerURL . $Account[0]->Avatar : "",
+                        "Avatar"       => isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "",
                         "Like"         => $Like,
                         "LikeCount"    => $LikeCount,
                         "CommentCount" => $CommentCount,
@@ -345,7 +371,7 @@
 
         foreach ($CommentList as $Comment)
         {
-            $Account = $App->DB->Find('account', ['_id' => $Comment->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "ServerID" => 1, "Avatar" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Comment->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
 
             if (isset($App->DB->Find('post_comment_like', ['$and' => [["OwnerID" => $Comment->OwnerID, "CommentID" => $Comment->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
                 $Like = true;
@@ -357,12 +383,12 @@
             if (!isset($LikeCount) || empty($LikeCount))
                 $LikeCount = 0;
 
-            if (isset($Account[0]->ServerID))
-                $ServerURL = Upload::GetServerURL($Account[0]->ServerID);
+            if (isset($Account[0]->AvatarServer))
+                $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer);
             else
-                $ServerURL = "";
+                $AvatarServerURL = "";
 
-            array_push($Result, array("CommentID" => $Comment->_id->__toString(), "OwnerID" => $Comment->OwnerID->__toString(), "Time" => $Comment->Time, "Message" => $Comment->Message, "LikeCount" => $LikeCount, "Like" => $Like, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $Account[0]->Avatar : "")));
+            array_push($Result, array("CommentID" => $Comment->_id->__toString(), "OwnerID" => $Comment->OwnerID->__toString(), "Time" => $Comment->Time, "Message" => $Comment->Message, "LikeCount" => $LikeCount, "Like" => $Like, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "")));
         }
 
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);
