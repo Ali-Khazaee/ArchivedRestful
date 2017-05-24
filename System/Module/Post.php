@@ -302,14 +302,14 @@
 
         $PostData = array();
 
-        if ($Post->Type == 1 || $Post->Type == 2)
+        if ($Post[0]->Type == 1 || $Post[0]->Type == 2)
         {
             if (isset($Post[0]->DataServer))
                 $DataServerURL = Upload::GetServerURL($Post[0]->DataServer);
             else
                 $DataServerURL = "";
 
-            foreach ($Post->Data As $Data)
+            foreach ($Post[0]->Data As $Data)
                 array_push($PostData, $DataServerURL . $Data);
         }
 
