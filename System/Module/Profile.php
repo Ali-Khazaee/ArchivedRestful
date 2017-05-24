@@ -7,7 +7,7 @@
 
         if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
         {
-            $Account = $App->DB->Find('account', ['Username' => $ID], ["projection" => ["_id" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
 
             if (!empty($Account))
                 $ID = $Account[0]->_id;
