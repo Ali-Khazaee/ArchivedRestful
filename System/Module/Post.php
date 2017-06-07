@@ -158,6 +158,10 @@
                 foreach ($Post->Data As $Data)
                     array_push($PostData, $DataServerURL . $Data);
             }
+            elseif ($Post->Type == 3)
+            {
+                $PostData = $Post->Data;
+            }
 
             if (isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $Post->OwnerID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
                 $Follow = true;
@@ -182,6 +186,16 @@
         }
 
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);
+    }
+
+    function PostReport($App)
+    {
+        if (!isset($_POST["PostID"]) || empty($_POST["PostID"]))
+            JSON(["Message" => 1]);
+
+        $App->DB->Insert('report', ["PostID" => new MongoDB\BSON\ObjectID($_POST["PostID"]), "OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "Time" => time()]);
+
+        JSON(["Message" => 1000]); 
     }
 
     function PostDelete($App)

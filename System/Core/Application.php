@@ -23,6 +23,7 @@
             $Router->Call('PostWrite',         function() { PostWrite($this);         }, true, 'PostWrite.10.2000');
             $Router->Call('PostList',          function() { PostList($this);          }, true, 'PostList.10.3000');
             $Router->Call('PostDelete',        function() { PostDelete($this);        }, true, 'PostDelete.10.2000');
+            $Router->Call('PostReport',        function() { PostReport($this);        }, true, 'PostReport.10.2000');
             $Router->Call('PostTurnComment',   function() { PostTurnComment($this);   }, true, 'PostTurnComment.10.2000');
             $Router->Call('PostLike',          function() { PostLike($this);          }, true, 'PostLike.10.2000');
             $Router->Call('PostLikeList',      function() { PostLikeList($this);      }, true, 'PostLikeList.10.2000');

@@ -104,6 +104,10 @@
                 foreach ($Post->Data As $Data)
                     array_push($PostData, $DataServerURL . $Data);
             }
+            elseif ($Post->Type == 3)
+            {
+                $PostData = $Post->Data;
+            }
 
             array_push($Result, array("PostID"       => $Post->_id->__toString(),
                                       "OwnerID"      => $Post->OwnerID->__toString(),
@@ -181,6 +185,10 @@
 
                 foreach ($Post->Data As $Data)
                     array_push($PostData, $PostServerURL . $Data);
+            }
+            elseif ($Post->Type == 3)
+            {
+                $PostData = $Post->Data;
             }
 
             array_push($Result, array("PostID"       => $Post[0]->_id->__toString(),
