@@ -363,6 +363,7 @@
             JSON(["Message" => 1]);
 
         $Result = array();
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
 
         if (isset($_POST["CommentTime"]))
             $CommentList = $App->DB->Find('post_comment', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"]), 'Time' => ['$gt' => (int) $_POST["CommentTime"]]], ['limit' => 8, 'sort' => ['Time' => 1]])->toArray();
@@ -373,7 +374,7 @@
         {
             $Account = $App->DB->Find('account', ['_id' => $Comment->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
 
-            if (isset($App->DB->Find('post_comment_like', ['$and' => [["OwnerID" => $Comment->OwnerID, "CommentID" => $Comment->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+            if (isset($App->DB->Find('post_comment_like', ['$and' => [["OwnerID" => $OwnerID, "CommentID" => $Comment->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
                 $Like = true;
             else
                 $Like = false;
