@@ -4,7 +4,9 @@
     function ProfileGet($App)
     {
         $Self = true;
-        $ID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $Follow = false;
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $ID = $OwnerID;
 
         if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
         {
@@ -18,6 +20,9 @@
                 $ID = $Account[0]->_id;
             }
         }
+
+        if ($Self == false && isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $ID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+            $Follow = true;
 
         $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "CoverServer" => 1, "Description" => 1, "Link" => 1, "Name" => 1, "Cover" => 1, "Avatar" => 1]])->toArray();
 
@@ -53,7 +58,7 @@
                                     "Follower"    => $Follower,
                                     "Following"   => $Following));
 
-        JSON(["Message" => 1000, "Result" => $Result, "Self" => $Self]);
+        JSON(["Message" => 1000, "Result" => $Result, "Self" => $Self, "Follow" => $Follow]);
     }
 
     function ProfileGetPost($App)
