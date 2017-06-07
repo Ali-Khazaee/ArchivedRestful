@@ -159,6 +159,11 @@
                     array_push($PostData, $DataServerURL . $Data);
             }
 
+            if (isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $Post->OwnerID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Follow = true;
+            else
+                $Follow = false;
+
             array_push($Result, array("PostID"       => $Post->_id->__toString(),
                                       "OwnerID"      => $Post->OwnerID->__toString(),
                                       "Type"         => $Post->Type,
@@ -172,7 +177,8 @@
                                       "Like"         => $Like,
                                       "LikeCount"    => $LikeCount,
                                       "CommentCount" => $CommentCount,
-                                      "BookMark"     => $BookMark));
+                                      "BookMark"     => $BookMark,
+                                      "Follow"       => $Follow));
         }
 
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);
