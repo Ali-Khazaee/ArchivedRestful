@@ -3,21 +3,27 @@
 
     function ProfileGet($App)
     {
+        $Self = true;
         $ID = new MongoDB\BSON\ObjectID($App->Auth->ID);
 
         if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
         {
-            $Account = $App->DB->Find('account', ['Username' => $ID], ["projection" => ["_id" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
 
             if (!empty($Account))
+            {
+                if ($ID != $Account[0]->_id)
+                    $Self = false;
+
                 $ID = $Account[0]->_id;
+            }
         }
 
         $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "CoverServer" => 1, "Description" => 1, "Link" => 1, "Name" => 1, "Cover" => 1, "Avatar" => 1]])->toArray();
 
         $Post = $App->DB->Command(["count" => "post", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
-        $Follower = $App->DB->Command(["count" => "follower", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
-        $Following = $App->DB->Command(["count" => "following", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
+        $Follower = $App->DB->Command(["count" => "follow", "query" => ['Follower' => $ID]])->toArray()[0]->n;
+        $Following = $App->DB->Command(["count" => "follow", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
 
         if (!isset($Post) || empty($Post))
             $Post = 0;
@@ -47,7 +53,7 @@
                                     "Follower"    => $Follower,
                                     "Following"   => $Following));
 
-        JSON(["Message" => 1000, "Result" => $Result]);
+        JSON(["Message" => 1000, "Result" => $Result, "Self" => $Self]);
     }
 
     function ProfileGetPost($App)

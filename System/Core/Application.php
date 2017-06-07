@@ -42,6 +42,10 @@
             $Router->Call('ProfileCoverDelete',  function() { ProfileCoverDelete($this);  }, true, 'ProfileCoverDelete.10.3000');
             $Router->Call('ProfileAvatarDelete', function() { ProfileAvatarDelete($this); }, true, 'ProfileAvatarDelete.10.3000');
 
+            $Router->Call('Follow',       function() { Follow($this);       }, true, 'Follow.10.3000');
+            $Router->Call('FollowingGet', function() { FollowingGet($this); }, true, 'FollowingGet.10.3000');
+            $Router->Call('FollowersGet', function() { FollowersGet($this); }, true, 'FollowersGet.10.3000');
+
             $Router->Call('LastOnline', function() { LastOnline($this); }, true, 'LastOnline.10.120000');
 
             $Router->Execute($this);
