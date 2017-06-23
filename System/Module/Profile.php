@@ -27,11 +27,19 @@
         $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "CoverServer" => 1, "Description" => 1, "Link" => 1, "Name" => 1, "Cover" => 1, "Avatar" => 1]])->toArray();
 
         $Post = $App->DB->Command(["count" => "post", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
+        $Comment = $App->DB->Command(["count" => "post_comment", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
+        $Like = $App->DB->Command(["count" => "post_like", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
         $Follower = $App->DB->Command(["count" => "follow", "query" => ['Follower' => $ID]])->toArray()[0]->n;
         $Following = $App->DB->Command(["count" => "follow", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
 
         if (!isset($Post) || empty($Post))
             $Post = 0;
+
+        if (!isset($Comment) || empty($Comment))
+            $Comment = 0;
+
+        if (!isset($Like) || empty($Like))
+            $Like = 0;
 
         if (!isset($Follower) || empty($Follower))
             $Follower = 0;
@@ -54,11 +62,16 @@
                                     "Link"        => isset($Account[0]->Link)        ? $Account[0]->Link : "",
                                     "Cover"       => isset($Account[0]->Cover)       ? $CoverServerURL . $Account[0]->Cover : "",
                                     "Avatar"      => isset($Account[0]->Avatar)      ? $AvatarServerURL . $Account[0]->Avatar : "",
+                                    "Location"    => isset($Account[0]->Location)    ? $Account[0]->Location : "",
+                                    "Self"        => $Self,
+                                    "Follow"      => $Follow,
                                     "Post"        => $Post,
+                                    "Comment"     => $Comment,
+                                    "Like"        => $Like,
                                     "Follower"    => $Follower,
                                     "Following"   => $Following));
 
-        JSON(["Message" => 1000, "Result" => $Result, "Self" => $Self, "Follow" => $Follow]);
+        JSON(["Message" => 1000, "Result" => $Result]);
     }
 
     function ProfileGetPost($App)
@@ -405,5 +418,220 @@
         $App->DB->Update('account', ['_id' => $ID], ['$set' => ['Avatar' => "", "AvatarServer" => 0]]);
 
         JSON(["Message" => 1000]);
+    }
+
+    function ProfilePostGet($App)
+    {
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $ID = $OwnerID;
+
+        if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        {
+            $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
+
+            if (!empty($Account))
+                $ID = $Account[0]->_id;
+        }
+
+        $Result = array();
+        $PostList = $App->DB->Find('post', ["OwnerID" => $ID], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+
+        foreach ($PostList as $Post)
+        {
+            $Account = $App->DB->Find('account', ['_id' => $Post->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+
+            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Like = true;
+            else
+                $Like = false;
+
+            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $BookMark = true;
+            else
+                $BookMark = false;
+            
+            $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post->_id]])->toArray()[0]->n;
+
+            if (!isset($LikeCount) || empty($LikeCount))
+                $LikeCount = 0;
+
+            $CommentCount = $App->DB->Command(["count" => "post_comment", "query" => ['PostID' => $Post->_id]])->toArray()[0]->n;
+
+            if (!isset($CommentCount) || empty($CommentCount))
+                $CommentCount = 0;
+
+            if (isset($Account[0]->AvatarServer))
+                $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer);
+            else
+                $AvatarServerURL = "";
+
+            $PostData = array();
+
+            if ($Post->Type == 1 || $Post->Type == 2)
+            {
+                if (isset($Post->DataServer))
+                    $DataServerURL = Upload::GetServerURL($Post->DataServer);
+                else
+                    $DataServerURL = "";
+
+                foreach ($Post->Data As $Data)
+                    array_push($PostData, $DataServerURL . $Data);
+            }
+            elseif ($Post->Type == 3)
+            {
+                $PostData = $Post->Data;
+            }
+
+            if (isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $Post->OwnerID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Follow = true;
+            else
+                $Follow = false;
+
+            array_push($Result, array("PostID"       => $Post->_id->__toString(),
+                                      "OwnerID"      => $Post->OwnerID->__toString(),
+                                      "Type"         => $Post->Type,
+                                      "Category"     => $Post->Category,
+                                      "Time"         => $Post->Time,
+                                      "Comment"      => $Post->Comment,
+                                      "Message"      => isset($Post->Message) ? $Post->Message : "",
+                                      "Data"         => $PostData,
+                                      "Username"     => $Account[0]->Username,
+                                      "Avatar"       => isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "",
+                                      "Like"         => $Like,
+                                      "LikeCount"    => $LikeCount,
+                                      "CommentCount" => $CommentCount,
+                                      "BookMark"     => $BookMark,
+                                      "Follow"       => $Follow));
+        }
+
+        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
+    }
+
+    function ProfileCommentGet($App)
+    {
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $ID = $OwnerID;
+
+        if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        {
+            $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
+
+            if (!empty($Account))
+                $ID = $Account[0]->_id;
+        }
+
+        $Result = array();
+        $CommentList = $App->DB->Find('post_comment', ["OwnerID" => $ID], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
+
+        foreach ($CommentList as $Comment)
+        {
+            $Post = $App->DB->Find('post', ["_id" => $Comment->PostID], ["projection" => ["_id" => 0, "OwnerID" => 1]])->toArray();
+
+            $Account = $App->DB->Find('account', ['_id' => $Comment->OwnerID], ["projection" => ["_id" => 0, "Username" => 1]])->toArray();
+            $PostAccount = $App->DB->Find('account', ['_id' => $Post[0]->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+
+            if (isset($PostAccount[0]->AvatarServer))
+                $AvatarServerURL = Upload::GetServerURL($PostAccount[0]->AvatarServer);
+            else
+                $AvatarServerURL = "";
+
+            array_push($Result, array("PostID"   => $Comment->PostID->__toString(),
+                                      "Username" => $Account[0]->Username,
+                                      "Avatar"   => isset($PostAccount[0]->Avatar) ? $AvatarServerURL . $PostAccount[0]->Avatar : "",
+                                      "Target"   => $PostAccount[0]->Username,
+                                      "Comment"  => $Comment->Message,
+                                      "Time"     => $Comment->Time));
+        }
+
+        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
+    }
+
+    function ProfileLikeGet($App)
+    {
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $ID = $OwnerID;
+
+        if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        {
+            $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
+
+            if (!empty($Account))
+                $ID = $Account[0]->_id;
+        }
+
+        $Result = array();
+        $LikeList = $App->DB->Find('post_like', ["OwnerID" => $ID], ["projection" => ["PostID" => 1], 'skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+
+        foreach ($LikeList as $Like)
+        {
+            $Post = $App->DB->Find('post', ["_id" => $Like->PostID])->toArray();
+
+            $Account = $App->DB->Find('account', ['_id' => $Post[0]->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+
+            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $IsLike = true;
+            else
+                $IsLike = false;
+
+            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $BookMark = true;
+            else
+                $BookMark = false;
+            
+            $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+            if (!isset($LikeCount) || empty($LikeCount))
+                $LikeCount = 0;
+
+            $CommentCount = $App->DB->Command(["count" => "post_comment", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+            if (!isset($CommentCount) || empty($CommentCount))
+                $CommentCount = 0;
+
+            if (isset($Account[0]->AvatarServer))
+                $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer);
+            else
+                $AvatarServerURL = "";
+
+            $PostData = array();
+
+            if ($Post[0]->Type == 1 || $Post[0]->Type == 2)
+            {
+                if (isset($Post[0]->DataServer))
+                    $DataServerURL = Upload::GetServerURL($Post[0]->DataServer);
+                else
+                    $DataServerURL = "";
+
+                foreach ($Post[0]->Data As $Data)
+                    array_push($PostData, $DataServerURL . $Data);
+            }
+            elseif ($Post[0]->Type == 3)
+            {
+                $PostData = $Post[0]->Data;
+            }
+
+            if (isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $Post[0]->OwnerID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Follow = true;
+            else
+                $Follow = false;
+
+            array_push($Result, array("PostID"       => $Post[0]->_id->__toString(),
+                                      "OwnerID"      => $Post[0]->OwnerID->__toString(),
+                                      "Type"         => $Post[0]->Type,
+                                      "Category"     => $Post[0]->Category,
+                                      "Time"         => $Post[0]->Time,
+                                      "Comment"      => $Post[0]->Comment,
+                                      "Message"      => isset($Post[0]->Message) ? $Post[0]->Message : "",
+                                      "Data"         => $PostData,
+                                      "Username"     => $Account[0]->Username,
+                                      "Avatar"       => isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "",
+                                      "Like"         => $IsLike,
+                                      "LikeCount"    => $LikeCount,
+                                      "CommentCount" => $CommentCount,
+                                      "BookMark"     => $BookMark,
+                                      "Follow"       => $Follow));
+        }
+
+        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
     }
 ?>

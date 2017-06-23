@@ -42,6 +42,9 @@
             $Router->Call('ProfileGetEdit',      function() { ProfileGetEdit($this);      }, true, 'ProfileGetEdit.10.3000');
             $Router->Call('ProfileCoverDelete',  function() { ProfileCoverDelete($this);  }, true, 'ProfileCoverDelete.10.3000');
             $Router->Call('ProfileAvatarDelete', function() { ProfileAvatarDelete($this); }, true, 'ProfileAvatarDelete.10.3000');
+            $Router->Call('ProfilePostGet',      function() { ProfilePostGet($this);      }, true, 'ProfilePostGet.10.3000');
+            $Router->Call('ProfileCommentGet',   function() { ProfileCommentGet($this);   }, true, 'ProfileCommentGet.10.3000');
+            $Router->Call('ProfileLikeGet',      function() { ProfileLikeGet($this);      }, true, 'ProfileLikeGet.10.3000');
 
             $Router->Call('Follow',       function() { Follow($this);       }, true, 'Follow.10.3000');
             $Router->Call('FollowingGet', function() { FollowingGet($this); }, true, 'FollowingGet.10.3000');

@@ -37,7 +37,7 @@
 
         public static function DeleteFile($ID, $URL)
         {
-            $Server = $ServerList[$ID];
+            $Server = self::$ServerList[$ID];
 
             $Channel = curl_init();
             curl_setopt($Channel, CURLOPT_URL, $Server);
