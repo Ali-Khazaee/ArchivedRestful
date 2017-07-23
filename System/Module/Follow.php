@@ -22,11 +22,17 @@
         {
             $IsFollow = false;
             $App->DB->Remove('follow', $Query);
+
+            if ($FollowID != $OwnerID)
+                $App->DB->Remove('notification', ["OwnerID" => $FollowID, "SenderID" => $OwnerID, "Type" => 3]);
         }
         else
         {
             $IsFollow = true;
             $App->DB->Insert('follow', ["OwnerID" => $OwnerID, "Follower" => $FollowID, "Time" => time()]);
+
+            if ($FollowID != $OwnerID)
+                $App->DB->Insert('notification', ["OwnerID" => $FollowID, "SenderID" => $OwnerID, "Type" => 3, "Seen" => 0, "Time" => time()]);
         }
 
         JSON(["Message" => 1000, "Follow" => $IsFollow]);

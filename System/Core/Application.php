@@ -19,6 +19,7 @@
             $Router->Call('SignIn',              function() { SignIn($this);              }, false, 'SignIn.10.1000');
             $Router->Call('ResetPassword',       function() { ResetPassword($this);       }, false, 'ResetPassword.10.1000');
             $Router->Call('SignInGoogle',        function() { SignInGoogle($this);        }, false, 'SignInGoogle.10.1000');
+            $Router->Call('ChangePassword',      function() { ChangePassword($this);      }, true, 'ChangePassword.10.1000');
 
             $Router->Call('PostWrite',         function() { PostWrite($this);         }, true, 'PostWrite.10.2000');
             $Router->Call('PostList',          function() { PostList($this);          }, true, 'PostList.10.3000');
@@ -33,6 +34,7 @@
             $Router->Call('PostCommentLike',   function() { PostCommentLike($this);   }, true, 'PostCommentLike.10.2000');
             $Router->Call('PostCommentDelete', function() { PostCommentDelete($this); }, true, 'PostCommentDelete.10.2000');
             $Router->Call('PostBookMark',      function() { PostBookMark($this);      }, true, 'PostBookMark.10.2000');
+            $Router->Call('PostInboxList',     function() { PostInboxList($this);     }, true, 'PostInboxList.10.2000');
 
             $Router->Call('ProfileGet',          function() { ProfileGet($this);          }, true, 'ProfileGet.10.3000');
             $Router->Call('ProfileGetPost',      function() { ProfileGetPost($this);      }, true, 'ProfileGetPost.10.3000');
@@ -50,7 +52,15 @@
             $Router->Call('FollowingGet', function() { FollowingGet($this); }, true, 'FollowingGet.10.3000');
             $Router->Call('FollowersGet', function() { FollowersGet($this); }, true, 'FollowersGet.10.3000');
 
-            $Router->Call('LastOnline', function() { LastOnline($this); }, true, 'LastOnline.10.120000');
+            $Router->Call('SearchPeople',  function() { SearchPeople($this); },  true, 'SearchPeople.10.3000');
+            $Router->Call('SearchTag',     function() { SearchTag($this); },     true, 'SearchTag.10.3000');
+            $Router->Call('SearchTagList', function() { SearchTagList($this); }, true, 'SearchTagList.10.3000');
+
+            $Router->Call('LastOnline',          function() { LastOnline($this);          }, true, 'LastOnline.10.120000');
+            $Router->Call('NotificationList',    function() { NotificationList($this);    }, true, 'NotificationList.10.3000');
+            $Router->Call('NotificationService', function() { NotificationService($this); }, true, 'NotificationService.10.3000');
+
+            $Router->Call('PostCategoryList', function() { PostCategoryList($this); }, true, 'PostCategoryList.10.3000');
 
             $Router->Execute($this);
         }

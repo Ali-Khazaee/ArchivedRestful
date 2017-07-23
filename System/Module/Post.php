@@ -91,7 +91,8 @@
         if (empty($Category) || $Category > 16 || $Category < 1)
             $Category = 100;
 
-        $Result = array("OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "Type" => $Type, "Category" => $Category, "Time" => time(), "Comment" => true);
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $Result = array("OwnerID" => $OwnerID, "Type" => $Type, "Category" => $Category, "Time" => time(), "Comment" => true);
 
         if (!empty($Message))
             $Result["Message"] = $Message;
@@ -102,7 +103,39 @@
         if (!empty($Data))
             $Result["Data"] = $Data;
 
-        $App->DB->Insert('post', $Result);
+        $PostID = $App->DB->Insert('post', $Result);
+
+        if (!empty($Message))
+        {
+            preg_match_all('/@(\\w+)/', $Message, $UsernameList);
+            $UsernameList = explode(',', implode(',', $UsernameList[1]));
+
+            if (count($UsernameList) > 0)
+            {
+                for ($X = 0; $X < count($UsernameList); $X++)
+                {
+                    $Account = $App->DB->Find('account', ['Username' => $UsernameList[$X]], ["projection" => ["_id" => 1]])->toArray();
+
+                    if (empty($Account))
+                        continue;
+
+                    if ($Account[0]->_id != $OwnerID)
+                        $App->DB->Insert('notification', ["OwnerID" => $Account[0]->_id, "SenderID" => $OwnerID, "PostID" => $PostID, "Seen" => 0, "Type" => 1, "Time" => time()]);
+                }
+            }
+
+            preg_match_all('/#(\\w+)/', $Message, $HashTagList);
+            $HashTagList = explode(',', implode(',', $HashTagList[1]));
+
+            if (count($HashTagList) > 0)
+            {
+                for ($X = 0; $X < count($HashTagList); $X++)
+                {
+                    if (!isset($App->DB->Find('tag', ['Tag' => $HashTagList[$X]])->toArray()[0]))
+                        $App->DB->Insert('tag', ['Tag' => $HashTagList[$X]]);
+                }
+            }
+        }
 
         JSON(["Message" => 1000]);
     }
@@ -204,11 +237,18 @@
             JSON(["Message" => 1]);
 
         $PostID = new MongoDB\BSON\ObjectID($_POST["PostID"]);
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $Post = $App->DB->Find('post', ['$and' => [["OwnerID" => $OwnerID, "_id" => $PostID]]], ["projection" => ["Message" => 1]])->toArray();
 
-        if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => new MongoDB\BSON\ObjectID($App->Auth->ID), "_id" => $PostID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+        if (isset($Post) && !empty($Post))
         {
+            $App->DB->Remove('notification', ["PostID" => $PostID]);
+
             foreach ($App->DB->Find('post_comment', ["PostID" => $PostID], ["projection" => ["_id" => 1]])->toArray() as $Comment)
+            {
                 $App->DB->Remove('post_comment_like', ["CommentID" => $Comment->_id]);
+                $App->DB->Remove('notification', ["CommentID" => $Comment->_id]);
+            }
 
             $App->DB->Remove('post', ["_id" => $PostID]);
             $App->DB->Remove('post_like', ["PostID" => $PostID]);
@@ -252,9 +292,23 @@
         $Query = ['$and' => [["OwnerID" => $OwnerID, "PostID" => $PostID]]];
 
         if (isset($App->DB->Find('post_like', $Query, ["projection" => ["_id" => 1]])->toArray()[0]))
+        {
             $App->DB->Remove('post_like', $Query);
+
+            $Post = $App->DB->Find('post', ["_id" => $PostID], ["projection" => ["OwnerID" => 1]])->toArray();
+
+            if ($Post[0]->OwnerID != $OwnerID)
+                $App->DB->Remove('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "PostID" => $PostID, "Type" => 2]);
+        }
         else
+        {
             $App->DB->Insert('post_like', ["OwnerID" => $OwnerID, "PostID" => $PostID, "Time" => time()]);
+
+            $Post = $App->DB->Find('post', ["_id" => $PostID], ["projection" => ["OwnerID" => 1]])->toArray();
+
+            if ($Post[0]->OwnerID != $OwnerID)
+                $App->DB->Insert('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "PostID" => $PostID, "Type" => 2, "Seen" => 0, "Time" => time()]);
+        }
 
         JSON(["Message" => 1000]); 
     }
@@ -263,7 +317,7 @@
     {
         if (!isset($_POST["PostID"]) || empty($_POST["PostID"]))
             JSON(["Message" => 1]);
-        
+
         $Result = array();
         $LikeList = $App->DB->Find('post_like', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"])], ["projection" => ["_id" => 0, "OwnerID" => 1, "Time" => 1], 'skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
 
@@ -372,9 +426,33 @@
         if (strlen($Message) > 150)
             $Message = mb_substr($Message, 0, 150);
 
-        $CommentID = $App->DB->Insert('post_comment', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"]), 'OwnerID' => new MongoDB\BSON\ObjectID($App->Auth->ID), 'Time' => time(), 'Message' => $Message])->__toString();
+        $PostID = new MongoDB\BSON\ObjectID($_POST["PostID"]);
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $CommentID = $App->DB->Insert('post_comment', ['PostID' => $PostID, 'OwnerID' => $OwnerID, 'Time' => time(), 'Message' => $Message]);
 
-        JSON(["Message" => 1000, "CommentID" => $CommentID]);
+        $Post = $App->DB->Find('post', ["_id" => $PostID], ["projection" => ["OwnerID" => 1]])->toArray();
+
+        if ($Post[0]->OwnerID != $OwnerID)
+            $App->DB->Insert('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 5, "Time" => time()]);
+
+        preg_match_all('/@(\\w+)/', $Message, $UsernameList);
+        $UsernameList = explode(',', implode(',', $UsernameList[1]));
+
+        if (count($UsernameList) > 0)
+        {
+            for ($X = 0; $X < count($UsernameList); $X++)
+            {
+                $Account = $App->DB->Find('account', ['Username' => $UsernameList[$X]], ["projection" => ["_id" => 1]])->toArray();
+
+                if (empty($Account))
+                    continue;
+
+                if ($Account[0]->_id != $OwnerID)
+                    $App->DB->Insert('notification', ["OwnerID" => $Account[0]->_id, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 6, "Seen" => 0, "Time" => time()]);
+            }
+        }
+
+        JSON(["Message" => 1000, "CommentID" => $CommentID->__toString()]);
     }
 
     function PostCommentList($App)
@@ -427,9 +505,23 @@
         $Comment = $App->DB->Find('post_comment_like', $Query, ["projection" => ["_id" => 1]])->toArray();
 
         if (isset($Comment[0]))
+        {
             $App->DB->Remove('post_comment_like', $Query);
+
+            $Comment = $App->DB->Find('post', ["_id" => $CommentID], ["projection" => ["OwnerID" => 1]])->toArray();
+
+            if ($Comment[0]->OwnerID != $OwnerID)
+                $App->DB->Remove('notification', ["OwnerID" => $Comment[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 4]);
+        }
         else
+        {
             $App->DB->Insert('post_comment_like', ["OwnerID" => $OwnerID, "CommentID" => $CommentID]);
+
+            $Comment = $App->DB->Find('post', ["_id" => $CommentID], ["projection" => ["OwnerID" => 1]])->toArray();
+
+            if ($Comment[0]->OwnerID != $OwnerID)
+                $App->DB->Insert('notification', ["OwnerID" => $Comment[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 4, "Seen" => 0, "Time" => time()]);
+        }
 
         JSON(["Message" => 1000]); 
     }
@@ -446,15 +538,17 @@
         $CommentID = new MongoDB\BSON\ObjectID($_POST["CommentID"]);
         $Query = ['$and' => [["OwnerID" => $OwnerID, "_id" => $CommentID]]];
 
-        if (isset($App->DB->Find('post_comment', $Query, ["projection" => ["_id" => 1]])->toArray()[0]))
+        if (isset($App->DB->Find('post_comment', $Query, ["projection" => ["Message" => 1]])->toArray()[0]))
         {
             $App->DB->Remove('post_comment', $Query);
+            $App->DB->Remove('notification', ["CommentID" => $CommentID]);
             JSON(["Message" => 1000]); 
         }
 
         if (isset($App->DB->Find('post', ['$and' => [["OwnerID" => $OwnerID, "PostID" => new MongoDB\BSON\ObjectID($_POST["PostID"])]]], ["projection" => ["_id" => 1]])->toArray()[0]))
         {
             $App->DB->Remove('post_comment', ["CommentID" => $CommentID]);
+            $App->DB->Remove('notification', ["CommentID" => $CommentID]);
             JSON(["Message" => 1000]); 
         }
 
@@ -478,5 +572,184 @@
             $App->DB->Insert('post_bookmark', ["OwnerID" => $OwnerID, "PostID" => $PostID]);
 
         JSON(["Message" => 1000]); 
+    }
+
+    function PostInboxList($App)
+    {
+        $ResultList = array();
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+        $FollowList = $App->DB->Find('follow', ["OwnerID" => $OwnerID], ["projection" => ["_id" => 0, "Follower" => 1]])->toArray();
+
+        foreach ($FollowList as $Follow)
+        {
+            $PostList = $App->DB->Find('post', ['OwnerID' => $Follow->Follower], ["projection" => ["_id" => 1, "Time" => 1]])->toArray();
+
+            foreach ($PostList as $Post)
+                $ResultList[$Post->Time] = $Post->_id;
+        }
+
+        $Count = 0;
+        $Result = array();
+        arsort($ResultList);
+        $ResultList = array_values($ResultList);
+        $Skip = isset($_POST["Skip"]) ? $_POST["Skip"] : 0;
+
+        for ($I = $Skip; $I < count($ResultList); $I++)
+        {
+            if ($Count > 7)
+                break;
+
+            $Count++;
+
+            $Post = $App->DB->Find('post', ["_id" => $ResultList[$I]])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Post[0]->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+
+            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Like = true;
+            else
+                $Like = false;
+
+            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $BookMark = true;
+            else
+                $BookMark = false;
+            
+            $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+            if (!isset($LikeCount) || empty($LikeCount))
+                $LikeCount = 0;
+
+            $CommentCount = $App->DB->Command(["count" => "post_comment", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+            if (!isset($CommentCount) || empty($CommentCount))
+                $CommentCount = 0;
+
+            if (isset($Account[0]->AvatarServer))
+                $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer);
+            else
+                $AvatarServerURL = "";
+
+            $PostData = array();
+
+            if ($Post[0]->Type == 1 || $Post[0]->Type == 2)
+            {
+                if (isset($Post[0]->DataServer))
+                    $DataServerURL = Upload::GetServerURL($Post[0]->DataServer);
+                else
+                    $DataServerURL = "";
+
+                foreach ($Post[0]->Data As $Data)
+                    array_push($PostData, $DataServerURL . $Data);
+            }
+            elseif ($Post[0]->Type == 3)
+            {
+                $PostData = $Post[0]->Data;
+            }
+
+            if (isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $Post[0]->OwnerID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Follow = true;
+            else
+                $Follow = false;
+
+            array_push($Result, array("PostID"       => $Post[0]->_id->__toString(),
+                                      "OwnerID"      => $Post[0]->OwnerID->__toString(),
+                                      "Type"         => $Post[0]->Type,
+                                      "Category"     => $Post[0]->Category,
+                                      "Time"         => $Post[0]->Time,
+                                      "Comment"      => $Post[0]->Comment,
+                                      "Message"      => isset($Post[0]->Message) ? $Post[0]->Message : "",
+                                      "Data"         => $PostData,
+                                      "Username"     => $Account[0]->Username,
+                                      "Avatar"       => isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "",
+                                      "Like"         => $Like,
+                                      "LikeCount"    => $LikeCount,
+                                      "CommentCount" => $CommentCount,
+                                      "BookMark"     => $BookMark,
+                                      "Follow"       => $Follow));
+        }
+
+        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
+    }
+
+    function PostCategoryList($App)
+    {
+        $Result = array();
+        $Category = isset($_POST["CatType"]) ? $_POST["CatType"] : 17;
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+
+        if (isset($_POST["Time"]))
+            $PostList = $App->DB->Find('post', ["Category" => $Category, 'Time' => ['$gt' => (int) $_POST["Time"]]], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+        else
+            $PostList = $App->DB->Find('post', ["Category" => $Category], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+
+        foreach ($PostList as $Post)
+        {
+            $Account = $App->DB->Find('account', ['_id' => $Post->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+
+            if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Like = true;
+            else
+                $Like = false;
+
+            if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $OwnerID, "PostID" => $Post->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $BookMark = true;
+            else
+                $BookMark = false;
+            
+            $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post->_id]])->toArray()[0]->n;
+
+            if (!isset($LikeCount) || empty($LikeCount))
+                $LikeCount = 0;
+
+            $CommentCount = $App->DB->Command(["count" => "post_comment", "query" => ['PostID' => $Post->_id]])->toArray()[0]->n;
+
+            if (!isset($CommentCount) || empty($CommentCount))
+                $CommentCount = 0;
+
+            if (isset($Account[0]->AvatarServer))
+                $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer);
+            else
+                $AvatarServerURL = "";
+
+            $PostData = array();
+
+            if ($Post->Type == 1 || $Post->Type == 2)
+            {
+                if (isset($Post->DataServer))
+                    $DataServerURL = Upload::GetServerURL($Post->DataServer);
+                else
+                    $DataServerURL = "";
+
+                foreach ($Post->Data As $Data)
+                    array_push($PostData, $DataServerURL . $Data);
+            }
+            elseif ($Post->Type == 3)
+            {
+                $PostData = $Post->Data;
+            }
+
+            if (isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $Post->OwnerID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $Follow = true;
+            else
+                $Follow = false;
+
+            array_push($Result, array("PostID"       => $Post->_id->__toString(),
+                                      "OwnerID"      => $Post->OwnerID->__toString(),
+                                      "Type"         => $Post->Type,
+                                      "Category"     => $Post->Category,
+                                      "Time"         => $Post->Time,
+                                      "Comment"      => $Post->Comment,
+                                      "Message"      => isset($Post->Message) ? $Post->Message : "",
+                                      "Data"         => $PostData,
+                                      "Username"     => $Account[0]->Username,
+                                      "Avatar"       => isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "",
+                                      "Like"         => $Like,
+                                      "LikeCount"    => $LikeCount,
+                                      "CommentCount" => $CommentCount,
+                                      "BookMark"     => $BookMark,
+                                      "Follow"       => $Follow));
+        }
+
+        JSON(["Message" => 1000, "Result" => json_encode($Result)]);
     }
 ?>

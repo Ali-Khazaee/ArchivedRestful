@@ -247,4 +247,35 @@
             JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "")]);
         }
     }
+
+    function ChangePassword($App)
+    {
+        $PasswordCurrent = isset($_POST["PasswordCurrent"]) ? $_POST["PasswordCurrent"] : "";
+        $PasswordNew = isset($_POST["PasswordNew"]) ? $_POST["PasswordNew"] : "";
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
+
+        if (!isset($PasswordCurrent) || empty($PasswordCurrent))
+            JSON(["Message" => 1]);
+
+        if (!isset($PasswordNew) || empty($PasswordNew))
+            JSON(["Message" => 2]);
+
+        if (strlen($PasswordNew) < 5)
+            JSON(["Message" => 3]);
+
+        if (strlen($PasswordNew) > 32)
+            JSON(["Message" => 4]);
+
+        $Account = $App->DB->Find('account', ['_id' => $OwnerID], ["projection" => ["Password" => 1]])->toArray();
+
+        if (empty($Account))
+            JSON(["Message" => 5]);
+
+        if (!isset($Account[0]->Password) || !password_verify($PasswordCurrent, $Account[0]->Password))
+            JSON(["Message" => 6]);
+
+        $App->DB->Update('account', ['_id' => $OwnerID], ['$set' => ['Password' => password_hash($PasswordNew, PASSWORD_BCRYPT)]]);
+
+        JSON(["Message" => 1000]);
+    }
 ?>
