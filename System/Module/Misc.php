@@ -38,7 +38,7 @@
 
         foreach ($NotificationList as $Notification)
         {
-            //$App->DB->Update('notification', ["_id" => $Notification->_id], ['$set' => ['Soon' => 1]]);
+            $App->DB->Update('notification', ["_id" => $Notification->_id], ['$set' => ['Seen' => 1]]);
 
             $Account = $App->DB->Find('account', ['_id' => $Notification->SenderID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
 
