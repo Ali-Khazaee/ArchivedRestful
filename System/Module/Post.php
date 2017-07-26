@@ -107,7 +107,7 @@
 
         if (!empty($Message))
         {
-            preg_match_all('/@(\\w+)/', $Message, $UsernameList);
+            preg_match_all('/@(\w+)/', $Message, $UsernameList);
             $UsernameList = explode(',', implode(',', $UsernameList[1]));
 
             if (count($UsernameList) > 0)
@@ -124,7 +124,7 @@
                 }
             }
 
-            preg_match_all('/#(\\w+)/', $Message, $HashTagList);
+            preg_match_all('/#(\w+)/u', $Message, $HashTagList);
             $HashTagList = explode(',', implode(',', $HashTagList[1]));
 
             if (count($HashTagList) > 0)
@@ -435,7 +435,7 @@
         if ($Post[0]->OwnerID != $OwnerID)
             $App->DB->Insert('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 5, "Time" => time()]);
 
-        preg_match_all('/@(\\w+)/', $Message, $UsernameList);
+        preg_match_all('/@(\w+)/', $Message, $UsernameList);
         $UsernameList = explode(',', implode(',', $UsernameList[1]));
 
         if (count($UsernameList) > 0)
@@ -753,13 +753,12 @@
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);
     }
 
-    function PostListBookMark($App)
+    function PostListBookmark($App)
     {
         $Result = array();
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
 
-        if (isset($_POST["Time"]))
-            $BookMarkList = $App->DB->Find('post_bookmark', ["OwnerID" => $OwnerID], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
+        $BookMarkList = $App->DB->Find('post_bookmark', ["OwnerID" => $OwnerID], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 8, 'sort' => ['Time' => -1]])->toArray();
 
         foreach ($BookMarkList as $BookMark)
         {

@@ -34,9 +34,9 @@
             $Router->Call('PostCommentLike',   function() { PostCommentLike($this);   }, true, 'PostCommentLike.10.2000');
             $Router->Call('PostCommentDelete', function() { PostCommentDelete($this); }, true, 'PostCommentDelete.10.2000');
             $Router->Call('PostBookMark',      function() { PostBookMark($this);      }, true, 'PostBookMark.10.2000');
-            $Router->Call('PostListInbox',     function() { PostInboxList($this);     }, true, 'PostInboxList.10.2000');
+            $Router->Call('PostListInbox',     function() { PostListInbox($this);     }, true, 'PostListInbox.10.2000');
             $Router->Call('PostListCategory',  function() { PostListCategory($this);  }, true, 'PostListCategory.10.3000');
-            $Router->Call('PostListBookMark',  function() { PostListBookMark($this);  }, true, 'PostListBookMark.10.3000');
+            $Router->Call('PostListBookmark',  function() { PostListBookmark($this);  }, true, 'PostListBookmark.10.3000');
 
             $Router->Call('ProfileGet',          function() { ProfileGet($this);          }, true, 'ProfileGet.10.3000');
             $Router->Call('ProfileGetPost',      function() { ProfileGetPost($this);      }, true, 'ProfileGetPost.10.3000');
