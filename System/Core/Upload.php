@@ -5,8 +5,8 @@
     {
         private static $ServerList =
         [
-            "1" => 'http://10.48.9.85:8080/',
-            "2" => 'http://10.48.9.85:8081/'
+            "1" => UPLOAD_SERVER_1,
+            "2" => UPLOAD_SERVER_2
         ];
 
         public static function GetBestServerID()
@@ -16,12 +16,14 @@
             foreach (self::$ServerList as $ID => $Server)
             {
                 $Channel = curl_init();
-                curl_setopt($Channel, CURLOPT_URL, $Server);
-                curl_setopt($Channel, CURLOPT_HEADER, false);
+                curl_setopt($Channel, CURLOPT_URL, $Server . "StorageSpace");
+                curl_setopt($Channel, CURLOPT_POST, true);
                 curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_SPACE", "TOKEN" => self::GetServerToken($ID)]);
-                $Result[$ID] = curl_exec($Channel);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, "Password=" . self::GetServerToken($ID));
+                $ServerResult = json_decode(curl_exec($Channel));
                 curl_close($Channel);
+
+                $Result[$ID] = $ServerResult->Space;
             }
 
             return array_keys($Result, max($Result))[0];
@@ -32,7 +34,7 @@
             if (array_key_exists($ID, self::$ServerList))
                 return self::$ServerList[$ID];
 
-            return 0;
+            return "";
         }
 
         public static function DeleteFile($ID, $URL)
@@ -40,20 +42,22 @@
             $Server = self::$ServerList[$ID];
 
             $Channel = curl_init();
-            curl_setopt($Channel, CURLOPT_URL, $Server);
-            curl_setopt($Channel, CURLOPT_HEADER, false);
+            curl_setopt($Channel, CURLOPT_URL, $Server . "DeleteFile");
+            curl_setopt($Channel, CURLOPT_POST, true);
             curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_REMOVE", "URL" => $Server . $URL, "TOKEN" => self::GetServerToken($ID)]);
-            curl_exec($Channel);
+            curl_setopt($Channel, CURLOPT_POSTFIELDS, "Password=" . self::GetServerToken($ID) . "&Path=" . $URL);
+            $ServerResult = json_decode(curl_exec($Channel));
             curl_close($Channel);
+
+            return $ServerResult->Result;
         }
 
         public static function GetServerToken($ID)
         {
             switch ($ID)
             {
-                case "1": return 'Access1'; break;
-                case "2": return 'Access2'; break;
+                case "1": return UPLOAD_SERVER_1_TOKEN; break;
+                case "2": return UPLOAD_SERVER_2_TOKEN; break;
             }
         }
     }

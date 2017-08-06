@@ -48,14 +48,17 @@
                 $ImageCount++;
 
                 $Channel = curl_init();
-                curl_setopt($Channel, CURLOPT_URL, $DataServerURL);
-                curl_setopt($Channel, CURLOPT_HEADER, false);
+                curl_setopt($Channel, CURLOPT_URL, $DataServerURL . "UploadImage");
+                curl_setopt($Channel, CURLOPT_POST, true);
                 curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($DataServerID), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($File['tmp_name'], "image/jpeg")]);
-                $URL = curl_exec($Channel);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["Password" => Upload::GetServerToken($DataServerID), "FileImage" => new CurlFile($File['tmp_name'], "image/jpeg")]);
+                $ServerResult = json_decode(curl_exec($Channel));
                 curl_close($Channel);
 
-                array_push($Data, $URL);
+                if ($ServerResult->Result != 1000)
+                    JSON(["Message" => 2]);
+
+                array_push($Data, $ServerResult->Path);
             }
         }
         elseif ($Type == 2)
@@ -73,14 +76,17 @@
                 $VideoCount++;
 
                 $Channel = curl_init();
-                curl_setopt($Channel, CURLOPT_URL, $DataServerURL);
-                curl_setopt($Channel, CURLOPT_HEADER, false);
+                curl_setopt($Channel, CURLOPT_URL, $DataServerURL . "UploadVideo");
+                curl_setopt($Channel, CURLOPT_POST, true);
                 curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_VIDEO", "TOKEN" => Upload::GetServerToken($DataServerID), "FOLDER" => $App->Auth->ID, "FILE" => new CurlFile($File['tmp_name'], "video/mp4")]);
-                $URL = curl_exec($Channel);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["Password" => Upload::GetServerToken($DataServerID), "FileVideo" => new CurlFile($File['tmp_name'], "video/mp4")]);
+                $ServerResult = json_decode(curl_exec($Channel));
                 curl_close($Channel);
 
-                array_push($Data, $URL);
+                if ($ServerResult->Result != 1000)
+                    JSON(["Message" => 2]);
+
+                array_push($Data, $ServerResult->Path);
             }
         }
         elseif ($Type == 3)

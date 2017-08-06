@@ -333,18 +333,21 @@
                     Upload::DeleteFile($OldAvatarServerID, $Account[0]->Avatar);
 
                 $Channel = curl_init();
-                curl_setopt($Channel, CURLOPT_URL, $NewServerURL);
-                curl_setopt($Channel, CURLOPT_HEADER, false);
+                curl_setopt($Channel, CURLOPT_URL, $NewServerURL . "UploadImage");
+                curl_setopt($Channel, CURLOPT_POST, true);
                 curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($NewServerID), "FOLDER" => $OwnerID, "FILE" => new CurlFile($_FILES['Avatar']['tmp_name'], "image/jpeg")]);
-                $URL = curl_exec($Channel);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["Password" => Upload::GetServerToken($NewServerID), "FileImage" => new CurlFile($_FILES['Avatar']['tmp_name'], "image/jpeg")]);
+                $ServerResult = json_decode(curl_exec($Channel));
                 curl_close($Channel);
 
-                $Avatar = $URL;
+                if ($ServerResult->Result != 1000)
+                    JSON(["Message" => 10]);
+
+                $Avatar = $ServerResult->Path;
                 $NewAvatar = true;
             }
         }
-        
+
         if (isset($_FILES['Cover']))
         {
             if ($_FILES['Cover']['size'] < 2097152)
@@ -353,14 +356,17 @@
                     Upload::DeleteFile($OldCoverServerID, $Account[0]->Cover);
 
                 $Channel = curl_init();
-                curl_setopt($Channel, CURLOPT_URL, $NewServerURL);
-                curl_setopt($Channel, CURLOPT_HEADER, false);
+                curl_setopt($Channel, CURLOPT_URL, $NewServerURL . "UploadImage");
+                curl_setopt($Channel, CURLOPT_POST, true);
                 curl_setopt($Channel, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["ACTION" => "UPLOAD_IMAGE", "TOKEN" => Upload::GetServerToken($NewServerID), "FOLDER" => $OwnerID, "FILE" => new CurlFile($_FILES['Cover']['tmp_name'], "image/jpeg")]);
-                $URL = curl_exec($Channel);
+                curl_setopt($Channel, CURLOPT_POSTFIELDS, ["Password" => Upload::GetServerToken($NewServerID), "FileImage" => new CurlFile($_FILES['Cover']['tmp_name'], "image/jpeg")]);
+                $ServerResult = json_decode(curl_exec($Channel));
                 curl_close($Channel);
 
-                $Cover = $URL;
+                if ($ServerResult->Result != 1000)
+                    JSON(["Message" => 10]);
+
+                $Cover = $ServerResult->Path;
                 $NewCover = true;
             }
         }
