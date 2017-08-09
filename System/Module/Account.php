@@ -199,13 +199,13 @@
         $Client = new Google_Client();
         $PayLoad = $Client->verifyIdToken($Token);
 
-        if (isset($PayLoad))
+        if (!isset($PayLoad))
             JSON(["Message" => 2]);
 
-        if ($PayLoad['iss'] != "accounts.google.com" && $PayLoad['iss'] != "https://accounts.google.com");
+        if ($PayLoad['iss'] != "accounts.google.com" && $PayLoad['iss'] != "https://accounts.google.com")
             JSON(["Message" => 3]);
 
-        if ($PayLoad['aud'] != '590625045379-9pgbc6r8v0794rij59jj50o1gp6ijnvl.apps.googleusercontent.com');
+        if ($PayLoad['aud'] != '590625045379-sdgme2k81supeig9iruse656uj2e3geb.apps.googleusercontent.com')
             JSON(["Message" => 4]);
 
         if (!isset($Session) || empty($Session))
@@ -215,13 +215,15 @@
 
         $App->RateLimit->Call('SignInGoogleQuery.5.1000');
 
-        $Account = $App->DB->Find('account', ['GoogleID' => $PayLoad['sub']], ["projection" => ["Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+        $Account = $App->DB->Find('account', ['GoogleID' => $PayLoad['sub']], ["projection" => ["Username" => 1, "Password" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
 
         if (empty($Account))
         {
             $App->RateLimit->Call('SignInGoogleCreated.1.60000');
-            
-            $Username = ("unknown" . time());
+
+            $Username = explode("@", $PayLoad['email'])[0];
+            $Username = substr($Username, 0, 12);
+            $Username = $Username . substr(time(), -4, 4);
 
             $ID = $App->DB->Insert('account', ['GoogleID' => $PayLoad['sub'], 'Username' => $Username, 'Email' => $PayLoad['email'], 'CreatedTime' => time()]);
 
@@ -229,7 +231,7 @@
 
             $App->DB->Update('account', ['_id' => $ID], ['$push' => ['Session' => ['Name' => $Session, 'Token' => $Token, 'CreatedTime' => time()]]]);
 
-            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID->__toString(), "Username" => $Username, "Avatar" => ""]);
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID->__toString(), "Username" => $Username, "Password" => false, "Avatar" => ""]);
         }
         else
         {
@@ -244,7 +246,12 @@
             else
                 $AvatarServerURL = "";
 
-            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "")]);
+            $Password = false;
+
+            if (isset($Account[0]->Password))
+                $Password = true;
+
+            JSON(["Message" => 1000, "TOKEN" => $Token, "ID" => $ID, "Username" => $Account[0]->Username, "Password" => $Password, "Avatar" => (isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "")]);
         }
     }
 
