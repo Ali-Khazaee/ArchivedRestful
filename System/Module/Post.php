@@ -561,7 +561,7 @@
         JSON(["Message" => 3]); 
     }
 
-    function PostBookMark($App)
+    function PostBookmark($App)
     {
         if (!isset($_POST["PostID"]) || empty($_POST["PostID"]))
             JSON(["Message" => 1]);
@@ -573,11 +573,17 @@
         $BookMark = $App->DB->Find('post_bookmark', $Query, ["projection" => ["_id" => 1]])->toArray();
 
         if (isset($BookMark[0]))
+        {
+            $IsBookmark = false;
             $App->DB->Remove('post_bookmark', $Query);
+        }
         else
+        {
+            $IsBookmark = true;
             $App->DB->Insert('post_bookmark', ["OwnerID" => $OwnerID, "PostID" => $PostID]);
+        }
 
-        JSON(["Message" => 1000]); 
+        JSON(["Message" => 1000, "Bookmark" => $IsBookmark]); 
     }
 
     function PostListInbox($App)

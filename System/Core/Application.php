@@ -33,7 +33,7 @@
             $Router->Call('PostCommentList',   function() { PostCommentList($this);   }, true, 'PostCommentList.10.2000');
             $Router->Call('PostCommentLike',   function() { PostCommentLike($this);   }, true, 'PostCommentLike.10.2000');
             $Router->Call('PostCommentDelete', function() { PostCommentDelete($this); }, true, 'PostCommentDelete.10.2000');
-            $Router->Call('PostBookMark',      function() { PostBookMark($this);      }, true, 'PostBookMark.10.2000');
+            $Router->Call('PostBookmark',      function() { PostBookmark($this);      }, true, 'PostBookmark.10.2000');
             $Router->Call('PostListInbox',     function() { PostListInbox($this);     }, true, 'PostListInbox.10.2000');
             $Router->Call('PostListCategory',  function() { PostListCategory($this);  }, true, 'PostListCategory.10.3000');
             $Router->Call('PostListBookmark',  function() { PostListBookmark($this);  }, true, 'PostListBookmark.10.3000');

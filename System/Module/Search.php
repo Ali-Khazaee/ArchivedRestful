@@ -45,7 +45,7 @@
 
         foreach ($TagList as $Tag)
         {
-            $Count = $App->DB->Command(["count" => "post", "query" => ['Message' => ['$regex' => ("#" . $Tag->Tag)]]])->toArray()[0]->n;
+            $Count = $App->DB->Command(["count" => "post", "query" => ['Message' => ['$regex' => ("#" . strtolower($Tag->Tag)), '$options' => "i"]]])->toArray()[0]->n;
 
             if (!isset($Count) || empty($Count))
                 $Count = 0;
@@ -80,7 +80,7 @@
                 $BookMark = true;
             else
                 $BookMark = false;
-            
+
             $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post->_id]])->toArray()[0]->n;
 
             if (!isset($LikeCount) || empty($LikeCount))
