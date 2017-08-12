@@ -439,7 +439,7 @@
         $Post = $App->DB->Find('post', ["_id" => $PostID], ["projection" => ["OwnerID" => 1]])->toArray();
 
         if ($Post[0]->OwnerID != $OwnerID)
-            $App->DB->Insert('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 5, "Time" => time()]);
+            $App->DB->Insert('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Seen" => 0, "Type" => 5, "Time" => time()]);
 
         preg_match_all('/@(\w+)/', $Message, $UsernameList);
         $UsernameList = explode(',', implode(',', $UsernameList[1]));

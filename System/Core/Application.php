@@ -59,6 +59,8 @@
             $Router->Call('SearchTagList', function() { SearchTagList($this); }, true, 'SearchTagList.10.3000');
 
             $Router->Call('LastOnline',          function() { LastOnline($this);          }, true, 'LastOnline.10.120000');
+
+            $Router->Call('Notification',        function() { Notification($this);        }, true, 'Notification.10.3000');
             $Router->Call('NotificationList',    function() { NotificationList($this);    }, true, 'NotificationList.10.3000');
             $Router->Call('NotificationService', function() { NotificationService($this); }, true, 'NotificationService.10.3000');
 
