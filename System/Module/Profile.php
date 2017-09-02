@@ -119,8 +119,11 @@
                 else
                     $DataServerURL = "";
 
-                foreach ($Post->Data As $Data)
-                    array_push($PostData, $DataServerURL . $Data);
+                if (isset($Post->Data))
+                {
+                    foreach ($Post->Data As $Data)
+                        array_push($PostData, $DataServerURL . $Data);
+                }
             }
             elseif ($Post->Type == 3)
             {
@@ -201,8 +204,11 @@
                 else
                     $PostServerURL = "";
 
-                foreach ($Post->Data As $Data)
-                    array_push($PostData, $PostServerURL . $Data);
+                if (isset($Post->Data))
+                {
+                    foreach ($Post->Data As $Data)
+                        array_push($PostData, $DataServerURL . $Data);
+                }
             }
             elseif ($Post->Type == 3)
             {
@@ -310,7 +316,7 @@
         $NewCover = false;
         $NewAvatar = false;
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
-        $Account = $App->DB->Find('account', ['_id' => $OwnerID], ["projection" => ["_id" => 0, "AvatarServer" => 1, "CoverServer" => 1, "Avatar" => 1, "Cover" => 1]])->toArray();
+        $Account = $App->DB->Find('account', ['_id' => $OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "CoverServer" => 1, "Avatar" => 1, "Cover" => 1]])->toArray();
 
         if (isset($Account[0]->AvatarServer))
             $OldAvatarServerID = $Account[0]->AvatarServer;
@@ -382,6 +388,9 @@
 
         if ($Cover == "" && isset($Account[0]->Cover))
             $Cover = $Account[0]->Cover;
+
+        if ($App->DB->Find('account', ['Username' => $Username])->toArray()[0])
+            $Username = $Account[0]->Username;
 
         $App->DB->Update('account', ['_id' => $OwnerID], ['$set' => ['Username'     => $Username,
                                                                      'Description'  => $Description,
@@ -480,8 +489,11 @@
                 else
                     $DataServerURL = "";
 
-                foreach ($Post->Data As $Data)
-                    array_push($PostData, $DataServerURL . $Data);
+                if (isset($Post->Data))
+                {
+                    foreach ($Post->Data As $Data)
+                        array_push($PostData, $DataServerURL . $Data);
+                }
             }
             elseif ($Post->Type == 3)
             {

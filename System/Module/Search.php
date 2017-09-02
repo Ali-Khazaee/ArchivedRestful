@@ -41,7 +41,7 @@
 
         $Result = array();
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
-        $TagList = $App->DB->Find('tag', ['Tag' => ['$regex' => $Tag]], ['limit' => 15])->toArray();
+        $TagList = $App->DB->Find('tag', ['Tag' => ['$regex' => $Tag, '$options' => "i"]], ['limit' => 15])->toArray();
 
         foreach ($TagList as $Tag)
         {
@@ -65,7 +65,7 @@
 
         $Result = array();
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
-        $PostList = $App->DB->Find('post', ['Message' => ['$regex' => ("#" . $Tag)]], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 10])->toArray();
+        $PostList = $App->DB->Find('post', ['Message' => ['$regex' => ("#" . $Tag), '$options' => "i"]], ['skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 10])->toArray();
 
         foreach ($PostList as $Post)
         {
@@ -105,8 +105,11 @@
                 else
                     $DataServerURL = "";
 
-                foreach ($Post->Data As $Data)
-                    array_push($PostData, $DataServerURL . $Data);
+                if (isset($Post->Data))
+                {
+                    foreach ($Post->Data As $Data)
+                        array_push($PostData, $DataServerURL . $Data);
+                }
             }
             elseif ($Post->Type == 3)
             {

@@ -34,6 +34,7 @@
             array_push($Result, array("Username" => $Account[0]->Username,
                                       "Avatar"   => isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : "",
                                       "Type"     => $Notification->Type,
+                                      "PostID"   => isset($Notification->PostID) ? $Notification->PostID->__toString() : "",
                                       "Time"     => $Notification->Time));
         }
 
@@ -57,9 +58,9 @@
         {
             $App->DB->Update('notification', ["_id" => $Notification->_id], ['$set' => ['Seen' => 1]]);
 
-            $Account = $App->DB->Find('account', ['_id' => $Notification->SenderID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Notification->SenderID], ["projection" => ["_id" => 0, "Username" => 1]])->toArray();
 
-            array_push($Result, array("Username" => $Account[0]->Username, "Type" => $Notification->Type));
+            array_push($Result, array("Username" => $Account[0]->Username, "Type" => $Notification->Type, "PostID" => $Notification->PostID->__toString()));
         }
 
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);

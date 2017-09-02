@@ -138,7 +138,7 @@
                 for ($X = 0; $X < count($HashTagList); $X++)
                 {
                     if (!isset($App->DB->Find('tag', ['Tag' => $HashTagList[$X]])->toArray()[0]))
-                        $App->DB->Insert('tag', ['Tag' => $HashTagList[$X]]);
+                        $App->DB->Insert('tag', ['Tag' => strtolower($HashTagList[$X])]);
                 }
             }
         }
@@ -194,8 +194,11 @@
                 else
                     $DataServerURL = "";
 
-                foreach ($Post->Data As $Data)
-                    array_push($PostData, $DataServerURL . $Data);
+                if (isset($Post->Data))
+                {
+                    foreach ($Post->Data As $Data)
+                        array_push($PostData, $DataServerURL . $Data);
+                }
             }
             elseif ($Post->Type == 3)
             {
@@ -439,7 +442,7 @@
         $Post = $App->DB->Find('post', ["_id" => $PostID], ["projection" => ["OwnerID" => 1]])->toArray();
 
         if ($Post[0]->OwnerID != $OwnerID)
-            $App->DB->Insert('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Seen" => 0, "Type" => 5, "Time" => time()]);
+            $App->DB->Insert('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "PostID" => $PostID, "CommentID" => $CommentID, "Seen" => 0, "Type" => 5, "Time" => time()]);
 
         preg_match_all('/@(\w+)/', $Message, $UsernameList);
         $UsernameList = explode(',', implode(',', $UsernameList[1]));
@@ -454,7 +457,7 @@
                     continue;
 
                 if ($Account[0]->_id != $OwnerID)
-                    $App->DB->Insert('notification', ["OwnerID" => $Account[0]->_id, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 6, "Seen" => 0, "Time" => time()]);
+                    $App->DB->Insert('notification', ["OwnerID" => $Account[0]->_id, "SenderID" => $OwnerID, "PostID" => $PostID, "CommentID" => $CommentID, "Type" => 6, "Seen" => 0, "Time" => time()]);
             }
         }
 
@@ -514,19 +517,19 @@
         {
             $App->DB->Remove('post_comment_like', $Query);
 
-            $Comment = $App->DB->Find('post', ["_id" => $CommentID], ["projection" => ["OwnerID" => 1]])->toArray();
+            $Post = $App->DB->Find('post', ["_id" => $CommentID], ["projection" => ["OwnerID" => 1]])->toArray();
 
-            if ($Comment[0]->OwnerID != $OwnerID)
-                $App->DB->Remove('notification', ["OwnerID" => $Comment[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 4]);
+            if ($Post[0]->OwnerID != $OwnerID)
+                $App->DB->Remove('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 4]);
         }
         else
         {
             $App->DB->Insert('post_comment_like', ["OwnerID" => $OwnerID, "CommentID" => $CommentID]);
 
-            $Comment = $App->DB->Find('post', ["_id" => $CommentID], ["projection" => ["OwnerID" => 1]])->toArray();
+            $Post = $App->DB->Find('post', ["_id" => $CommentID], ["projection" => ["_id" => 1, "OwnerID" => 1]])->toArray();
 
-            if ($Comment[0]->OwnerID != $OwnerID)
-                $App->DB->Insert('notification', ["OwnerID" => $Comment[0]->OwnerID, "SenderID" => $OwnerID, "CommentID" => $CommentID, "Type" => 4, "Seen" => 0, "Time" => time()]);
+            if ($Post[0]->OwnerID != $OwnerID)
+                $App->DB->Insert('notification', ["OwnerID" => $Post[0]->OwnerID, "SenderID" => $OwnerID, "PostID" => $Post[0]->_id, "CommentID" => $CommentID, "Type" => 4, "Seen" => 0, "Time" => time()]);
         }
 
         JSON(["Message" => 1000]); 
@@ -732,8 +735,11 @@
                 else
                     $DataServerURL = "";
 
-                foreach ($Post->Data As $Data)
-                    array_push($PostData, $DataServerURL . $Data);
+                if (isset($Post->Data))
+                {
+                    foreach ($Post->Data As $Data)
+                        array_push($PostData, $DataServerURL . $Data);
+                }
             }
             elseif ($Post->Type == 3)
             {
@@ -811,8 +817,11 @@
                 else
                     $DataServerURL = "";
 
-                foreach ($Post->Data As $Data)
-                    array_push($PostData, $DataServerURL . $Data);
+                if (isset($Post->Data))
+                {
+                    foreach ($Post->Data As $Data)
+                        array_push($PostData, $DataServerURL . $Data);
+                }
             }
             elseif ($Post->Type == 3)
             {

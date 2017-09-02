@@ -5,8 +5,8 @@
     {
         private static $ServerList =
         [
-            "1" => UPLOAD_SERVER_1,
-            "2" => UPLOAD_SERVER_2
+            "0" => UPLOAD_SERVER_1,
+            "1" => UPLOAD_SERVER_2
         ];
 
         public static function GetBestServerID()
@@ -56,8 +56,8 @@
         {
             switch ($ID)
             {
-                case "1": return UPLOAD_SERVER_1_TOKEN; break;
-                case "2": return UPLOAD_SERVER_2_TOKEN; break;
+                case "0": return UPLOAD_SERVER_1_TOKEN; break;
+                case "1": return UPLOAD_SERVER_2_TOKEN; break;
             }
         }
     }

@@ -1,6 +1,8 @@
 <?php
     if (!defined("ROOT")) { exit(); }
 
+    define("ADMIN_PASSWORD", "admin3", true);
+
     define("SSL_PRIVATE_KEY", openssl_pkey_get_private(file_get_contents(ROOT . 'Storage/PrivateKey.pem')), true);
     define("SSL_PUBLIC_KEY", openssl_pkey_get_public(file_get_contents(ROOT . 'Storage/PublicKey.pem')), true);
 

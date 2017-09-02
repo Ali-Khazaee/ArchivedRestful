@@ -50,19 +50,21 @@
             $Router->Call('ProfileCommentGet',   function() { ProfileCommentGet($this);   }, true, 'ProfileCommentGet.10.3000');
             $Router->Call('ProfileLikeGet',      function() { ProfileLikeGet($this);      }, true, 'ProfileLikeGet.10.3000');
 
-            $Router->Call('Follow',       function() { Follow($this);       }, true, 'Follow.10.3000');
-            $Router->Call('FollowingGet', function() { FollowingGet($this); }, true, 'FollowingGet.10.3000');
-            $Router->Call('FollowersGet', function() { FollowersGet($this); }, true, 'FollowersGet.10.3000');
+            $Router->Call('Follow',        function() { Follow($this);        }, true, 'Follow.10.3000');
+            $Router->Call('FollowingList', function() { FollowingList($this); }, true, 'FollowingList.10.3000');
+            $Router->Call('FollowersList', function() { FollowersList($this); }, true, 'FollowersList.10.3000');
 
             $Router->Call('SearchPeople',  function() { SearchPeople($this); },  true, 'SearchPeople.10.3000');
             $Router->Call('SearchTag',     function() { SearchTag($this); },     true, 'SearchTag.10.3000');
             $Router->Call('SearchTagList', function() { SearchTagList($this); }, true, 'SearchTagList.10.3000');
 
-            $Router->Call('LastOnline',          function() { LastOnline($this);          }, true, 'LastOnline.10.120000');
-
             $Router->Call('Notification',        function() { Notification($this);        }, true, 'Notification.10.3000');
             $Router->Call('NotificationList',    function() { NotificationList($this);    }, true, 'NotificationList.10.3000');
             $Router->Call('NotificationService', function() { NotificationService($this); }, true, 'NotificationService.10.3000');
+
+            $Router->Call('Crash', function() { Crash($this); }, false, 'Crash.10.120000');
+
+            $Router->Call('AdminStatus', function() { AdminStatus($this); }, false, 'AdminStatus.10.120000');
 
             $Router->Execute($this);
         }
