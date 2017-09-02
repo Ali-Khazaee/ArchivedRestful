@@ -583,7 +583,7 @@
         else
         {
             $IsBookmark = true;
-            $App->DB->Insert('post_bookmark', ["OwnerID" => $OwnerID, "PostID" => $PostID]);
+            $App->DB->Insert('post_bookmark', ["OwnerID" => $OwnerID, "PostID" => $PostID, "Time" => time()]);
         }
 
         JSON(["Message" => 1000, "Bookmark" => $IsBookmark]); 

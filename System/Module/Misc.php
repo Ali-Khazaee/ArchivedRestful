@@ -28,4 +28,9 @@
 
         JSON(["Message" => 1000]);
     }
+
+    function Update($App)
+    {
+        JSON(["Message" => 1000, "VersionCode" => 5]);
+    }
 ?>

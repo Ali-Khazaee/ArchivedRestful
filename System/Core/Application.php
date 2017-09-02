@@ -62,7 +62,8 @@
             $Router->Call('NotificationList',    function() { NotificationList($this);    }, true, 'NotificationList.10.3000');
             $Router->Call('NotificationService', function() { NotificationService($this); }, true, 'NotificationService.10.3000');
 
-            $Router->Call('Crash', function() { Crash($this); }, false, 'Crash.10.120000');
+            $Router->Call('Crash',  function() { Crash($this);  }, false, 'Crash.10.120000');
+            $Router->Call('Update', function() { Update($this); }, false, 'Update.10.120000');
 
             $Router->Call('AdminStatus', function() { AdminStatus($this); }, false, 'AdminStatus.10.120000');
 
