@@ -223,7 +223,8 @@
 
             $Username = explode("@", $PayLoad['email'])[0];
             $Username = substr($Username, 0, 12);
-            $Username = $Username . substr(time(), -4, 4);
+            $Username .= substr(time(), -4, 4);
+            $Username .= "b";
 
             $ID = $App->DB->Insert('account', ['GoogleID' => $PayLoad['sub'], 'Username' => $Username, 'Email' => $PayLoad['email'], 'CreatedTime' => time()]);
 

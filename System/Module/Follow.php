@@ -51,18 +51,24 @@
             JSON(["Message" => 3]);
 
         $Result = array();
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
         $FollowingList = $App->DB->Find('follow', ['OwnerID' => new MongoDB\BSON\ObjectID($Account[0]->_id)], ["projection" => ["_id" => 0, "Follower" => 1, "Time" => 1], 'skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
 
         foreach ($FollowingList as $Follow)
         {
-            $Account = $App->DB->Find('account', ['_id' => $Follow->Follower], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Follow->Follower], ["projection" => ["Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
 
             if (isset($Account[0]->AvatarServer))
                 $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer) . $Account[0]->Avatar;
             else
                 $AvatarServerURL = "";
 
-            array_push($Result, array("Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $AvatarServerURL : ""), "Time" => $Follow->Time));
+            if (isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $Account[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $IsFollow = true;
+            else
+                $IsFollow = false;
+
+            array_push($Result, array("Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $AvatarServerURL : ""), "Time" => $Follow->Time, "Follow" => $IsFollow));
         }
 
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);
