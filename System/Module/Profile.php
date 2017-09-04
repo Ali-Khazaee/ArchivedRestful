@@ -8,7 +8,7 @@
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
         $ID = $OwnerID;
 
-        if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        if (isset($_POST["Username"]))
         {
             $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
 
@@ -147,11 +147,6 @@
         }
 
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);
-    }
-
-    function ProfileGetComment($App)
-    {
-        JSON(["Message" => 1000]);
     }
 
     function ProfileGetLike($App)
@@ -440,7 +435,7 @@
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
         $ID = $OwnerID;
 
-        if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        if (isset($_POST["Username"]))
         {
             $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
 
@@ -530,7 +525,7 @@
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
         $ID = $OwnerID;
 
-        if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        if (isset($_POST["Username"]))
         {
             $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
 
@@ -569,7 +564,7 @@
         $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
         $ID = $OwnerID;
 
-        if (isset($_POST["Username"]) && preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        if (isset($_POST["Username"]))
         {
             $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
 
