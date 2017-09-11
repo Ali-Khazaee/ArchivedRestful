@@ -280,7 +280,7 @@
         if (strlen($Username) > 32)
             JSON(["Message" => 3]);
 
-        if (!preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $Username))
+        if (!preg_match("/^(?![^a-z])(?!.*([_.])\1)[\w.]*[a-z]$/", $Username))
             JSON(["Message" => 4]);
 
         if (!isset($Email) || empty($Email))

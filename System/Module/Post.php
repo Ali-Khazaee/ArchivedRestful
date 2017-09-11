@@ -143,7 +143,85 @@
             }
         }
 
-        JSON(["Message" => 1000]);
+        JSON(["Message" => 1000, "Result" => GetSinglePost($App, $PostID, $OwnerID)]);
+    }
+
+    function GetSinglePost($App, $PostID, $RequestID)
+    {
+        $Post = $App->DB->Find('post', ["_id" => $PostID])->toArray();
+
+        if (!isset($Post) || empty($Post))
+            return null;
+
+        $Account = $App->DB->Find('account', ['_id' => $Post[0]->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+
+        if (isset($App->DB->Find('post_like', ['$and' => [["OwnerID" => $RequestID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+            $Like = true;
+        else
+            $Like = false;
+
+        if (isset($App->DB->Find('post_bookmark', ['$and' => [["OwnerID" => $RequestID, "PostID" => $Post[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+            $BookMark = true;
+        else
+            $BookMark = false;
+
+        $LikeCount = $App->DB->Command(["count" => "post_like", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+        if (!isset($LikeCount) || empty($LikeCount))
+            $LikeCount = 0;
+
+        $CommentCount = $App->DB->Command(["count" => "post_comment", "query" => ['PostID' => $Post[0]->_id]])->toArray()[0]->n;
+
+        if (!isset($CommentCount) || empty($CommentCount))
+            $CommentCount = 0;
+
+        if (isset($Account[0]->AvatarServer) && isset($Account[0]->Avatar))
+            $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer) . $Account[0]->Avatar;
+        else
+            $AvatarServerURL = "";
+
+        $PostData = array();
+
+        if ($Post[0]->Type == 1 || $Post[0]->Type == 2)
+        {
+            if (isset($Post[0]->DataServer))
+                $DataServerURL = Upload::GetServerURL($Post[0]->DataServer);
+            else
+                $DataServerURL = "";
+
+            if (isset($Post[0]->Data))
+            {
+                foreach ($Post[0]->Data As $Data)
+                    array_push($PostData, $DataServerURL . $Data);
+            }
+        }
+        elseif ($Post[0]->Type == 3)
+        {
+            $PostData = $Post[0]->Data;
+        }
+
+        if (isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $RequestID, "Follower" => $Post[0]->OwnerID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+            $Follow = true;
+        else
+            $Follow = false;
+
+        $Result = array("PostID"       => $Post[0]->_id->__toString(),
+                        "OwnerID"      => $Post[0]->OwnerID->__toString(),
+                        "Type"         => $Post[0]->Type,
+                        "Category"     => $Post[0]->Category,
+                        "Time"         => $Post[0]->Time,
+                        "Comment"      => $Post[0]->Comment,
+                        "Message"      => isset($Post[0]->Message) ? $Post[0]->Message : "",
+                        "Data"         => $PostData,
+                        "Username"     => $Account[0]->Username,
+                        "Avatar"       => $AvatarServerURL,
+                        "Like"         => $Like,
+                        "LikeCount"    => $LikeCount,
+                        "CommentCount" => $CommentCount,
+                        "BookMark"     => $BookMark,
+                        "Follow"       => $Follow);
+
+        return json_encode($Result);
     }
 
     function PostList($App)

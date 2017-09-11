@@ -14,7 +14,7 @@
         if (strlen($Username) > 32)
             JSON(["Message" => 3]);
 
-        if (!preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $Username))
+        if (!preg_match("/^(?![^a-z])(?!.*([_.])\1)[\w.]*[a-z]$/", $Username))
             JSON(["Message" => 4]);
 
         $App->RateLimit->Call('UsernameIsAvailableQuery.5.1000');
@@ -59,7 +59,7 @@
         if (strlen($Email) > 64)
             JSON(["Message" => 9]);
 
-        if (!preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $Username))
+        if (!preg_match("/^(?![^a-z])(?!.*([_.])\1)[\w.]*[a-z]$/", $Username))
             JSON(["Message" => 10]);
 
         $App->RateLimit->Call('SignUpQuery.5.1000');
@@ -110,7 +110,7 @@
             JSON(["Message" => 6]);
 
         if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
-            if (!preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $EmailOrUsername))
+            if (!preg_match("/^(?![^a-z])(?!.*([_.])\1)[\w.]*[a-z]$/", $EmailOrUsername))
                 JSON(["Message" => 7]);
 
         $App->RateLimit->Call('SignInQuery.5.1000');
@@ -158,7 +158,7 @@
             JSON(["Message" => 3]);
 
         if (!filter_var($EmailOrUsername, FILTER_VALIDATE_EMAIL))
-            if (!preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $EmailOrUsername))
+            if (!preg_match("/^(?![^a-z])(?!.*([_.])\1)[\w.]*[a-z]$/", $EmailOrUsername))
                 JSON(["Message" => 4]);
 
         $App->RateLimit->Call('ResetPasswordQuery.5.1000');

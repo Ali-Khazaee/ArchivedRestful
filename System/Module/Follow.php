@@ -6,7 +6,7 @@
         if (!isset($_POST["Username"]))
             JSON(["Message" => 1]);
 
-        if (!preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        if (!preg_match("/^(?![^a-z])(?!.*([_.])\1)[\w.]*[a-z]$/", $_POST["Username"]))
             JSON(["Message" => 2]);
 
         $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
@@ -42,7 +42,7 @@
         if (!isset($_POST["Username"]))
             JSON(["Message" => 1]);
 
-        if (!preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        if (!preg_match("/^(?![^a-z])(?!.*([_.])\1)[\w.]*[a-z]$/", $_POST["Username"]))
             JSON(["Message" => 2]);
 
         $Account = $App->DB->Find('account', ['Username' => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
@@ -79,7 +79,7 @@
         if (!isset($_POST["Username"]))
             JSON(["Message" => 1]);
 
-        if (!preg_match("/^(?![^a-z])(?!.*\.\.)[a-z0-9_.]+(?<![^a-z])$/", $_POST["Username"]))
+        if (!preg_match("/^(?![^a-z])(?!.*([_.])\1)[\w.]*[a-z]$/", $_POST["Username"]))
             JSON(["Message" => 2]);
 
         $Account = $App->DB->Find('account', ["Username" => $_POST["Username"]], ["projection" => ["_id" => 1]])->toArray();
