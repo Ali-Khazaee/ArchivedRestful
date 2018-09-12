@@ -406,18 +406,24 @@
             JSON(["Message" => 1]);
 
         $Result = array();
+        $OwnerID = new MongoDB\BSON\ObjectID($App->Auth->ID);
         $LikeList = $App->DB->Find('post_like', ['PostID' => new MongoDB\BSON\ObjectID($_POST["PostID"])], ["projection" => ["_id" => 0, "OwnerID" => 1, "Time" => 1], 'skip' => (isset($_POST["Skip"]) ? $_POST["Skip"] : 0), 'limit' => 10, 'sort' => ['Time' => -1]])->toArray();
 
         foreach ($LikeList as $Like)
         {
-            $Account = $App->DB->Find('account', ['_id' => $Like->OwnerID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
+            $Account = $App->DB->Find('account', ['_id' => $Like->OwnerID], ["projection" => ["Username" => 1, "AvatarServer" => 1, "Avatar" => 1]])->toArray();
 
             if (isset($Account[0]->AvatarServer))
-                $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer);
+                $AvatarServerURL = Upload::GetServerURL($Account[0]->AvatarServer) . $Account[0]->Avatar;
             else
                 $AvatarServerURL = "";
 
-            array_push($Result, array("OwnerID" => $Like->OwnerID->__toString(), "Username" => $Account[0]->Username, "Avatar" => (isset($Account[0]->Avatar) ? $AvatarServerURL . $Account[0]->Avatar : ""), "Time" => $Like->Time));
+            if (isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $Account[0]->_id]]], ["projection" => ["_id" => 1]])->toArray()[0]))
+                $IsFollow = true;
+            else
+                $IsFollow = false;
+
+            array_push($Result, array("OwnerID" => $Like->OwnerID->__toString(), "Username" => $Account[0]->Username, "Avatar" => $AvatarServerURL, "Follow" => $IsFollow, "Time" => $Like->Time));
         }
 
         JSON(["Message" => 1000, "Result" => json_encode($Result)]);

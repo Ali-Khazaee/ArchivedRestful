@@ -24,7 +24,7 @@
         if ($Self == false && isset($App->DB->Find('follow', ['$and' => [["OwnerID" => $OwnerID, "Follower" => $ID]]], ["projection" => ["_id" => 1]])->toArray()[0]))
             $Follow = true;
 
-        $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "CoverServer" => 1, "Description" => 1, "Link" => 1, "Name" => 1, "Cover" => 1, "Avatar" => 1]])->toArray();
+        $Account = $App->DB->Find('account', ['_id' => $ID], ["projection" => ["_id" => 0, "Username" => 1, "AvatarServer" => 1, "CoverServer" => 1, "Description" => 1, "Link" => 1, "Name" => 1, "Location" => 1, "Cover" => 1, "Avatar" => 1]])->toArray();
 
         $Post = $App->DB->Command(["count" => "post", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
         $Comment = $App->DB->Command(["count" => "post_comment", "query" => ['OwnerID' => $ID]])->toArray()[0]->n;
@@ -384,7 +384,7 @@
         if ($Cover == "" && isset($Account[0]->Cover))
             $Cover = $Account[0]->Cover;
 
-        if ($App->DB->Find('account', ['Username' => $Username])->toArray()[0])
+        if (isset($App->DB->Find('account', ['Username' => $Username])->toArray()[0]))
             $Username = $Account[0]->Username;
 
         $App->DB->Update('account', ['_id' => $OwnerID], ['$set' => ['Username'     => $Username,
